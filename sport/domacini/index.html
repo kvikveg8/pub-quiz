@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Domaćini OI — Pub Quiz</title>
+<style>
+:root {
+  --bg: #1a0f05;
+  --surface: #241508;
+  --surface2: #2e1c0a;
+  --surface3: #3a2410;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --text: #f0e6d0;
+  --text2: #b89a70;
+  --border: #3a2a12;
+  --border2: #4a3518;
+  --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--gold);
+  padding: 16px 24px;
+  display: flex; align-items: center; gap: 20px;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-back { color: var(--gold); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; white-space: nowrap; transition: background 0.2s; }
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.controls {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+}
+.search-box {
+  flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 14px; color: var(--text);
+  font-family: Georgia, serif; font-size: 14px; outline: none;
+}
+.search-box:focus { border-color: var(--gold); }
+.search-box::placeholder { color: var(--text2); }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label { color: var(--text2); font-size: 12px; align-self: center; text-transform: uppercase; letter-spacing: 1px; }
+.filter-btn {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text2); padding: 6px 12px; font-family: Georgia, serif; font-size: 13px;
+  cursor: pointer; transition: all 0.2s;
+}
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+
+.main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+.results-count { color: var(--text2); font-size: 13px; margin-bottom: 20px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 16px; transition: border-color 0.2s, box-shadow 0.2s; position: relative;
+}
+.card:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(201,162,39,0.15); }
+.card.cancelled { opacity: 0.6; border-style: dashed; }
+.card.future { border-color: var(--gold); background: #1e1500; }
+
+.card-year { font-size: 28px; font-weight: bold; color: var(--gold2); line-height: 1; }
+.card-city { font-size: 18px; color: var(--text); margin: 4px 0 2px; font-weight: bold; }
+.card-country { font-size: 13px; color: var(--text2); margin-bottom: 10px; }
+.card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.tag {
+  font-size: 10px; padding: 2px 8px; border-radius: 3px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.tag-eu  { background: #1a2040; color: #80a0e0; border: 1px solid #2a3060; }
+.tag-am  { background: #102018; color: #70b070; border: 1px solid #1a4020; }
+.tag-as  { background: #201008; color: #c09050; border: 1px solid #402010; }
+.tag-oc  { background: #081820; color: #60b0c0; border: 1px solid #103040; }
+.tag-off { background: #201010; color: #c05050; border: 1px solid #401010; }
+.tag-fut { background: #1a1600; color: var(--gold); border: 1px solid var(--gold); }
+.card-fact { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.card-athletes { font-size: 11px; color: var(--text2); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+.no-results { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 16px; }
+
+@media (max-width: 600px) {
+  .main { padding: 14px; }
+  .controls { padding: 10px 14px; }
+  .header-title h1 { font-size: 18px; }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#127941; DOMA&#262;INI OI</h1>
+    <p>Letnje olimpijske igre &mdash; 1896&ndash;2032</p>
+  </div>
+  <span style="font-size:28px">&#127758;</span>
+</header>
+
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretra&#382;i grad, dr&#382;avu, godinu...">
+  <div class="filter-group">
+    <span class="filter-label">Kontinent:</span>
+    <button class="filter-btn active" data-cat="all">Sve</button>
+    <button class="filter-btn" data-cat="EU">Evropa</button>
+    <button class="filter-btn" data-cat="AM">Amerike</button>
+    <button class="filter-btn" data-cat="AS">Azija</button>
+    <button class="filter-btn" data-cat="OC">Okeanija</button>
+    <button class="filter-btn" data-cat="OFF">Nije odr&#382;ano</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="results-count" id="resultsCount"></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+var DATA = [
+  {year:1896, city:"Atina", country:"Gr\u010dka", cat:"EU", athletes:241, sports:9, fact:"Prve moderne olimpijske igre — ideja barona Pjer de Kubertena. U\u010destvovalo 14 zemalja."},
+  {year:1900, city:"Pariz", country:"Francuska", cat:"EU", athletes:997, sports:19, fact:"Odr\u017eane uz Svetsku izlo\u017ebu. Prve OI na kojima su u\u010destvovale \u017eene."},
+  {year:1904, city:"St. Louis", country:"SAD", cat:"AM", athletes:651, sports:17, fact:"Prve OI u Severnoj Americi. Ve\u0107ina takmi\u010dara bila je iz SAD."},
+  {year:1908, city:"London", country:"Velika Britanija", cat:"EU", athletes:2008, sports:24, fact:"Prvobitno planirane za Rim — Vesuvijus sprije\u010dio. Maraton je standardizovan na 42,195 km."},
+  {year:1912, city:"Stokholm", country:"\u0160vedska", cat:"EU", athletes:2408, sports:14, fact:"Poslednje OI na kojima su u\u010destvovale \u017eive \u017eivotinje (konji u hipiku)."},
+  {year:1916, city:"Berlin", country:"Nema\u010dka", cat:"OFF", athletes:0, sports:0, fact:"Nije odr\u017eano zbog Prvog svetskog rata."},
+  {year:1920, city:"Antverpen", country:"Belgija", cat:"EU", athletes:2626, sports:22, fact:"Uvedena olimpijska zastava sa pet krug\u0101. Nema\u010dka, Austrija i Turska nisu pozvane."},
+  {year:1924, city:"Pariz", country:"Francuska", cat:"EU", athletes:3089, sports:17, fact:"Tarzan (Johnny Weissm\u00fcller) pobedio u plivanju. Chariots of Fire."},
+  {year:1928, city:"Amsterdam", country:"Holandija", cat:"EU", athletes:2883, sports:17, fact:"Olimpijski plamen su\u017eegnut po prvi put. \u017dene po\u010dele da tr\u010de atletsku trku."},
+  {year:1932, city:"Los An\u0111eles", country:"SAD", cat:"AM", athletes:1332, sports:14, fact:"Mala poseta zbog Velike depresije. Uveden olimpijski sat i foto-finish."},
+  {year:1936, city:"Berlin", country:"Nema\u010dka", cat:"EU", athletes:3963, sports:19, fact:"Jesse Owens osv. 4 zlatne medalje. Nacisti\u010dke OI — Hitlerov propagandni spektakl."},
+  {year:1940, city:"Tokio", country:"Japan", cat:"OFF", athletes:0, sports:0, fact:"Nije odr\u017eano — Drugi svetski rat. Tokio se odrekao, doma\u0107instvo dodeljeno Helsinkiju pa i to otpalo."},
+  {year:1944, city:"London", country:"Velika Britanija", cat:"OFF", athletes:0, sports:0, fact:"Nije odr\u017eano zbog Drugog svetskog rata."},
+  {year:1948, city:"London", country:"Velika Britanija", cat:"EU", athletes:4104, sports:17, fact:"Prve posleratne OI — zvane 'OI na {tednji'. Nema\u010dka i Japan nisu pozvani."},
+  {year:1952, city:"Helsinki", country:"Finska", cat:"EU", athletes:4955, sports:17, fact:"SSSR prvi put u\u010destvovao. Emil Z\u00e1topek osv. trku na 5km, 10km i maraton u istim igrama."},
+  {year:1956, city:"Melburn", country:"Australija", cat:"OC", athletes:3314, sports:17, fact:"Prve OI na Ju\u017enoj polulopti. Konjski deo odr\u017ean u \u0160tokholmu zbog australijskih karantinskih zakona."},
+  {year:1960, city:"Rim", country:"Italija", cat:"EU", athletes:5338, sports:17, fact:"Kasijus Klej (Muhammad Ali) osv. zlato u boksu. Maraton odr\u017ean no\u0107u."},
+  {year:1964, city:"Tokio", country:"Japan", cat:"AS", athletes:5151, sports:19, fact:"Prve OI u Aziji. Uvedeni d\u017eudo i odbojka. Japanci izgradili Shinkansen za OI."},
+  {year:1968, city:"Meksiko Siti", country:"Meksiko", cat:"AM", athletes:5516, sports:18, fact:"Protest crnih atleti\u010dara. Bob Beamon skok u dalj 8,90m. Prve OI na nadmorskoj visini."},
+  {year:1972, city:"Minhen", country:"Nema\u010dka", cat:"EU", athletes:7134, sports:21, fact:"Teroristicki napad na izraelske sportiste — 11 poginulih. Mark Spitz 7 zlatnih u plivanju."},
+  {year:1976, city:"Montreal", country:"Kanada", cat:"AM", athletes:6084, sports:21, fact:"Bojkot 28 afri\u010dkih zemalja. Nadia Comaneci prva savr\u0161ena desetka u gimnastici."},
+  {year:1980, city:"Moskva", country:"SSSR", cat:"EU", athletes:5179, sports:21, fact:"Bojkot SAD i jo\u0161 65 zemalja zbog invazije na Avganistan. Prve OI u Isto\u010dnoj Evropi."},
+  {year:1984, city:"Los An\u0111eles", country:"SAD", cat:"AM", athletes:6829, sports:21, fact:"Protivbojkot SSSR-a i isto\u010dnog bloka. Carl Lewis 4 zlatne medalje."},
+  {year:1988, city:"Seoul", country:"Ju\u017ena Koreja", cat:"AS", athletes:8391, sports:23, fact:"Ben Johnson pozitivan na doping. Florence Griffith-Joyner rekord 100m (10.49s) koji stoji i danas."},
+  {year:1992, city:"Barselona", country:"\u0160panija", cat:"EU", athletes:9356, sports:25, fact:"'Dream Team' SAD u ko\u0161arci. Prve OI bez bojkota od 1972. Jugoslovija nastupila kao 'Nezavisni olimpijci'."},
+  {year:1996, city:"Atlanta", country:"SAD", cat:"AM", athletes:10318, sports:26, fact:"Centennijalne OI. Bomba{ki napad u parku. Michael Johnson 200m i 400m rekord."},
+  {year:2000, city:"Sidnej", country:"Australija", cat:"OC", athletes:10651, sports:28, fact:"Zvane 'najboljim igrama ikad'. Cathy Freeman zapalila bakljU i osv. zlato na 400m."},
+  {year:2004, city:"Atina", country:"Gr\u010dka", cat:"EU", athletes:10625, sports:28, fact:"Povratak u domovinu olimpijskog pokreta. Michael Phelps 6 zlatnih, 2 bronzane."},
+  {year:2008, city:"Peking", country:"Kina", cat:"AS", athletes:10942, sports:28, fact:"Usain Bolt 9.69s na 100m. Michael Phelps rekordnih 8 zlatnih medalja na jednim igrama."},
+  {year:2012, city:"London", country:"Velika Britanija", cat:"EU", athletes:10568, sports:26, fact:"Tre\u0107e doma\u0107instvo Londona. Usain Bolt odbranio titule. Prve OI na kojima svaka zemlja ima \u017eene."},
+  {year:2016, city:"Rio de \u017daneiro", country:"Brazil", cat:"AM", athletes:11238, sports:28, fact:"Prve OI u Ju\u017enoj Americi. Usain Bolt tre\u0107i put odbranio zlatnu medalju na 100m."},
+  {year:2020, city:"Tokio", country:"Japan", cat:"AS", athletes:11656, sports:33, fact:"Odr\u017eano 2021. zbog COVID-19. Bez publike. Uvedeni skejtbording, surfanje, karate, sport penjanje."},
+  {year:2024, city:"Pariz", country:"Francuska", cat:"EU", athletes:10714, sports:32, fact:"Tre\u0107e doma\u0107instvo Pariza. Novak \u0110okovi\u0107 osv. zlato u tenisu. Ceremonija otvaranja na Seni."},
+  {year:2028, city:"Los An\u0111eles", country:"SAD", cat:"AM", athletes:0, sports:0, fact:"Tre\u0107e doma\u0107instvo Los An\u0111elesa. Unapred dodeljeno 2017. zajedno sa Parizom.", future:true},
+  {year:2032, city:"Brizbejn", country:"Australija", cat:"OC", athletes:0, sports:0, fact:"Tre\u0107e australijsko doma\u0107instvo. Dodeljeno 2021.", future:true}
+];
+
+var state = { cat: "all", search: "" };
+
+function getItems() {
+  var items = DATA.slice();
+  if (state.cat !== "all") items = items.filter(function(d){ return d.cat === state.cat; });
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    items = items.filter(function(d){
+      return String(d.year).includes(q) || d.city.toLowerCase().includes(q) || d.country.toLowerCase().includes(q) || d.fact.toLowerCase().includes(q);
+    });
+  }
+  return items;
+}
+
+var TAG_CLS  = {EU:"tag-eu", AM:"tag-am", AS:"tag-as", OC:"tag-oc", OFF:"tag-off"};
+var TAG_LBL  = {EU:"Evropa", AM:"Amerike", AS:"Azija", OC:"Okeanija", OFF:"Nije odr\u017eano"};
+
+function render() {
+  var items = getItems();
+  document.getElementById("resultsCount").textContent = items.length + " olimpijada";
+  var grid = document.getElementById("grid");
+  if (!items.length) { grid.innerHTML = "<div class=\"no-results\">\u2606 Nema rezultata.</div>"; return; }
+  var html = "";
+  for (var i = 0; i < items.length; i++) {
+    var d = items[i];
+    var cls = "card" + (d.cat === "OFF" ? " cancelled" : "") + (d.future ? " future" : "");
+    var tc = TAG_CLS[d.cat] || "";
+    var tl = TAG_LBL[d.cat] || "";
+    html += "<div class=\"" + cls + "\">";
+    html += "<div class=\"card-year\">" + d.year + (d.future ? " \u23f3" : "") + "</div>";
+    html += "<div class=\"card-city\">" + (d.cat === "OFF" ? "\u2014" : d.city) + "</div>";
+    html += "<div class=\"card-country\">" + (d.cat === "OFF" ? "Nije odr\u017eano" : d.country) + "</div>";
+    html += "<div class=\"card-tags\"><span class=\"tag " + tc + "\">" + tl + "</span></div>";
+    html += "<div class=\"card-fact\">" + d.fact + "</div>";
+    if (d.athletes > 0) html += "<div class=\"card-athletes\">\ud83d\udc64 " + d.athletes.toLocaleString() + " sportista &nbsp;\u00b7&nbsp; \ud83c\udfc5 " + d.sports + " sportova</div>";
+    html += "</div>";
+  }
+  grid.innerHTML = html;
+}
+
+document.getElementById("searchBox").addEventListener("input", function(){ state.search = this.value.trim(); render(); });
+document.querySelectorAll("[data-cat]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.cat = this.getAttribute("data-cat");
+    document.querySelectorAll("[data-cat]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active");
+    render();
+  });
+});
+render();
+</script>
+</body>
+</html>

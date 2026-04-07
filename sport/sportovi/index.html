@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Olimpijski sportovi — Pub Quiz</title>
+<style>
+:root {
+  --bg: #1a0f05; --surface: #241508; --surface2: #2e1c0a; --surface3: #3a2410;
+  --gold: #c9a227; --gold2: #e8c84a;
+  --text: #f0e6d0; --text2: #b89a70;
+  --border: #3a2a12; --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+
+header { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 16px 24px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100; }
+.header-back { color: var(--gold); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; transition: background 0.2s; }
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.controls { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.search-box { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; color: var(--text); font-family: Georgia, serif; font-size: 14px; outline: none; }
+.search-box:focus { border-color: var(--gold); }
+.search-box::placeholder { color: var(--text2); }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label { color: var(--text2); font-size: 12px; align-self: center; text-transform: uppercase; letter-spacing: 1px; }
+.filter-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text2); padding: 6px 12px; font-family: Georgia, serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+
+.main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+.results-count { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+
+.sport-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+.sport-card:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(201,162,39,0.15); }
+.sport-card.open { border-color: var(--gold); }
+
+.card-head { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.card-emoji { font-size: 28px; width: 44px; text-align: center; flex-shrink: 0; }
+.card-info { flex: 1; }
+.card-name { font-size: 16px; color: var(--gold2); font-weight: bold; }
+.card-since { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.card-status {
+  font-size: 10px; padding: 3px 8px; border-radius: 3px;
+  text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0;
+}
+.st-aktivan   { background: #0a2010; color: #70c070; border: 1px solid #1a4020; }
+.st-uklonjen  { background: #200a0a; color: #c07070; border: 1px solid #401010; }
+.st-privremen { background: #1a1600; color: #c0a030; border: 1px solid #3a3000; }
+.arrow-toggle { color: var(--text2); font-size: 14px; transition: transform 0.3s; margin-left: 6px; }
+.sport-card.open .arrow-toggle { transform: rotate(180deg); }
+
+.card-expand { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.sport-card.open .card-expand { max-height: 500px; }
+.card-body { border-top: 1px solid var(--border); padding: 14px 16px; }
+.card-desc { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
+.card-facts { display: flex; flex-direction: column; gap: 6px; }
+.fact-row { display: flex; gap: 8px; font-size: 13px; }
+.fact-label { color: var(--text2); min-width: 100px; flex-shrink: 0; }
+.fact-val { color: var(--text); }
+
+.cat-tag { font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-right: 4px; }
+.cat-vodeni   { background: #081828; color: #60a0d0; border: 1px solid #102840; }
+.cat-borba    { background: #1e0808; color: #d07070; border: 1px solid #380808; }
+.cat-atletika { background: #081808; color: #70c080; border: 1px solid #103010; }
+.cat-ekipni   { background: #180818; color: #c080c0; border: 1px solid #300830; }
+.cat-tehnika  { background: #181808; color: #c0c060; border: 1px solid #303008; }
+.cat-ostalo   { background: #181818; color: #a0a0a0; border: 1px solid #303030; }
+
+.no-results { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 16px; }
+
+@media (max-width: 600px) {
+  .main { padding: 14px; }
+  .controls { padding: 10px 14px; }
+  .header-title h1 { font-size: 18px; }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#127939; OLIMPIJSKI SPORTOVI</h1>
+    <p>Svi sportovi koji su bili ili jesu na Letnjim OI</p>
+  </div>
+  <span style="font-size:28px">&#127941;</span>
+</header>
+
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretra&#382;i sport...">
+  <div class="filter-group">
+    <span class="filter-label">Status:</span>
+    <button class="filter-btn active" data-st="all">Svi</button>
+    <button class="filter-btn" data-st="aktivan">Aktivni</button>
+    <button class="filter-btn" data-st="uklonjen">Uklonjeni</button>
+    <button class="filter-btn" data-st="privremen">Privremeni</button>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Kategorija:</span>
+    <button class="filter-btn active" data-cat="all">Sve</button>
+    <button class="filter-btn" data-cat="atletika">Atletika</button>
+    <button class="filter-btn" data-cat="vodeni">Vodeni</button>
+    <button class="filter-btn" data-cat="borba">Borila&#269;ki</button>
+    <button class="filter-btn" data-cat="ekipni">Ekipni</button>
+    <button class="filter-btn" data-cat="tehnika">Tehni&#269;ki</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="results-count" id="resultsCount"></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+var DATA = [
+  {name:"Atletika", emoji:"🏃", cat:"atletika", status:"aktivan", od:1896, do_:null,
+   desc:"Osnova olimpijskog pokreta — trke, skokovi, bacanja i višeboj. Najmedaljovaniji sport na OI.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Disciplina",v:"48 (trke, skokovi, bacanja, višeboj)"},{l:"Rekorderi",v:"USA u sprintovima, Etiopija/Kenija na du\u017einama"}]},
+  {name:"Plivanje", emoji:"🏊", cat:"vodeni", status:"aktivan", od:1896, do_:null,
+   desc:"Jedan od najprestižnijih olimpijskih sportova. Michael Phelps drži rekord sa 23 zlatne medalje.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Discipline",v:"35 (slobodno, le\u0111a, prsa, leptir, me\u0161ovito, stafete)"},{l:"Rekord",v:"Michael Phelps — 28 ukupno (23 zlata)"}]},
+  {name:"Gimnastika", emoji:"🤸", cat:"atletika", status:"aktivan", od:1896, do_:null,
+   desc:"Artistička, ritmička i trampolinom — tri discipline. Nadia Comaneci 1976. postigla prvu desetku.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Tri grane",v:"Artisti\u010dka, ritmi\u010dka (od 1984), trampolinom (od 2000)"},{l:"Ikona",v:"Nadia Comaneci, Simone Biles"}]},
+  {name:"Ma\u010devanje", emoji:"⚔️", cat:"borba", status:"aktivan", od:1896, do_:null,
+   desc:"Jedan od retkih sportova prisutnih na svim modernim OI. Tri oružja: floret, mač, sablja.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Oružja",v:"Floret, ma\u010d, sablja"},{l:"Dominacija",v:"Ma\u0111arska, Francuska, Italija"}]},
+  {name:"Bacanje diska", emoji:"🥏", cat:"atletika", status:"aktivan", od:1896, do_:null,
+   desc:"Simbol antičkih OI. Diskobol je jedan od najpoznatijih skulptorskih motiva antike.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Rekord",v:"Jurgen Schult — 74,08m (1986)"},{l:"Zanimljivost",v:"Inspirisano anti\u010dkim OI"}]},
+  {name:"Veslanje", emoji:"🚣", cat:"vodeni", status:"aktivan", od:1896, do_:null,
+   desc:"Disciplina snage i izdržljivosti. Razlikuju se kajak/kanu od klasičnog veslanja.",
+   facts:[{l:"Na OI od",v:"1896. (1900 prvi put odr\u017eano)"},{l:"Discipline",v:"14 disciplina"},{l:"Dominacija",v:"Nema\u010dka, Rumunija, SSSR"}]},
+  {name:"Biciklizam", emoji:"🚴", cat:"tehnika", status:"aktivan", od:1896, do_:null,
+   desc:"Drumske trke, vožnja na stazi (velodromu), MTB, BMX i biciklistički krostrening.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Grane",v:"Drum, staza, BMX (2008), MTB (1996)"},{l:"Rekorderi",v:"Francuska, Britanija, Australija na stazi"}]},
+  {name:"Jedrenje", emoji:"⛵", cat:"tehnika", status:"aktivan", od:1896, do_:null,
+   desc:"Takmičenje u različitim klasama jedrilica. Zavisi od vetra i taktike.",
+   facts:[{l:"Na OI od",v:"1896. (1900. prvi put odr\u017eano)"},{l:"Klase",v:"Vi\u0161e klasa jedrilica i dasaka"},{l:"Dominacija",v:"Britanija, SAD, Norve\u0161ka"}]},
+  {name:"Strelja\u0161tvo", emoji:"🎯", cat:"tehnika", status:"aktivan", od:1896, do_:null,
+   desc:"Pištolj, puška i luk — tri discipline. Jasna Šekarić višestruka olimpijska medalistinja.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Discipline",v:"Pi\u0161tolj, pu\u0161ka, luk (strelica\u0161tvo od 1900)"},{l:"Na\u0161a zvezda",v:"Jasna \u0160ekari\u0107 — 7 olimpijskih nastupa"}]},
+  {name:"Di\u017eanje tegova", emoji:"🏋️", cat:"borba", status:"aktivan", od:1896, do_:null,
+   desc:"Istrgnuće i nabačaj. Dominiraju male, snažne nacije.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Discipline",v:"Istrgnu\u0107e + naba\u010daj"},{l:"Dominacija",v:"Kina, SSSR, Bugarska"}]},
+  {name:"Rvanje", emoji:"🤼", cat:"borba", status:"aktivan", od:1896, do_:null,
+   desc:"Slobodni i grčko-rimski stil. Jedan od najstarijih sportova u istoriji čovečanstva.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Stilovi",v:"Slobodni + gr\u010dko-rimski"},{l:"Dominacija",v:"SSSR, SAD, Turska, Iran"}]},
+  {name:"Boks", emoji:"🥊", cat:"borba", status:"aktivan", od:1904, do_:null,
+   desc:"Olympian of olympians — Cassius Clay (Muhammad Ali) zlatom 1960. zacementirao legendu.",
+   facts:[{l:"Na OI od",v:"1904."},{l:"Legenda",v:"Muhammad Ali — zlato 1960."},{l:"Dominacija",v:"SAD, Kuba, SSSR"}]},
+  {name:"Vaterpolo", emoji:"🤽", cat:"vodeni", status:"aktivan", od:1900, do_:null,
+   desc:"Ekipni vodeni sport. Jugoslavija trostruki olimpijski šampion!",
+   facts:[{l:"Na OI od",v:"1900."},{l:"SFRJ/Jug.",v:"Zlato 1968, 1984, 1988"},{l:"Dominacija",v:"Ma\u0111arska, Italija, Jugoslavija"}]},
+  {name:"Ko\u0161arka", emoji:"🏀", cat:"ekipni", status:"aktivan", od:1936, do_:null,
+   desc:"USA je dominirala sve do pojave Dream Teama. Jugoslavija je zlatna 1980.",
+   facts:[{l:"Na OI od",v:"1936."},{l:"SFRJ",v:"Zlato 1980, vi\u0161e srebra"},{l:"Dream Team",v:"SAD 1992 — \"Nepobedivi\""}]},
+  {name:"Odbojka", emoji:"🏐", cat:"ekipni", status:"aktivan", od:1964, do_:null,
+   desc:"Uveden na Tokio 1964. Srbija višestruka medalja!",
+   facts:[{l:"Na OI od",v:"1964."},{l:"Srbija",v:"Zlato (mu\u0161karci 2000. kao Jug., \u017eene 2020.)"},{l:"Dominacija",v:"Brazil, SAD, Rusija, Kuba"}]},
+  {name:"Rukomet", emoji:"🤾", cat:"ekipni", status:"aktivan", od:1936, do_:null,
+   desc:"Popularan u Evropi. Jugoslavija zlatna 1972. u Minhenu.",
+   facts:[{l:"Na OI od",v:"1936. (terenska), 1972. (sala)"},{l:"Jug. zlato",v:"1972. Minhen (mu\u0161karci)"},{l:"Dominacija",v:"Francuska, Danska, SSSR"}]},
+  {name:"D\u017eudo", emoji:"🥋", cat:"borba", status:"aktivan", od:1964, do_:null,
+   desc:"Japanski borilački sport, uveden na domaćim igrama 1964. Teddy Riner — legenda.",
+   facts:[{l:"Na OI od",v:"1964."},{l:"Legenda",v:"Teddy Riner — 3 olimpijska zlata"},{l:"Osniva\u010d",v:"Jigoro Kano, Japan"}]},
+  {name:"Taekwondo", emoji:"🦵", cat:"borba", status:"aktivan", od:2000, do_:null,
+   desc:"Korejski borilački sport. Srbija zlato — Milica Mandić 2012, Jovana Preković 2024.",
+   facts:[{l:"Na OI od",v:"2000."},{l:"Srbija",v:"Milica Mandi\u0107 2012, Jovana Prekovi\u0107 2024"},{l:"Osniva\u010d",v:"Koreja"}]},
+  {name:"Ragbi 7", emoji:"🏉", cat:"ekipni", status:"aktivan", od:2016, do_:null,
+   desc:"Kratki format ragbija — 7 igrača, 7 minuta poluvrijeme. Fiji zlato 2016. i 2020.",
+   facts:[{l:"Na OI od",v:"2016."},{l:"Zlato",v:"Fiji 2016. i 2020. (mu\u0161karci)"},{l:"Format",v:"7 igra\u010da, 14 minuta"}]},
+  {name:"Golf", emoji:"⛳", cat:"tehnika", status:"aktivan", od:2016, do_:null,
+   desc:"Vraćen na OI nakon 112 godina pauze (bio 1900. i 1904.).",
+   facts:[{l:"Na OI od",v:"2016. (povratak)"},{l:"Pauza",v:"112 godina bez golfa na OI"},{l:"Format",v:"72 rupe, 4 runde"}]},
+  {name:"Skejtbording", emoji:"🛹", cat:"atletika", status:"aktivan", od:2020, do_:null,
+   desc:"Uveden u Tokiju 2021. Najmlađi olimpijci u istoriji.",
+   facts:[{l:"Na OI od",v:"2021. (Tokio)"},{l:"Zanimljivost",v:"Neki takmi\u010dari imali 13 godina"},{l:"Discipline",v:"Street + Park"}]},
+  {name:"Surfanje", emoji:"🏄", cat:"vodeni", status:"aktivan", od:2020, do_:null,
+   desc:"Takmičenje u oceanu, ne na bazenu. Taheaiti — najteže olimpijsko takmičilište ikad.",
+   facts:[{l:"Na OI od",v:"2021. (Tokio)"},{l:"Lokacija",v:"Tahi\u0107i (Pariz 2024) — 15.000km od Pariza"},{l:"Talasi",v:"Do 5 metara visoki"}]},
+  {name:"Sport penjanje", emoji:"🧗", cat:"atletika", status:"aktivan", od:2020, do_:null,
+   desc:"Brzina, bouldering i lead climbing. Mlad i dinamičan sport.",
+   facts:[{l:"Na OI od",v:"2021. (Tokio)"},{l:"Discipline",v:"Brzina, Bouldering, Lead"},{l:"Format",v:"U Parizu razdvojeno u 2 discipline"}]},
+  {name:"Baseball/Softball", emoji:"⚾", cat:"ekipni", status:"privremen", od:1992, do_:2008,
+   desc:"Uveden 1992, uklonjen 2008 (mlaka podrška izvan SAD). Vraćen samo za Tokio 2020.",
+   facts:[{l:"Na OI",v:"1992–2008, pa Tokio 2020. samo"},{l:"Razlog uklanjanja",v:"MLB nije slao igra\u010de, slaba publika"},{l:"Zlato",v:"SAD (baseball), SAD/Japonija (softball)"}]},
+  {name:"Polo", emoji:"🐎", cat:"tehnika", status:"uklonjen", od:1900, do_:1936,
+   desc:"Konjički sport za elitu. Uklonjen 1936. kao preskup i nedovoljno međunarodni.",
+   facts:[{l:"Na OI",v:"1900–1936."},{l:"Razlog",v:"Preskup, mali broj zemalja"},{l:"Zlato",v:"Uglavnom Britanija i Argentina"}]},
+  {name:"Natezanje konopca", emoji:"🪢", cat:"borba", status:"uklonjen", od:1900, do_:1920,
+   desc:"Timski sport snage. Uklonjen nakon 1920, ali ostaje omiljena pub trivia!",
+   facts:[{l:"Na OI",v:"1900–1920."},{l:"Zanimljivost",v:"Svaka ekipa 8 igra\u010da"},{l:"Zlato",v:"UK, SAD, \u0160vedska"}]},
+  {name:"Kroket", emoji:"🔨", cat:"tehnika", status:"uklonjen", od:1900, do_:1900,
+   desc:"Bio samo 1900. u Parizu. Jedine OI na kojima je bio.",
+   facts:[{l:"Na OI",v:"Samo 1900."},{l:"Zanimljivost",v:"Sve medalje dodale Francuskinja"},{l:"Status",v:"Jedini nastup u istoriji"}]},
+  {name:"Karate", emoji:"🥋", cat:"borba", status:"privremen", od:2020, do_:2020,
+   desc:"Uveden samo za Tokio 2021. Jovana Preković zlatna — ali sport uklonjen za Pariz!",
+   facts:[{l:"Na OI",v:"Samo 2021. (Tokio)"},{l:"Na\u0161a zvezda",v:"Jovana Prekovi\u0107 — zlato u kumite"},{l:"Razlog",v:"Nije uvr\u0161ten za Pariz 2024"}]},
+  {name:"Tenis", emoji:"🎾", cat:"tehnika", status:"aktivan", od:1896, do_:null,
+   desc:"Bio od 1896–1924, pa dugačka pauza do 1988. Đoković zlatni 2024!",
+   facts:[{l:"Na OI od",v:"1988. (povratak, bio 1896–1924)"},{l:"Srbija",v:"Novak \u0110okovi\u0107 — zlato Pariz 2024"},{l:"Legenda",v:"Federer, Nadal (zlato 2008)"}]},
+  {name:"Stoni tenis", emoji:"🏓", cat:"tehnika", status:"aktivan", od:1988, do_:null,
+   desc:"Azijski sport broj 1 na OI. Kina dominira apsolutno.",
+   facts:[{l:"Na OI od",v:"1988."},{l:"Dominacija",v:"Kina osvaja gotovo sve zlatne"},{l:"Rekord",v:"Ma Long — vi\u0161estruki olimpijski \u0161ampion"}]},
+  {name:"Badminton", emoji:"🏸", cat:"tehnika", status:"aktivan", od:1992, do_:null,
+   desc:"Uveden u Barceloni. Azijska dominacija posebno izražena.",
+   facts:[{l:"Na OI od",v:"1992."},{l:"Dominacija",v:"Kina, Indonezija, Malezija, Koreja"},{l:"Brzina",v:"Perje do 400 km/h"}]},
+];
+
+var state = { st: "all", cat: "all", search: "" };
+
+function getItems() {
+  var items = DATA.slice();
+  if (state.st !== "all") items = items.filter(function(d){ return d.status === state.st; });
+  if (state.cat !== "all") items = items.filter(function(d){ return d.cat === state.cat; });
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    items = items.filter(function(d){
+      return d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q);
+    });
+  }
+  return items;
+}
+
+var ST_CLS = {aktivan:"st-aktivan", uklonjen:"st-uklonjen", privremen:"st-privremen"};
+var ST_LBL = {aktivan:"Aktivan", uklonjen:"Uklonjen", privremen:"Privremen"};
+
+function render() {
+  var items = getItems();
+  document.getElementById("resultsCount").textContent = items.length + " sporta";
+  var grid = document.getElementById("grid");
+  if (!items.length) { grid.innerHTML = "<div class=\"no-results\">\u2606 Nema rezultata.</div>"; return; }
+  var html = "";
+  for (var i = 0; i < items.length; i++) {
+    var d = items[i];
+    var sc = ST_CLS[d.status] || "";
+    var sl = ST_LBL[d.status] || "";
+    html += "<div class=\"sport-card\" onclick=\"toggle(this)\">";
+    html += "<div class=\"card-head\">";
+    html += "<div class=\"card-emoji\">" + d.emoji + "</div>";
+    html += "<div class=\"card-info\">";
+    html += "<div class=\"card-name\">" + d.name + "</div>";
+    html += "<div class=\"card-since\">Na OI od " + d.od + (d.do_ ? " \u2013 " + d.do_ : "") + "</div>";
+    html += "</div>";
+    html += "<span class=\"card-status " + sc + "\">" + sl + "</span>";
+    html += "<span class=\"arrow-toggle\">&#9660;</span>";
+    html += "</div>";
+    html += "<div class=\"card-expand\"><div class=\"card-body\">";
+    html += "<div class=\"card-desc\">" + d.desc + "</div>";
+    html += "<div class=\"card-facts\">";
+    for (var j = 0; j < d.facts.length; j++) {
+      html += "<div class=\"fact-row\"><span class=\"fact-label\">" + d.facts[j].l + "</span><span class=\"fact-val\">" + d.facts[j].v + "</span></div>";
+    }
+    html += "</div></div></div></div>";
+  }
+  grid.innerHTML = html;
+}
+
+function toggle(card) { card.classList.toggle("open"); }
+
+document.getElementById("searchBox").addEventListener("input", function(){ state.search = this.value.trim(); render(); });
+document.querySelectorAll("[data-st]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.st = this.getAttribute("data-st");
+    document.querySelectorAll("[data-st]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
+document.querySelectorAll("[data-cat]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.cat = this.getAttribute("data-cat");
+    document.querySelectorAll("[data-cat]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
+render();
+</script>
+</body>
+</html>

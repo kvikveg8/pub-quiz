@@ -809,9 +809,50 @@ footer {
       <span class="round-badge">Runda 5</span>
     </div>
     <div class="topics-grid">
-      <div class="coming-soon">
-        &#8987; Teme za ovu rundu su u pripremi...
-      </div>
+      <a href="sport/domacini/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #060e1a, #0d2035);">
+          &#127758;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Doma&#263;ini OI</h3>
+          <p>Svi gradovi doma&#263;ini Letnji olimpijskih igara od 1896. do danas</p>
+        </div>
+        <div class="topic-card-footer"><span>Istra&#382;i gradove</span><span class="arrow">&#8594;</span></div>
+      </a>
+      <a href="sport/medalje/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #1a1400, #2e2400);">
+          &#129351;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Medalje po dr&#382;avama</h3>
+          <p>Sve vreme &mdash; zlatne, srebrne i bronzane medalje po zemaljama</p>
+        </div>
+        <div class="topic-card-footer"><span>Istra&#382;i tabelu</span><span class="arrow">&#8594;</span></div>
+      </a>
+      <a href="sport/sportovi/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #081a08, #0d3010);">
+          &#127939;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Olimpijski sportovi</h3>
+          <p>Svi sportovi na Letnjim OI &mdash; aktivni, uklonjeni i privremeni</p>
+        </div>
+        <div class="topic-card-footer"><span>Istra&#382;i sportove</span><span class="arrow">&#8594;</span></div>
+      </a>
+      <a href="sport/nasi/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #1a0808, #2e1010);">
+          &#127981;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Na&#353;i olimpijci</h3>
+          <p>Jugoslovenski i srpski olimpijski medaljisti kroz istoriju</p>
+        </div>
+        <div class="topic-card-footer"><span>Istra&#382;i atletičare</span><span class="arrow">&#8594;</span></div>
+      </a>
     </div>
   </div>
 
@@ -930,7 +971,7 @@ var rounds = [
   { id: 'geografija', icon: '&#127758;', name: 'Geografija',   num: 'Runda 2', count: '2 teme' },
   { id: 'knjizevnost',icon: '&#128218;', name: 'Knji\u017Eevnost', num: 'Runda 3', count: '3 teme' },
   { id: 'svastara1',  icon: '&#127914;', name: 'Sva\u0161tara I', num: 'Runda 4', count: 'Uskoro' },
-  { id: 'sport',      icon: '&#127942;', name: 'Sport',        num: 'Runda 5', count: 'Uskoro' },
+  { id: 'sport',      icon: '&#127942;', name: 'Sport',        num: 'Runda 5', count: '4 teme' },
   { id: 'istorija',   icon: '&#9876;',   name: 'Istorija',     num: 'Runda 6', count: '3 teme' },
   { id: 'muzika',     icon: '&#127932;', name: 'Muzika',       num: 'Runda 7', count: 'Uskoro' },
   { id: 'svastara2',  icon: '&#9889;',   name: 'Sva\u0161tara II', num: 'Runda 8', count: 'Uskoro' }
@@ -963,6 +1004,10 @@ var TOPICS = [
   { title: 'Filmski direktori', desc: 'Najve\u0107i reditelji svetske kinematografije', round: 'Film', roundIcon: '&#127916;', roundId: 'film', icon: '&#127909;', gradient: 'linear-gradient(135deg, #1a1a0a, #2e2e1b)', url: null, available: false },
   { title: 'Filmski citati', desc: 'Prepoznaj film po \u010Duvenom citatu', round: 'Film', roundIcon: '&#127916;', roundId: 'film', icon: '&#127902;', gradient: 'linear-gradient(135deg, #0a1a1a, #1b2e2e)', url: null, available: false },
   { title: 'Planine i reke', desc: 'Najve\u0107i prirodni oblici reljefa na planeti Zemlji', round: 'Geografija', roundIcon: '&#127758;', roundId: 'geografija', icon: '&#9968;', gradient: 'linear-gradient(135deg, #1a0a0a, #2e1b1b)', url: null, available: false },
+  { title: 'Doma\u0107ini OI', desc: 'Svi gradovi doma\u0107ini Letnih olimpijskih igara od 1896. do danas', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#127758;', gradient: 'linear-gradient(135deg, #060e1a, #0d2035)', url: 'sport/domacini/index.html', available: true },
+  { title: 'Medalje po dr\u017Eavama', desc: 'Sve vreme \u2014 zlatne, srebrne i bronzane medalje po zemljama', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#129351;', gradient: 'linear-gradient(135deg, #1a1400, #2e2400)', url: 'sport/medalje/index.html', available: true },
+  { title: 'Olimpijski sportovi', desc: 'Svi sportovi na Letnjim OI \u2014 aktivni, uklonjeni i privremeni', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#127939;', gradient: 'linear-gradient(135deg, #081a08, #0d3010)', url: 'sport/sportovi/index.html', available: true },
+  { title: 'Na\u0161i olimpijci', desc: 'Jugoslovenski i srpski olimpijski medaljisti kroz istoriju', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#127981;', gradient: 'linear-gradient(135deg, #1a0808, #2e1010)', url: 'sport/nasi/index.html', available: true },
   { title: 'Srpski pisci', desc: 'Najve\u0107a imena srpske knji\u017Eevnosti kroz vekove', round: 'Knji\u017Eevnost', roundIcon: '&#128218;', roundId: 'knjizevnost', icon: '&#128196;', gradient: 'linear-gradient(135deg, #0a0a1a, #1b1b2e)', url: null, available: false },
   { title: 'II Svetski rat', desc: 'Interaktivni tajmlajn klju\u010Dnih doga\u0111aja od 1939. do 1945.', round: 'Istorija', roundIcon: '&#9876;', roundId: 'istorija', icon: '&#9876;', gradient: 'linear-gradient(135deg, #0e0808, #1e1008)', url: 'istorija/wwii/index.html', available: true },
   { title: 'Stari vek', desc: 'Gr\u010Dka, Rim, Egipat — civilizacije koje su postavile temelje', round: 'Istorija', roundIcon: '&#9876;', roundId: 'istorija', icon: '&#127981;', gradient: 'linear-gradient(135deg, #12100a, #22201a)', url: null, available: false }

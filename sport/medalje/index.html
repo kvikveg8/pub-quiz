@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Medalje po državama — Pub Quiz</title>
+<style>
+:root {
+  --bg: #1a0f05; --surface: #241508; --surface2: #2e1c0a;
+  --gold: #c9a227; --gold2: #e8c84a;
+  --text: #f0e6d0; --text2: #b89a70;
+  --border: #3a2a12; --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+
+header { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 16px 24px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100; }
+.header-back { color: var(--gold); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; transition: background 0.2s; }
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.controls { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.search-box { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; color: var(--text); font-family: Georgia, serif; font-size: 14px; outline: none; }
+.search-box:focus { border-color: var(--gold); }
+.search-box::placeholder { color: var(--text2); }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label { color: var(--text2); font-size: 12px; align-self: center; text-transform: uppercase; letter-spacing: 1px; }
+.filter-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text2); padding: 6px 12px; font-family: Georgia, serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+
+.main { padding: 24px; max-width: 960px; margin: 0 auto; }
+.results-count { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+
+.note { font-size: 11px; color: var(--text2); margin-bottom: 14px; padding: 8px 12px; border: 1px dashed var(--border); border-radius: 4px; line-height: 1.5; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead tr { background: var(--surface); border-bottom: 2px solid var(--gold); }
+th { padding: 10px 12px; text-align: left; color: var(--gold); font-weight: normal; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; user-select: none; white-space: nowrap; }
+th:hover { color: var(--gold2); }
+th.active { color: var(--gold2); }
+th .arr { margin-left: 4px; opacity: 0.5; }
+th.active .arr { opacity: 1; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+tbody tr:hover { background: var(--hover); }
+td { padding: 10px 12px; vertical-align: middle; }
+.td-rank { color: var(--text2); font-size: 13px; width: 36px; }
+.td-rank.top3 { color: var(--gold2); font-weight: bold; }
+.td-country { font-weight: bold; color: var(--text); }
+.td-flag { font-size: 20px; margin-right: 8px; }
+.td-gold { color: #f5d060; font-size: 15px; font-weight: bold; }
+.td-silver { color: #c0c8d8; font-size: 15px; font-weight: bold; }
+.td-bronze { color: #d0905a; font-size: 15px; font-weight: bold; }
+.td-total { color: var(--text); font-size: 15px; font-weight: bold; }
+.td-note { color: var(--text2); font-size: 11px; font-style: italic; }
+
+.reg-tag { font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-left: 8px; opacity: 0.8; }
+.r-eu { background: #1a2040; color: #80a0e0; }
+.r-am { background: #102018; color: #70b070; }
+.r-as { background: #201008; color: #c09050; }
+.r-oc { background: #081820; color: #60b0c0; }
+.r-af { background: #1a0820; color: #c070b0; }
+
+.highlight { background: #1e1800 !important; }
+
+/* Mobile cards */
+.card-list { display: none; flex-direction: column; gap: 8px; }
+.m-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+.m-rank { font-size: 18px; font-weight: bold; color: var(--gold2); min-width: 28px; text-align: center; }
+.m-info { flex: 1; }
+.m-name { font-size: 15px; color: var(--text); font-weight: bold; }
+.m-medals { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+.no-results { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 16px; }
+
+@media (max-width: 680px) {
+  .main { padding: 14px; }
+  .controls { padding: 10px 14px; }
+  .header-title h1 { font-size: 18px; }
+  table { display: none; }
+  .card-list { display: flex; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#127941; MEDALJE PO DR&#381;AVAMA</h1>
+    <p>Sve vreme &mdash; Letnje olimpijske igre 1896&ndash;2024</p>
+  </div>
+  <span style="font-size:28px">&#127942;</span>
+</header>
+
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretra&#382;i dr&#382;avu...">
+  <div class="filter-group">
+    <span class="filter-label">Region:</span>
+    <button class="filter-btn active" data-reg="all">Sve</button>
+    <button class="filter-btn" data-reg="EU">Evropa</button>
+    <button class="filter-btn" data-reg="AM">Amerike</button>
+    <button class="filter-btn" data-reg="AS">Azija</button>
+    <button class="filter-btn" data-reg="OC">Okeanija</button>
+    <button class="filter-btn" data-reg="AF">Afrika</button>
+  </div>
+</div>
+
+<div class="main">
+  <p class="note">&#9432; Podaci su kumulativni za sve letnje OI 1896&ndash;2024. Neke dr&#382;ave uklju&#269;uju istorijske entitete (npr. Nema&#269;ka = ZRN+DDR+ujedinjena). Jugoslavija i Srbija su posebni unosi.</p>
+  <div class="results-count" id="resultsCount"></div>
+  <div id="tableWrap"></div>
+  <div class="card-list" id="cardList"></div>
+</div>
+
+<script>
+var DATA = [
+  {country:"SAD",            flag:"🇺🇸", reg:"AM", g:1061, s:830,  b:736,  note:"Najuspešnija zemlja u istoriji OI"},
+  {country:"SSSR",           flag:"🇷🇺", reg:"EU", g:395,  s:319,  b:296,  note:"1952–1988, uklju\u010duje sve sov. republike"},
+  {country:"Velika Britanija",flag:"🇬🇧",reg:"EU", g:285,  s:314,  b:315,  note:""},
+  {country:"Nema\u010dka",   flag:"🇩🇪", reg:"EU", g:275,  s:313,  b:305,  note:"ZRN + DDR + ujedinjena Nema\u010dka"},
+  {country:"Kina",           flag:"🇨🇳", reg:"AS", g:263,  s:199,  b:172,  note:"U\u010dествovala od 1984."},
+  {country:"Francuska",      flag:"🇫🇷", reg:"EU", g:230,  s:251,  b:281,  note:""},
+  {country:"Italija",        flag:"🇮🇹", reg:"EU", g:215,  s:192,  b:218,  note:""},
+  {country:"Ma\u0111arska",  flag:"🇭🇺", reg:"EU", g:179,  s:153,  b:176,  note:"Dominantna u ma\u010devanju i kanuistici"},
+  {country:"Australija",     flag:"🇦🇺", reg:"OC", g:164,  s:173,  b:211,  note:"Dva doma\u0107instva (1956, 2000)"},
+  {country:"Japan",          flag:"🇯🇵", reg:"AS", g:170,  s:162,  b:189,  note:"Skokovit rast nakon 1964."},
+  {country:"Rusija",         flag:"🇷🇺", reg:"EU", g:148,  s:125,  b:152,  note:"1992– (Zajednička ekipa + RF)"},
+  {country:"\u0160vedska",   flag:"🇸🇪", reg:"EU", g:148,  s:170,  b:177,  note:""},
+  {country:"Isto\u010dna Nema\u010dka (DDR)", flag:"🇩🇪", reg:"EU", g:153, s:129, b:127, note:"1956–1988, kontroverzni dopinški program"},
+  {country:"Holandija",      flag:"🇳🇱", reg:"EU", g:100,  s:98,   b:122,  note:""},
+  {country:"Finska",         flag:"🇫🇮", reg:"EU", g:101,  s:83,   b:117,  note:"Paavo Nurmi — 9 zlatnih"},
+  {country:"Kanada",         flag:"🇨🇦", reg:"AM", g:73,   s:104,  b:139,  note:""},
+  {country:"Koreja (Jug.)",  flag:"🇰🇷", reg:"AS", g:96,   s:88,   b:89,   note:"Dominantna u strelja\u0161tvu i taekwondou"},
+  {country:"Rumunija",       flag:"🇷🇴", reg:"EU", g:89,   s:95,   b:121,  note:"Nadia Comaneci — savr\u0161ena desetka 1976."},
+  {country:"Poljska",        flag:"🇵🇱", reg:"EU", g:69,   s:82,   b:132,  note:""},
+  {country:"Kuba",           flag:"🇨🇺", reg:"AM", g:82,   s:68,   b:80,   note:"Dominantna u boksu i atletici"},
+  {country:"Bugarska",       flag:"🇧🇬", reg:"EU", g:57,   s:85,   b:78,   note:""},
+  {country:"Brazil",         flag:"🇧🇷", reg:"AM", g:39,   s:47,   b:76,   note:""},
+  {country:"Gr\u010dka",     flag:"🇬🇷", reg:"EU", g:37,   s:44,   b:40,   note:"Doma\u0107in 1896. i 2004."},
+  {country:"Novi Zeland",    flag:"🇳🇿", reg:"OC", g:45,   s:19,   b:47,   note:""},
+  {country:"\u0160panija",   flag:"🇪🇸", reg:"EU", g:47,   s:71,   b:70,   note:""},
+  {country:"Kenija",         flag:"🇰🇪", reg:"AF", g:36,   s:41,   b:38,   note:"Dominantna u du\u017einama tr\u010danjem"},
+  {country:"Etiopija",       flag:"🇪🇹", reg:"AF", g:24,   s:13,   b:31,   note:"Abebe Bikila — maraton 1960. bos"},
+  {country:"Norve\u0161ka",  flag:"🇳🇴", reg:"EU", g:60,   s:49,   b:46,   note:"Vi\u0161e medalja na zimskim OI"},
+  {country:"Danska",         flag:"🇩🇰", reg:"EU", g:46,   s:73,   b:75,   note:""},
+  {country:"Švajcarska",     flag:"🇨🇭", reg:"EU", g:50,   s:75,   b:67,   note:""},
+  {country:"Jugoslavija",    flag:"🇾🇺", reg:"EU", g:37,   s:40,   b:50,   note:"1920–1992; vaterpolo, ko\u0161arka, rukomet", highlight:true},
+  {country:"Srbija",         flag:"🇷🇸", reg:"EU", g:5,    s:4,    b:4,    note:"2008–2024; \u0110okovi\u0107, Mandić, Preković", highlight:true},
+  {country:"Turska",         flag:"🇹🇷", reg:"AS", g:40,   s:27,   b:28,   note:"Rvanje i di\u017eanje tegova"},
+  {country:"Argentina",      flag:"🇦🇷", reg:"AM", g:23,   s:25,   b:28,   note:""},
+  {country:"Jam. (Jamaica)", flag:"🇯🇲", reg:"AM", g:27,   s:36,   b:23,   note:"Usain Bolt — najbrži čovek ikad"},
+  {country:"Ukrajina",       flag:"🇺🇦", reg:"EU", g:44,   s:51,   b:56,   note:"1996– (pre kao deo SSSR-a)"},
+  {country:"Bela Rusija",    flag:"🇧🇾", reg:"EU", g:24,   s:28,   b:36,   note:""},
+  {country:"Maroko",         flag:"🇲🇦", reg:"AF", g:23,   s:5,    b:12,   note:""},
+  {country:"Ju\u017ena Afrika",flag:"🇿🇦",reg:"AF", g:26,  s:28,   b:30,   note:"Isklju\u010dena 1964–1988 zbog apartheida"},
+];
+
+var state = { reg: "all", search: "", sortCol: "g", sortDir: -1 };
+
+function getRows() {
+  var rows = DATA.slice();
+  if (state.reg !== "all") rows = rows.filter(function(r){ return r.reg === state.reg; });
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    rows = rows.filter(function(r){ return r.country.toLowerCase().includes(q); });
+  }
+  rows.sort(function(a, b){
+    var av = a[state.sortCol], bv = b[state.sortCol];
+    return state.sortDir * (bv - av);
+  });
+  return rows;
+}
+
+function render() {
+  var rows = getRows();
+  document.getElementById("resultsCount").textContent = rows.length + " zemalja";
+  if (!rows.length) {
+    document.getElementById("tableWrap").innerHTML = "<div class=\"no-results\">\u2606 Nema rezultata.</div>";
+    document.getElementById("cardList").innerHTML = "";
+    return;
+  }
+
+  var cols = [{k:"g",l:"\ud83e\udd47 Zlato"},{k:"s",l:"\ud83e\udd48 Srebro"},{k:"b",l:"\ud83e\udd49 Bronza"},{k:"total",l:"Ukupno"}];
+  var html = "<table><thead><tr><th style=\"width:36px\">#</th><th>Zemlja</th>";
+  ["g","s","b"].forEach(function(k){
+    var arr = state.sortCol === k ? (state.sortDir === -1 ? " ▼" : " ▲") : " ▽";
+    html += "<th class=\"" + (state.sortCol===k?"active":"") + "\" data-sort=\"" + k + "\">" + (k==="g"?"🥇":k==="s"?"🥈":"🥉") + " " + (k==="g"?"Zlato":k==="s"?"Srebro":"Bronza") + "<span class=\"arr\">" + arr + "</span></th>";
+  });
+  var arrt = state.sortCol === "total" ? (state.sortDir === -1 ? " ▼" : " ▲") : " ▽";
+  html += "<th class=\"" + (state.sortCol==="total"?"active":"") + "\" data-sort=\"total\">Ukupno<span class=\"arr\">" + arrt + "</span></th>";
+  html += "<th style=\"min-width:120px\">Napomena</th></tr></thead><tbody>";
+
+  var cards = "";
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var total = r.g + r.s + r.b;
+    var hi = r.highlight ? " class=\"highlight\"" : "";
+    html += "<tr" + hi + ">";
+    html += "<td class=\"td-rank" + (i<3?" top3":"") + "\">" + (i+1) + "</td>";
+    html += "<td class=\"td-country\"><span class=\"td-flag\">" + r.flag + "</span>" + r.country + "</td>";
+    html += "<td class=\"td-gold\">" + r.g + "</td>";
+    html += "<td class=\"td-silver\">" + r.s + "</td>";
+    html += "<td class=\"td-bronze\">" + r.b + "</td>";
+    html += "<td class=\"td-total\">" + total + "</td>";
+    html += "<td class=\"td-note\">" + r.note + "</td>";
+    html += "</tr>";
+
+    cards += "<div class=\"m-card" + (r.highlight?" highlight":"") + "\">";
+    cards += "<div class=\"m-rank\">" + (i+1) + "</div>";
+    cards += "<div class=\"m-info\">";
+    cards += "<div class=\"m-name\">" + r.flag + " " + r.country + "</div>";
+    cards += "<div class=\"m-medals\">\ud83e\udd47 " + r.g + " &nbsp; \ud83e\udd48 " + r.s + " &nbsp; \ud83e\udd49 " + r.b + " &nbsp;&mdash;&nbsp; Ukupno: " + total + "</div>";
+    if (r.note) cards += "<div style=\"font-size:11px;color:var(--text2);margin-top:2px\">" + r.note + "</div>";
+    cards += "</div></div>";
+  }
+  html += "</tbody></table>";
+  document.getElementById("tableWrap").innerHTML = html;
+  document.getElementById("cardList").innerHTML = cards;
+
+  document.querySelectorAll("th[data-sort]").forEach(function(th){
+    th.addEventListener("click", function(){
+      var k = this.getAttribute("data-sort");
+      if (state.sortCol === k) state.sortDir *= -1;
+      else { state.sortCol = k; state.sortDir = -1; }
+      render();
+    });
+  });
+}
+
+document.getElementById("searchBox").addEventListener("input", function(){ state.search = this.value.trim(); render(); });
+document.querySelectorAll("[data-reg]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.reg = this.getAttribute("data-reg");
+    document.querySelectorAll("[data-reg]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active");
+    render();
+  });
+});
+render();
+</script>
+</body>
+</html>
