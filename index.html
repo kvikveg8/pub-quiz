@@ -986,8 +986,16 @@ footer {
       </div>
       <span class="round-badge">Runda 6</span>
     </div>
-    <div class="topics-grid">
-      <a href="istorija/nemanjici/nemanjici.html" class="topic-card">
+    <div class="sport-filter-bar" id="istorijaFilterBar">
+      <button class="sf-btn active" data-sc="all">Sve</button>
+      <button class="sf-btn" data-sc="praistorija">🦕 Praistorija</button>
+      <button class="sf-btn" data-sc="starivek">🏺 Stari vek</button>
+      <button class="sf-btn" data-sc="srednjivek">⚔️ Srednji vek</button>
+      <button class="sf-btn" data-sc="novivek">🏭 Novi vek</button>
+      <button class="sf-btn" data-sc="savremeno">🌍 Savremeno</button>
+    </div>
+    <div class="topics-grid" id="istorijaTopicsGrid">
+      <a href="istorija/nemanjici/nemanjici.html" class="topic-card" data-sc="srednjivek">
         <div class="topic-card-top" style="background: linear-gradient(135deg, #1a0800, #2e1400);">
           &#9812;
           <span class="topic-badge new">Novo</span>
@@ -1001,7 +1009,7 @@ footer {
           <span class="arrow">&#8594;</span>
         </div>
       </a>
-      <a href="istorija/jugoslavija/index.html" class="topic-card">
+      <a href="istorija/jugoslavija/index.html" class="topic-card" data-sc="savremeno">
         <div class="topic-card-top" style="background: linear-gradient(135deg, #080e08, #0f1e10);">
           &#9733;
           <span class="topic-badge new">Novo</span>
@@ -1015,7 +1023,7 @@ footer {
           <span class="arrow">&#8594;</span>
         </div>
       </a>
-      <a href="istorija/wwii/index.html" class="topic-card">
+      <a href="istorija/wwii/index.html" class="topic-card" data-sc="savremeno">
         <div class="topic-card-top" style="background: linear-gradient(135deg, #0e0808, #1e1008);">
           &#9876;
           <span class="topic-badge new">Novo</span>
@@ -1029,7 +1037,7 @@ footer {
           <span class="arrow">&#8594;</span>
         </div>
       </a>
-      <div class="topic-card disabled">
+      <div class="topic-card disabled" data-sc="starivek">
         <div class="topic-card-top" style="background: linear-gradient(135deg, #12100a, #22201a);">
           &#127981;
           <span class="topic-badge soon">Uskoro</span>
@@ -1223,6 +1231,25 @@ if (sportFilterBar) {
     sportFilterBar.querySelectorAll('.sf-btn').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
     document.querySelectorAll('#sportTopicsGrid .topic-card').forEach(function(card) {
+      if (sc === 'all') {
+        card.style.display = '';
+      } else {
+        card.style.display = card.dataset.sc === sc ? '' : 'none';
+      }
+    });
+  });
+}
+
+// Istorija filter bar
+var istorijaFilterBar = document.getElementById('istorijaFilterBar');
+if (istorijaFilterBar) {
+  istorijaFilterBar.addEventListener('click', function(e) {
+    var btn = e.target.closest('.sf-btn');
+    if (!btn) return;
+    var sc = btn.dataset.sc;
+    istorijaFilterBar.querySelectorAll('.sf-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.querySelectorAll('#istorijaTopicsGrid .topic-card').forEach(function(card) {
       if (sc === 'all') {
         card.style.display = '';
       } else {
