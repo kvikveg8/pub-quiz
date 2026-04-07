@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bronzano doba — Praistorija — Pub Quiz</title>
+<link rel="manifest" href="../../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e0a04;
+  --surface: #1c1408;
+  --surface2: #261c0a;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #7a6015;
+  --text: #f0e6d0;
+  --muted: #9a8060;
+  --border: #2a1e08;
+  --border2: #3a2a0c;
+  --era-color: #c89040;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(120,80,20,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(90,60,15,0.2) 0%, transparent 60%);
+}
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back { color: #8a6830; text-decoration: none; font-size: 13px; padding: 6px 12px; border: 1px solid var(--border2); border-radius: 6px; transition: all 0.2s; white-space: nowrap; }
+.header-back:hover { color: var(--era-color); border-color: #8a6830; }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 20px; color: var(--era-color); font-weight: normal; letter-spacing: 3px; }
+.header-title p { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 2px; }
+.header-spacer { width: 80px; }
+.stats-bar { max-width: 860px; margin: 0 auto; padding: 14px 20px 0; }
+.stats-count { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.stats-count span { color: var(--era-color); }
+.main-wrap { max-width: 860px; margin: 0 auto; padding: 20px 20px 60px; }
+.timeline { position: relative; padding-left: 28px; margin-top: 16px; }
+.timeline::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: var(--border2); }
+.event { position: relative; margin-bottom: 12px; cursor: pointer; }
+.event::before { content: ''; position: absolute; left: -24px; top: 18px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--era-color); background: var(--bg); transition: all 0.2s; z-index: 1; }
+.event.open::before { background: var(--era-color); transform: scale(1.3); }
+.event-card { background: var(--surface); border: 1px solid var(--border2); border-left: 3px solid var(--era-color); border-radius: 8px; overflow: hidden; transition: box-shadow 0.2s; }
+.event:hover .event-card, .event.open .event-card { box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+.event-head { padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px; }
+.event-date { font-size: 10px; color: #8a6830; white-space: nowrap; min-width: 100px; padding-top: 3px; letter-spacing: 0.3px; font-style: italic; line-height: 1.4; }
+.event-main { flex: 1; }
+.event-title { font-size: 15px; color: var(--text); line-height: 1.35; }
+.event-arrow { color: var(--muted); font-size: 13px; padding-top: 2px; transition: transform 0.2s, color 0.2s; flex-shrink: 0; }
+.event.open .event-arrow { transform: rotate(90deg); color: var(--era-color); }
+.event-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.event.open .event-body { display: block; }
+.event-desc { font-size: 13px; color: var(--muted); line-height: 1.7; margin-top: 12px; margin-bottom: 12px; }
+.event-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin-bottom: 10px; }
+.event-meta-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+.event-meta-label { font-size: 10px; color: #8a6830; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.event-meta-val { font-size: 12px; color: var(--text); line-height: 1.5; }
+.event-fact { margin-top: 4px; padding: 10px 14px; background: rgba(200,144,64,0.07); border: 1px solid rgba(200,144,64,0.2); border-radius: 6px; font-size: 12px; color: #a07830; font-style: italic; line-height: 1.55; }
+.event-fact::before { content: '\2605\00A0\00A0'; color: var(--era-color); }
+footer { text-align: center; padding: 24px; border-top: 1px solid var(--border2); font-size: 12px; color: #8a6830; letter-spacing: 2px; }
+@media (max-width: 600px) {
+  .header-title h1 { font-size: 15px; letter-spacing: 1px; }
+  .header-spacer { width: 50px; }
+  .event-date { min-width: 76px; font-size: 9px; }
+  .event-title { font-size: 14px; }
+  .event-meta-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="header-back">&#8592; Praistorija</a>
+  <div class="header-title">
+    <h1>&#128296; BRONZANO DOBA</h1>
+    <p>~3.300 &#8211; 1.200 P.N.E. &nbsp;&#8226;&nbsp; METAL MENJA SVE</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="stats-bar">
+  <div class="stats-count"><span id="eventCount">4</span> klju&#269;na doga&#273;aja</div>
+</div>
+
+<div class="main-wrap">
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<footer>&#9830; Bronzano doba &#9830; ~3.300 &#8211; 1.200 p.n.e. &#9830;</footer>
+
+<script>
+var EVENTS = [
+  {
+    displayYear: '~3.500 p.n.e.',
+    title: 'Pronalazak to\u010dka',
+    desc: 'To\u010dak je izmišljen u Mesopotamiji, a najstariji fizički dokaz \u2014 glineni model \u2014 prona\u0111en je u dana\u0161njoj Poljskoj i Slova\u010dkoj. Prvobitna primena bila je lona\u010darski to\u010dak za oblikovanje keramike. Transportni to\u010dak pojavio se ne\u0161to kasnije, na zaprežnim kolima sa masivnim drvenim to\u010dkovima.',
+    place: 'Mesopotamija, \u0160umerani; dokazi i u isto\u010dnoj Evropi',
+    figures: '\u0160umerani',
+    fact: 'To\u010dak je nastao POSLE pisma, gradova i bronzanih alatki. Nije bio \u201eprvo\u201c u lancu pronalazaka \u2014 \u010dove\u010danstvo je milenijumima gradilo civilizaciju bez njega!'
+  },
+  {
+    displayYear: '~3.300 p.n.e.',
+    title: 'Pronalazak bronze',
+    desc: 'Bronza je legura bakra i kalaja. Mnogo je tvrda od \u010distog bakra i od kamena, pa je revolucionisala izradu oru\u017eija, alatki i posuda. Najstariji bronzani predmeti prona\u0111eni su u Mesopotamiji i Iranu. Upotreba bronze brzo se \u0161irila Evropom, Azijom i Afrikom.',
+    place: 'Mesopotamija, Iran; potom \u0161irom Evroazije',
+    figures: '\u0160umerani i rani metalurzi',
+    fact: 'Da bi napravio bronzu, moraš imati bakar I kalaj \u2014 a oni se retko nalaze na istom mestu. To je zna\u010dilo da su kulture bronzanog doba morale da razviju duge trgova\u010dke rute kroz Evropu i Aziju!'
+  },
+  {
+    displayYear: '~3.300 p.n.e.',
+    title: '\u00d6tzi \u2014 \u010dovek od leda',
+    desc: 'U Alpima, na granici Austrije i Italije, prona\u0111eno je telo prirodno mumificiranog \u010doveka starosti oko 45 godina. Bio je na\u0111en u ledu 1991. godine. Imao je bronzanu sekiru, luk i strele, ko\u017enu ode\u0107u, obu\u0107u sa slamom za toplotu i lekovito bilje. Na le\u0111ima je imao strelicu \u2014 ubijen je!',
+    place: '\u00d6tztal Alpi, Austrija/Italija (na granici)',
+    figures: '\u00d6tzi (prona\u0161li ga planinari)',
+    fact: 'Genetska analiza pokazala je da \u00d6tzi ima \u017eivih mu\u0161kih potomaka \u2014 u dana\u0161njem Tirolu! Njegovi gen-ovi i dalje \u017eive, 5.300 godina kasnije. Ima i tetova\u017ee \u2014 vi\u0161e od 60 \u2014 koji se poklapaju sa akupunkt-urnim ta\u010dkama za artritis od kojeg je bolovao.'
+  },
+  {
+    displayYear: '~3.000\u20131.500 p.n.e.',
+    title: 'Stounhend\u017e',
+    desc: 'Na jugozapadu Engleske, u Solsberiju, podignuta je monumentalna kamena gra\u0111evina u nekoliko faza. Kameni blokovi te\u017ee do 25 tona i donošeni su sa udaljenosti od 250 km. Poravnati su ta\u010dno prema izlasku Sunca na letnji solsticij i zalasku na zimski solsticij. Svrha nije sa sigurno\u0161\u0107u utvr\u0111ena.',
+    place: 'Solsberi, Engleska',
+    figures: 'Neznani graditelji bronzanog doba',
+    fact: 'Ni do dana\u0161njeg dana nije poznato ta\u010dno kako su preme\u0161tali kamenje od 25 tona na 250 km i postavljali ga sa precizno\u0161\u0107u astronomskog instrumenta. Ni\u0161ta sli\u010dno tada\u0161njoj tehnologiji ne bi to moglo lako objasniti.'
+  }
+];
+
+function buildEvent(e, uid) {
+  return '<div class="event" id="' + uid + '" onclick="toggleEvent(\'' + uid + '\')">' +
+    '<div class="event-card">' +
+      '<div class="event-head">' +
+        '<div class="event-date">' + e.displayYear + '</div>' +
+        '<div class="event-main"><div class="event-title">' + e.title + '</div></div>' +
+        '<div class="event-arrow">&#9658;</div>' +
+      '</div>' +
+      '<div class="event-body">' +
+        '<div class="event-desc">' + e.desc + '</div>' +
+        '<div class="event-meta-grid">' +
+          (e.place   ? '<div class="event-meta-item"><div class="event-meta-label">Lokacija</div><div class="event-meta-val">' + e.place + '</div></div>' : '') +
+          (e.figures ? '<div class="event-meta-item"><div class="event-meta-label">Kultura / Li\u010dnosti</div><div class="event-meta-val">' + e.figures + '</div></div>' : '') +
+        '</div>' +
+        (e.fact ? '<div class="event-fact">' + e.fact + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+function toggleEvent(uid) {
+  var el = document.getElementById(uid);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.event.open').forEach(function(e) { e.classList.remove('open'); });
+  if (!isOpen) el.classList.add('open');
+}
+var tl = document.getElementById('timeline');
+var html = '';
+EVENTS.forEach(function(e, idx) { html += buildEvent(e, 'ev-' + idx); });
+tl.innerHTML = html;
+document.getElementById('eventCount').textContent = EVENTS.length;
+</script>
+</body>
+</html>

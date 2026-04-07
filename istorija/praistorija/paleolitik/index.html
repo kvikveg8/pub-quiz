@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paleolitik — Praistorija — Pub Quiz</title>
+<link rel="manifest" href="../../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #100a04;
+  --surface: #1c1008;
+  --surface2: #261508;
+  --surface3: #301a0a;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #7a6015;
+  --text: #f0e6d0;
+  --muted: #9a8060;
+  --border: #3a2a12;
+  --border2: #4a3518;
+  --era-color: #c9a227;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(139,80,20,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(92,61,30,0.2) 0%, transparent 60%);
+}
+
+/* HEADER */
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back {
+  color: var(--gold-dim);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.header-back:hover { color: var(--gold); border-color: var(--gold-dim); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 20px; color: var(--gold2); font-weight: normal; letter-spacing: 3px; }
+.header-title p { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 2px; }
+.header-spacer { width: 80px; }
+
+/* STATS */
+.stats-bar {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 14px 20px 0;
+}
+.stats-count {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+.stats-count span { color: var(--gold); }
+
+/* MAIN */
+.main-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 20px 20px 60px;
+}
+
+/* TIMELINE */
+.timeline {
+  position: relative;
+  padding-left: 28px;
+  margin-top: 16px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border2);
+}
+
+/* EVENT */
+.event {
+  position: relative;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.event::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 18px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--era-color);
+  background: var(--bg);
+  transition: all 0.2s;
+  z-index: 1;
+}
+.event.open::before {
+  background: var(--era-color);
+  transform: scale(1.3);
+}
+
+.event-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--era-color);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.event:hover .event-card,
+.event.open .event-card {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+.event-head {
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.event-date {
+  font-size: 10px;
+  color: var(--gold-dim);
+  white-space: nowrap;
+  min-width: 100px;
+  padding-top: 3px;
+  letter-spacing: 0.3px;
+  font-style: italic;
+  line-height: 1.4;
+}
+.event-main { flex: 1; }
+.event-title {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.35;
+}
+.event-arrow {
+  color: var(--muted);
+  font-size: 13px;
+  padding-top: 2px;
+  transition: transform 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.event.open .event-arrow { transform: rotate(90deg); color: var(--gold); }
+
+/* EXPANDED */
+.event-body {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+}
+.event.open .event-body { display: block; }
+.event-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.event-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.event-meta-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+.event-meta-label {
+  font-size: 10px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.event-meta-val {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+}
+.event-fact {
+  margin-top: 4px;
+  padding: 10px 14px;
+  background: rgba(201,162,39,0.06);
+  border: 1px solid rgba(201,162,39,0.15);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--gold-dim);
+  font-style: italic;
+  line-height: 1.55;
+}
+.event-fact::before { content: '\2605\00A0\00A0'; color: var(--gold); }
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 24px;
+  border-top: 1px solid var(--border2);
+  font-size: 12px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .header-title h1 { font-size: 15px; letter-spacing: 1px; }
+  .header-spacer { width: 50px; }
+  .event-head { gap: 8px; }
+  .event-date { min-width: 76px; font-size: 9px; }
+  .event-title { font-size: 14px; }
+  .event-meta-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="header-back">&#8592; Praistorija</a>
+  <div class="header-title">
+    <h1>&#129460; PALEOLITIK</h1>
+    <p>DO ~10.000 P.N.E. &nbsp;&#8226;&nbsp; STARIJE KAMENO DOBA</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="stats-bar">
+  <div class="stats-count"><span id="eventCount">13</span> klju&#269;nih doga&#273;aja</div>
+</div>
+
+<div class="main-wrap">
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<footer>&#9830; Paleolitik &#9830; 3,3 miliona godina &#9830;</footer>
+
+<script>
+var EVENTS = [
+  {
+    displayYear: '~3.300.000 p.n.e.',
+    title: 'Prve kamene alatke',
+    desc: 'Homo habilis (\u201eSpretan \u010dovek\u201c) pravio je prve poznate kamene alatke od komada kvarcita udaranjem jednog o drugi. Na\u0111ene su u Olduvajskoj klisuri u Tanzaniji i na lokaciji Lomekvi 3 u Keniji.',
+    place: 'Olduvajska klisura (Tanzanija) i Lomekvi (Kenija)',
+    figures: 'Homo habilis',
+    fact: 'Najstarije alatke na lokaciji Lomekvi 3 stare su 3,3 miliona godina \u2014 starije od samog roda Homo, \u0161to zna\u010di da su ih pravili jo\u0161 stariji hominidi!'
+  },
+  {
+    displayYear: '~1.800.000 p.n.e.',
+    title: 'Homo erectus napušta Afriku',
+    desc: 'Homo erectus (\u201ePravi \u010dovek\u201c) bio je prvi hominin koji se pro\u0161irio van Afrike. Stigao je do Kavkaza, Kine, Ju\u017enoisto\u010dne Azije i \u010dak Indonezije. Koristio je sofistikovanije alatke, lovio u grupama i verovatno komunicirao primitivnim govorom.',
+    place: 'Afrika, Azija, Kavkaz, Indonezija',
+    figures: 'Homo erectus (Peki\u0161ki \u010dovek, Javan\u0161ki \u010dovek)',
+    fact: 'Homo erectus je opstao skoro 2 miliona godina \u2014 znatno duže od nas. Homo sapiens postoji tek 300.000 godina!'
+  },
+  {
+    displayYear: '~400.000 p.n.e.',
+    title: 'Kontrola vatre',
+    desc: 'Homo erectus je po\u010deo da namerno kontroli\u0161e i odr\u017eava vatru. Dokazi su na\u0111eni u pe\u0107ini Kesem u Izraelu i lokalitetima u Kini. Vatra je transformisala ishranu (pe\u010dena hrana lak\u0161e varljiva), omogu\u0107ila pre\u017eivljavanje u hladnim oblastima, za\u0161titu od grabljivica i prve dru\u0161tvene rituale oko ognji\u0161ta.',
+    place: 'Pe\u0107ina Kesem (Izrael), Zhoukoudian (Kina)',
+    figures: 'Homo erectus',
+    fact: 'Nau\u010dnici smatraju da je kuvana hrana direktno uticala na razvoj mozga \u2014 vi\u0161e kalorija u manje vremena = vi\u0161e energije za rast mozga.'
+  },
+  {
+    displayYear: '~300.000 p.n.e.',
+    title: 'Pojava Homo sapiensa',
+    desc: 'Najstariji fosili anatomski modernog \u010doveka na\u0111eni su u D\u017eebel Iraoud u Maroku. Imali su lice sli\u010dno na\u0161em, ali lobanju ne\u0161to druga\u010dijeg oblika. Mozak iste veli\u010dine kao na\u0161, ali organizacija nije bila identi\u010dna. Razvijali su se pored neandertala i Homo erectusa.',
+    place: 'D\u017eebel Iraud, Maroko',
+    figures: 'Homo sapiens (rani)',
+    fact: 'Do 2017. se smatralo da je Homo sapiens nastao pre 200.000 godina u isto\u010dnoj Africi. Nalazi iz Maroka su pomerili poreklo za skoro 100.000 godina unazad!'
+  },
+  {
+    displayYear: '~100.000 p.n.e.',
+    title: 'Neandertali sahranjuju mrtve',
+    desc: 'U pe\u0107ini \u0160anidar u Iraku na\u0111eni su kosturi neandertala polo\u017eeni u namerne polo\u017eaje sa cve\u0107em oko kostiju. Ovo je jedan od prvih dokaza apstraktnog mi\u0161ljenja, svesti o smrti i rituala kod neandertala. Sahranjivanje mrtvih uputi na emocionalnu i duhovnu dimenziju.',
+    place: '\u0160anidar pe\u0107ina, Irak',
+    figures: 'Homo neanderthalensis',
+    fact: 'Nau\u010dnici su dugo debatovali da li je cve\u0107e nala\u017eeno s namerom ili su ga uneli glodalci. Novija analiza podr\u017eava tezu o ritualnom sahranjivanju.'
+  },
+  {
+    displayYear: '~75.000 p.n.e.',
+    title: 'Najstariji nakit — simboli\u010dko mi\u0161ljenje',
+    desc: 'U pe\u0107ini Blombos u Ju\u017enoj Africi na\u0111ene su perle napravljene od perforiranih morskih \u0161koljki, kao i komadi ohra bojeni apstraktnim \u0161arama. Ovo su jedni od najranijih dokaza simboli\u010dkog pona\u0161anja i sposobnosti apstraktnog mi\u0161ljenja.',
+    place: 'Blombos pe\u0107ina, Ju\u017ena Afrika',
+    figures: 'Homo sapiens',
+    fact: 'Da bi napravio perlu, morao si probiti \u0161koljku preciznim alatom, nanizati je na konac i nositi kao ukras \u2014 sve to zahteva planiranje, motoriku i svest o sebi.'
+  },
+  {
+    displayYear: '~70.000 p.n.e.',
+    title: 'Velika migracija van Afrike',
+    desc: 'Homo sapiens krenuo je u veliku seobu iz Afrike du\u017e obale Arabijskog poluostrva i dalje ka Ju\u017enoj Aziji i Australiji. Genetski dokazi pokazuju da su svi ne-Afrikanci potomci jedne relativno male grupe. Mogli su prelaziti kopnene mostove koji su tada bili kopno (nivo mora ni\u017ei za ~70m).',
+    place: 'Afrika \u2192 Arabijsko poluostrvo \u2192 Azija',
+    figures: 'Homo sapiens',
+    fact: 'Pore\u0111enjem DNK svih \u017eivih ne-Afrikanaca, nau\u010dnici su utvrdili da smo svi potomci grupe od svega 1.000\u201310.000 individua \u2014 genetsko \u201eusko grlo\u201c istorije \u010dove\u010danstva.'
+  },
+  {
+    displayYear: '~64.000 p.n.e.',
+    title: 'Luk i strela',
+    desc: 'U pe\u0107ini Sibudu u Ju\u017enoj Africi na\u0111eni su mikrolitiSi (sitni kameni vrhovi) koji su slu\u017eili kao vrhovi strela. Ovo je najstariji poznati dokaz upotrebe luka i strele. Lov streljanjem omogu\u0107io je napad izdaleka, bez direktnog kontakta sa plenom.',
+    place: 'Sibudu pe\u0107ina, Ju\u017ena Afrika',
+    figures: 'Homo sapiens',
+    fact: 'Luk i strela su toliko revolucionarne da su mnoge kulture u Aziji i Americi ovu tehnologiju razvile nezavisno \u2014 nu\u017enost lova nametnula je isto re\u0161enje!'
+  },
+  {
+    displayYear: '~45.000 p.n.e.',
+    title: 'Homo sapiens dolazi u Evropu',
+    desc: 'Homo sapiens po\u010deo je da se \u0161iri u Evropu iz Bliskog istoka i centralne Azije. Ovaj period ozna\u010dava po\u010detak \u201eGornjopaelolitske revolucije\u201c \u2014 eksplozivnog razvoja umetnosti, alata i kulturnih obi\u010daja. Homo sapiens i neandertali su kra\u0107e vreme koegzistirali.',
+    place: 'Evropa (Balkan, Francuska, Španija...)',
+    figures: 'Homo sapiens (Kromanjonnski \u010dovek)',
+    fact: 'Genetski dokazi pokazuju da su se Homo sapiens i neandertali ukr\u0161tali. 1\u20134% DNK modernih Evropljana i Azijaca vodi poreklo od neandertala!'
+  },
+  {
+    displayYear: '~40.000 p.n.e.',
+    title: 'Izumiranje neandertala',
+    desc: 'Posle vi\u0161e od 300.000 godina egzistencije, neandertali su nestali u roku od nekoliko hiljada godina od dolaska Homo sapiensa u Evropu. Uzroci su verovatno bili kombinacija: konkurencija za hranu i resurse, klimatske promene, bolesti i mo\u017eda direktni sukobi.',
+    place: 'Evropa i Bliski istok',
+    figures: 'Homo neanderthalensis',
+    fact: 'Neandertali nisu bili primitivne životinje \u2014 koristili su vatru, lekovite biljke, pravili nakite i pokapali mrtve. Mo\u017eda je samo manja populacija bila njihova propast.'
+  },
+  {
+    displayYear: '~36.000 p.n.e.',
+    title: 'Pe\u0107inska umetnost \u2014 \u0160ove pe\u0107ina',
+    desc: 'U pe\u0107ini \u0160ov (\u010cav\u00e9 Chauvet) u Francuskoj nalaze se najstarije poznate figurativne slike na svetu. Prikazuju lavove, nosoroge, mamute, medvede i konje sa neverovatnom umetni\u010dkom ve\u0161tinom \u2014 anatomski ta\u010dno, sa senkom i perspektivom.',
+    place: 'Pe\u0107ina \u0160ov (Grotte Chauvet), Francuska',
+    figures: 'Homo sapiens',
+    fact: 'Slike su toliko dobre da su ih nau\u010dnici u po\u010detku sumnjali da su falsifikat! Umetnici koji su ih crtali bili su jednako sposobni kao moderni slikari.'
+  },
+  {
+    displayYear: '~25.000 p.n.e.',
+    title: 'Venerin kip iz Vilendorfa',
+    desc: 'Mala figura \u017eene od kre\u010dnjaka visoka 11 cm, na\u0111ena u Austriji, jedna je od najpoznatijih dela praistorijske umetnosti. Naglašeni su delovi tela vezani za plodnost, \u0161to ukazuje na kult plodnosti ili duhovne veze sa prirodom. Sli\u010dnih figura na\u0111eno je \u0161irom Evrope.',
+    place: 'Vilendorf, Austrija',
+    figures: 'Homo sapiens',
+    fact: 'Figura nema lice, ali su mu ruke, noge i grudi izuzetno detaljno izra\u0111ene. Prona\u0111eno je vi\u0161e od 200 sli\u010dnih \u201eVenera\u201c \u0161irom Evrope i Azije iz istog perioda!'
+  },
+  {
+    displayYear: '~17.000 p.n.e.',
+    title: 'Laskaux i Altamira \u2014 vrhunac pe\u0107inske umetnosti',
+    desc: 'Pe\u0107ine Laskaux (Francuska) i Altamira (\u0160panija) sadr\u017ee najsavr\u0161enije primere praistorijske umetnosti. Vi\u0161e od 600 slika prikazuju bizOne, jelene, konje i krave u prirodnoj veli\u010dini, sa anatomskom ta\u010dno\u0161\u0107u i dinami\u010dnim pokretom. Boje napravljene od minerala \u2014 ohra, mangana, uglja.',
+    place: 'Laskaux (Dordonja, Francuska), Altamira (\u0160panija)',
+    figures: 'Homo sapiens',
+    fact: 'Laskaux su 1940. slu\u010dajno otkrila \u010detiri de\u010daka tra\u017ee\u0107i izgubljenog psa! Pe\u0107ina je danas zatvorena za javnost \u2014 disanje posetilaca uni\u0161tava slike. Postoji savr\u0161ena replika u blizini.'
+  }
+];
+
+function buildEvent(e, uid) {
+  return '<div class="event" id="' + uid + '" onclick="toggleEvent(\'' + uid + '\')">' +
+    '<div class="event-card">' +
+      '<div class="event-head">' +
+        '<div class="event-date">' + e.displayYear + '</div>' +
+        '<div class="event-main">' +
+          '<div class="event-title">' + e.title + '</div>' +
+        '</div>' +
+        '<div class="event-arrow">&#9658;</div>' +
+      '</div>' +
+      '<div class="event-body">' +
+        '<div class="event-desc">' + e.desc + '</div>' +
+        '<div class="event-meta-grid">' +
+          (e.place   ? '<div class="event-meta-item"><div class="event-meta-label">Lokacija</div><div class="event-meta-val">' + e.place + '</div></div>' : '') +
+          (e.figures ? '<div class="event-meta-item"><div class="event-meta-label">Vrsta / Li\u010dnosti</div><div class="event-meta-val">' + e.figures + '</div></div>' : '') +
+        '</div>' +
+        (e.fact ? '<div class="event-fact">' + e.fact + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function toggleEvent(uid) {
+  var el = document.getElementById(uid);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.event.open').forEach(function(e) { e.classList.remove('open'); });
+  if (!isOpen) el.classList.add('open');
+}
+
+// Render
+var tl = document.getElementById('timeline');
+var html = '';
+EVENTS.forEach(function(e, idx) {
+  html += buildEvent(e, 'ev-' + idx);
+});
+tl.innerHTML = html;
+document.getElementById('eventCount').textContent = EVENTS.length;
+</script>
+</body>
+</html>

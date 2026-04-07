@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neolitik — Praistorija — Pub Quiz</title>
+<link rel="manifest" href="../../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #040e06;
+  --surface: #081808;
+  --surface2: #0c2010;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #7a6015;
+  --text: #f0e6d0;
+  --muted: #9a8060;
+  --border: #0e2410;
+  --border2: #163018;
+  --era-color: #4ab860;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(20,80,30,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(15,60,25,0.2) 0%, transparent 60%);
+}
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back { color: #3a7a45; text-decoration: none; font-size: 13px; padding: 6px 12px; border: 1px solid var(--border2); border-radius: 6px; transition: all 0.2s; white-space: nowrap; }
+.header-back:hover { color: var(--era-color); border-color: #3a7a45; }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 20px; color: var(--era-color); font-weight: normal; letter-spacing: 3px; }
+.header-title p { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 2px; }
+.header-spacer { width: 80px; }
+.stats-bar { max-width: 860px; margin: 0 auto; padding: 14px 20px 0; }
+.stats-count { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.stats-count span { color: var(--era-color); }
+.main-wrap { max-width: 860px; margin: 0 auto; padding: 20px 20px 60px; }
+.timeline { position: relative; padding-left: 28px; margin-top: 16px; }
+.timeline::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: var(--border2); }
+.event { position: relative; margin-bottom: 12px; cursor: pointer; }
+.event::before { content: ''; position: absolute; left: -24px; top: 18px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--era-color); background: var(--bg); transition: all 0.2s; z-index: 1; }
+.event.open::before { background: var(--era-color); transform: scale(1.3); }
+.event-card { background: var(--surface); border: 1px solid var(--border2); border-left: 3px solid var(--era-color); border-radius: 8px; overflow: hidden; transition: box-shadow 0.2s; }
+.event:hover .event-card, .event.open .event-card { box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+.event-head { padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px; }
+.event-date { font-size: 10px; color: #3a7a45; white-space: nowrap; min-width: 100px; padding-top: 3px; letter-spacing: 0.3px; font-style: italic; line-height: 1.4; }
+.event-main { flex: 1; }
+.event-title { font-size: 15px; color: var(--text); line-height: 1.35; }
+.event-arrow { color: var(--muted); font-size: 13px; padding-top: 2px; transition: transform 0.2s, color 0.2s; flex-shrink: 0; }
+.event.open .event-arrow { transform: rotate(90deg); color: var(--era-color); }
+.event-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.event.open .event-body { display: block; }
+.event-desc { font-size: 13px; color: var(--muted); line-height: 1.7; margin-top: 12px; margin-bottom: 12px; }
+.event-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin-bottom: 10px; }
+.event-meta-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+.event-meta-label { font-size: 10px; color: #3a7a45; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.event-meta-val { font-size: 12px; color: var(--text); line-height: 1.5; }
+.event-fact { margin-top: 4px; padding: 10px 14px; background: rgba(74,184,96,0.06); border: 1px solid rgba(74,184,96,0.2); border-radius: 6px; font-size: 12px; color: #3a9a50; font-style: italic; line-height: 1.55; }
+.event-fact::before { content: '\2605\00A0\00A0'; color: var(--era-color); }
+footer { text-align: center; padding: 24px; border-top: 1px solid var(--border2); font-size: 12px; color: #3a7a45; letter-spacing: 2px; }
+@media (max-width: 600px) {
+  .header-title h1 { font-size: 15px; letter-spacing: 1px; }
+  .header-spacer { width: 50px; }
+  .event-date { min-width: 76px; font-size: 9px; }
+  .event-title { font-size: 14px; }
+  .event-meta-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="header-back">&#8592; Praistorija</a>
+  <div class="header-title">
+    <h1>&#127806; NEOLITIK</h1>
+    <p>~8.000 &#8211; 3.300 P.N.E. &nbsp;&#8226;&nbsp; MLA&#208;E KAMENO DOBA</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="stats-bar">
+  <div class="stats-count"><span id="eventCount">7</span> klju&#269;nih doga&#273;aja</div>
+</div>
+
+<div class="main-wrap">
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<footer>&#9830; Neolitik &#9830; Ra&#273;anje civilizacije &#9830;</footer>
+
+<script>
+var EVENTS = [
+  {
+    displayYear: '~10.000 p.n.e.',
+    title: 'G\u00f6bekli Tepe \u2014 prvi hram na svetu',
+    desc: 'Na ju\u017eistoku dana\u0161nje Turske, lovci-sakuplja\u010di izgradili su monumentalne kamene konstrukcije \u2014 krugove od T-oblika stubova visokih i do 6 metara, ukrašenih reljefima \u017eivotinja. Gradili su ih hiljade godina pre izuma to\u010dka i pisma. Ni\u0161ta sli\u010dno nije poznato u tom periodu.',
+    place: 'G\u00f6bekli Tepe, ju\u017enoisto\u010dna Turska',
+    figures: 'Lovci-sakuplja\u010di (prepoljopriv.)',
+    fact: 'Pre otkrija G\u00f6bekli Tepea vladala je teorija da je poljoprivreda uslov za monumentalnu arhitekturu. Ovo nalaziš\u0107e je urušilo tu teoriju \u2014 hram je izgra\u0111en PRE nego \u0161to je bila izmišljena poljoprivreda!'
+  },
+  {
+    displayYear: '~9.000 p.n.e.',
+    title: 'Jeriho \u2014 prvi grad',
+    desc: 'Na mestu izvora vode u Palestini nastalo je Jeriho \u2014 jedno od prvih stalnih gradskih naselja na svetu. Imalo je kamene zidove, kulu visoku 9 metara i oko 2.000 stanovnika. Stanovnici su uzgajali žitarice, gajili stoku i razvili primarnu podelu rada.',
+    place: 'Jeriho, Palestina (dana\u0161nja Zapadna obala)',
+    figures: 'Rani neolitski farmeri',
+    fact: 'Jeriho je i danas nastanjeno \u2014 jedno je od najstarijih kontinuirano naseljenih gradova na svetu. Kada se ka\u017ee da je nešto \u201estaro kao Jeriho\u201c, to znači vi\u0161e od 11.000 godina!'
+  },
+  {
+    displayYear: '~9.000 p.n.e.',
+    title: 'Poljoprivredna revolucija',
+    desc: 'U Plodnom polumesecu (dana\u0161nji Irak, Sirija, Liban, Izrael, Jordan) po\u010dele su se gajiti divlje trave: p\u0161enica, je\u010dam, le\u0107a, grašak. Istovremeno su domestifikovane ovca, koza i svinja. Ovo je bio najveći preokret u istoriji \u010dove\u010danstva \u2014 od lutalica do stalnih naselja.',
+    place: 'Plodni polumesec (Bliski istok)',
+    figures: 'Rani neolitski farmeri',
+    fact: 'Paradoks poljoprivrede: prvu generaciju farmera su kosti pokazivale LOŠije zdravlje od lovaca-sakuplja\u010da \u2014 siroma\u0161nija ishrana, vi\u0161e bolesti, manje vitamina. Ali vi\u0161e hrane = vi\u0161e dece = ve\u0107a populacija.'
+  },
+  {
+    displayYear: '~7.500 p.n.e.',
+    title: '\u010catal H\u00f6y\u00fck \u2014 grad bez ulica',
+    desc: 'U dana\u0161njoj Turskoj razvio se jedan od najranijih pravih gradova sa do 10.000 stanovnika. Peculiarnost: ku\u0107e su bile zbijene jedne uz druge bez ulica izme\u0111u. Ulazilo se kroz krov! Mrtvi su sahranjivani ispod poda ku\u0107e. Zidovi su bili ukrašeni freskama i rogovima bikova.',
+    place: '\u010catal H\u00f6y\u00fck, Turska',
+    figures: 'Rani neolitski farmeri',
+    fact: 'Istra\u017eivanja nisu pokazala nikakve dokaze o vladaru, vojsci ili hijerarhiji \u2014 \u010catal H\u00f6y\u00fck je mo\u017eda bio egalitarno dru\u0161tvo gde su svi imali sli\u010dan status i bogatstvo.'
+  },
+  {
+    displayYear: '~5.700 p.n.e.',
+    title: 'Vin\u010danska kultura \u2014 Srbija &#127464;&#127479;',
+    desc: 'Na mestu danas zvanom Vin\u010da, 14 km nizvodno od Beograda, razvila se jedna od najnaprednijih neolitskih kultura Evrope. Prostirala se na 500.000 km\u00b2 \u2014 skoro \u010ditav Balkan. Figu-rine, keramika i graditeljstvo pokazuju izuzetno visok nivo organizacije. Centralno naselje imalo je i do 2.500 stanovnika.',
+    place: 'Vin\u010da (Beograd) i \u0161iri Balkan',
+    figures: 'Vin\u010danska kultura',
+    fact: 'Vin\u010da je najve\u0107e neolitsko nalaziš\u0107e u Evropi \u2014 sloj kulturnih ostataka ide 10 metara u dubinu! Kopano je od 1908, a i danas nije u potpunosti istra\u017eeno.'
+  },
+  {
+    displayYear: '~5.500 p.n.e.',
+    title: 'Vin\u010dansko pismo \u2014 najstariji znaci na svetu?',
+    desc: 'Na keramici Vin\u010danske kulture prona\u0111eni su sistematski urezani znakovi koji po mnogo \u010demu li\u010de na pismo. Stariji su od sumerskog klinastog pisma za vi\u0161e od 1.000 godina. Nije jo\u0161 utvr\u0111eno da li se radi o pravom pismu ili o skupu simbola i oznaka.',
+    place: 'Vin\u010da i ostala nalaziš\u0107a Vin\u010danske kulture',
+    figures: 'Vin\u010danska kultura',
+    fact: 'Ako je Vin\u010dansko pismo pravo pismo, srpski Balkan bi bio mesto nastanka najstarijeg pisma na svetu \u2014 pre Sumerana i Egipta. Debata me\u0111u nau\u010dnicima jo\u0161 uvek traje!'
+  },
+  {
+    displayYear: '~3.500 p.n.e.',
+    title: 'Domestifikacija konja',
+    desc: 'Konji su domestifikovani na stepama dana\u0161njeg Kazahstana \u2014 Botajska kultura koristila ih je za meso i mleko, a kasnije za jahanje. Ovo je revolucionisalo transport, ratovanje i komunikaciju. Konj je omogu\u0107io da u jednom danu pre\u0111e\u0161 put koji bi pe\u0161ke trajao nedelju dana.',
+    place: 'Evroazijska stepa (Kazahstan)',
+    figures: 'Botajska kultura',
+    fact: 'Domestifikacija konja je toliko promenila svet da lingvisti veruju da se Proto-Indoevropski jezik \u2014 praotac ve\u0107ine evropskih jezika \u2014 pro\u0161irio upravo zahvaljuju\u0107i jahanju i konjski zap-regama.'
+  }
+];
+
+function buildEvent(e, uid) {
+  return '<div class="event" id="' + uid + '" onclick="toggleEvent(\'' + uid + '\')">' +
+    '<div class="event-card">' +
+      '<div class="event-head">' +
+        '<div class="event-date">' + e.displayYear + '</div>' +
+        '<div class="event-main"><div class="event-title">' + e.title + '</div></div>' +
+        '<div class="event-arrow">&#9658;</div>' +
+      '</div>' +
+      '<div class="event-body">' +
+        '<div class="event-desc">' + e.desc + '</div>' +
+        '<div class="event-meta-grid">' +
+          (e.place   ? '<div class="event-meta-item"><div class="event-meta-label">Lokacija</div><div class="event-meta-val">' + e.place + '</div></div>' : '') +
+          (e.figures ? '<div class="event-meta-item"><div class="event-meta-label">Kultura / Li\u010dnosti</div><div class="event-meta-val">' + e.figures + '</div></div>' : '') +
+        '</div>' +
+        (e.fact ? '<div class="event-fact">' + e.fact + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+function toggleEvent(uid) {
+  var el = document.getElementById(uid);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.event.open').forEach(function(e) { e.classList.remove('open'); });
+  if (!isOpen) el.classList.add('open');
+}
+var tl = document.getElementById('timeline');
+var html = '';
+EVENTS.forEach(function(e, idx) { html += buildEvent(e, 'ev-' + idx); });
+tl.innerHTML = html;
+document.getElementById('eventCount').textContent = EVENTS.length;
+</script>
+</body>
+</html>

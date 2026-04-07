@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Praistorija — Pub Quiz</title>
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d0804;
+  --surface: #1a0f06;
+  --surface2: #221408;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #7a6015;
+  --text: #f0e6d0;
+  --muted: #9a8060;
+  --border: #3a2a12;
+  --border2: #4a3518;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 30% 0%, rgba(100,60,10,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 100%, rgba(60,40,10,0.18) 0%, transparent 60%);
+}
+
+/* HEADER */
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back {
+  color: var(--gold-dim);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.header-back:hover { color: var(--gold); border-color: var(--gold-dim); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 20px; color: var(--gold2); font-weight: normal; letter-spacing: 3px; }
+.header-title p { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 2px; }
+.header-spacer { width: 80px; }
+
+/* MAIN */
+.main-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 36px 20px 60px;
+}
+
+.intro {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-bottom: 32px;
+  font-style: italic;
+}
+
+/* ERA GRID */
+.eras-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.era-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.era-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  border-color: var(--gold-dim);
+}
+
+.era-card-top {
+  padding: 28px 20px;
+  font-size: 52px;
+  text-align: center;
+  position: relative;
+}
+.era-card-top.pal  { background: linear-gradient(135deg, #1a0f05, #2e1800); }
+.era-card-top.mez  { background: linear-gradient(135deg, #051a18, #0d2e28); }
+.era-card-top.neo  { background: linear-gradient(135deg, #051a08, #0d2e10); }
+.era-card-top.bron { background: linear-gradient(135deg, #1a1005, #2e2008); }
+
+.era-count {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 11px;
+  color: var(--muted);
+  font-family: Georgia, serif;
+}
+
+.era-card-body {
+  padding: 16px 20px;
+  flex: 1;
+}
+.era-card-body h3 {
+  font-size: 18px;
+  color: var(--gold2);
+  font-weight: normal;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.era-period {
+  font-size: 11px;
+  color: var(--gold-dim);
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+.era-card-body p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.era-card-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--gold-dim);
+  letter-spacing: 1px;
+}
+.era-card:hover .era-card-footer { color: var(--gold); }
+.era-arrow { font-size: 16px; }
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 24px;
+  border-top: 1px solid var(--border2);
+  font-size: 12px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .eras-grid { grid-template-columns: 1fr; gap: 14px; }
+  .header-title h1 { font-size: 15px; letter-spacing: 1px; }
+  .header-spacer { width: 50px; }
+  .era-card-top { padding: 20px; font-size: 44px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../index.html" class="header-back">&#8592; Istorija</a>
+  <div class="header-title">
+    <h1>&#129430; PRAISTORIJA</h1>
+    <p>OD PRVIH ALATKI DO PRVIH CIVILIZACIJA</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="main-wrap">
+  <p class="intro">Izaberi epohu i istra&#382;i klju&#269;ne doga&#273;aje</p>
+
+  <div class="eras-grid">
+
+    <a href="paleolitik/" class="era-card">
+      <div class="era-card-top pal">
+        &#129460;
+        <span class="era-count">13 doga&#273;aja</span>
+      </div>
+      <div class="era-card-body">
+        <h3>Paleolitik</h3>
+        <p class="era-period">do ~10.000 p.n.e.</p>
+        <p>Evolucija &#269;oveka, osvajanje vatre, prve alatke i pećinska umetnost koja traje milionima godina</p>
+      </div>
+      <div class="era-card-footer">
+        <span>Istra&#382;i</span>
+        <span class="era-arrow">&#8594;</span>
+      </div>
+    </a>
+
+    <a href="mezolitik/" class="era-card">
+      <div class="era-card-top mez">
+        &#127754;
+        <span class="era-count">3 doga&#273;aja</span>
+      </div>
+      <div class="era-card-body">
+        <h3>Mezolitik</h3>
+        <p class="era-period">~10.000 &#8211; 8.000 p.n.e.</p>
+        <p>Kraj ledenog doba, prve stalne zajednice i Lepenski Vir &#8212; jedno od najstarijih naselja u Evropi</p>
+      </div>
+      <div class="era-card-footer">
+        <span>Istra&#382;i</span>
+        <span class="era-arrow">&#8594;</span>
+      </div>
+    </a>
+
+    <a href="neolitik/" class="era-card">
+      <div class="era-card-top neo">
+        &#127806;
+        <span class="era-count">7 doga&#273;aja</span>
+      </div>
+      <div class="era-card-body">
+        <h3>Neolitik</h3>
+        <p class="era-period">~8.000 &#8211; 3.300 p.n.e.</p>
+        <p>Poljoprivredna revolucija, prvi gradovi, hramovi i Vin&#269;anska kultura &#8212; 14 km od Beograda</p>
+      </div>
+      <div class="era-card-footer">
+        <span>Istra&#382;i</span>
+        <span class="era-arrow">&#8594;</span>
+      </div>
+    </a>
+
+    <a href="bronzano/" class="era-card">
+      <div class="era-card-top bron">
+        &#128296;
+        <span class="era-count">4 doga&#273;aja</span>
+      </div>
+      <div class="era-card-body">
+        <h3>Bronzano doba</h3>
+        <p class="era-period">~3.300 &#8211; 1.200 p.n.e.</p>
+        <p>Pronalazak bronze, to&#269;ak, Sto&#271;nhend&#382; i O&#263;ci &#8212; misterije koje traju do danas</p>
+      </div>
+      <div class="era-card-footer">
+        <span>Istra&#382;i</span>
+        <span class="era-arrow">&#8594;</span>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<footer>&#9830; Praistorija &#9830; 3,3 miliona godina istorije &#269;oveka &#9830;</footer>
+
+</body>
+</html>
