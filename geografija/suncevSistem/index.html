@@ -751,7 +751,7 @@ function showTooltip(e, p) {
   var html = '<h4>' + p.name + ' <span style="color:var(--text2);font-size:11px;font-weight:normal;">' + p.latin + '</span></h4>';
   html += '<p><strong>Tip:</strong> ' + p.type + '</p>';
   if (p.dist) html += '<p><strong>Udaljenost:</strong> ' + p.dist + '</p>';
-  if (p.satTotal !== undefined) html += '<p><strong>Satelita:</strong> ' + p.satTotal + '</p>';
+  if (p.satTotal !== undefined) html += '<p><strong>' + (p.isSun ? 'Planeta' : 'Satelita') + ':</strong> ' + p.satTotal + '</p>';
   tooltip.innerHTML = html;
   tooltip.style.display = 'block';
   moveTooltip(e);
@@ -803,10 +803,11 @@ function renderDetail(p) {
   html += '</div>';
 
   // Satellites
-  html += '<div class="sats-section"><h3>Sateliti (' + p.satTotal + ')</h3>';
+  var satLabel = p.isSun ? 'Planete' : 'Sateliti';
+  html += '<div class="sats-section"><h3>' + satLabel + ' (' + p.satTotal + ')</h3>';
   html += '<div class="sat-list">';
   if (p.sats.length === 0) {
-    html += '<div class="no-sats">Nema prirodnih satelita</div>';
+    html += '<div class="no-sats">' + (p.isSun ? 'Planete su prikazane u orerijumu iznad' : 'Nema prirodnih satelita') + '</div>';
   } else {
     p.sats.forEach(function(s) {
       var dotSz = s.dot || satDotSize(s.size);
