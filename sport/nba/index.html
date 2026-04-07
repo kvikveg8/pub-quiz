@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>NBA liga — Pub Quiz</title>
+<style>
+:root {
+  --bg: #1a0f05; --surface: #241508; --surface2: #2e1c0a;
+  --gold: #c9a227; --gold2: #e8c84a;
+  --text: #f0e6d0; --text2: #b89a70;
+  --border: #3a2a12; --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+header { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 16px 24px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100; }
+.header-back { color: var(--gold); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; transition: background 0.2s; }
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.controls { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.search-box { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; color: var(--text); font-family: Georgia, serif; font-size: 14px; outline: none; }
+.search-box:focus { border-color: var(--gold); }
+.search-box::placeholder { color: var(--text2); }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label { color: var(--text2); font-size: 12px; align-self: center; text-transform: uppercase; letter-spacing: 1px; }
+.filter-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text2); padding: 6px 12px; font-family: Georgia, serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+.main { padding: 24px; max-width: 1000px; margin: 0 auto; }
+.results-count { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+.note { font-size: 11px; color: var(--text2); margin-bottom: 14px; padding: 8px 12px; border: 1px dashed var(--border); border-radius: 4px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead tr { background: var(--surface); border-bottom: 2px solid var(--gold); }
+th { padding: 10px 12px; text-align: left; color: var(--gold); font-weight: normal; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+tbody tr:hover { background: var(--hover); }
+tbody tr.highlight { background: #1e1800 !important; }
+tbody tr.nasi { background: #1a0e18 !important; border-left: 3px solid #c9a227; }
+td { padding: 8px 12px; vertical-align: top; }
+.td-season { color: var(--gold2); font-weight: bold; white-space: nowrap; }
+.td-champ { font-weight: bold; color: var(--text); }
+.td-runner { color: var(--text2); }
+.td-mvp { color: var(--text2); font-size: 12px; }
+.td-fact { color: var(--text2); font-size: 12px; line-height: 1.4; }
+.card-list { display: none; flex-direction: column; gap: 8px; }
+.m-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.m-card.highlight { background: #1e1800; }
+.m-card.nasi { background: #1a0e18; border-left: 3px solid var(--gold); }
+.m-season { font-size: 15px; font-weight: bold; color: var(--gold2); }
+.m-champ { font-size: 15px; color: var(--text); font-weight: bold; margin: 4px 0 2px; }
+.m-runner { font-size: 12px; color: var(--text2); }
+.m-mvp { font-size: 12px; color: var(--text2); }
+.m-fact { font-size: 11px; color: var(--text2); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); line-height: 1.4; }
+.no-results { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 16px; }
+@media (max-width: 700px) {
+  .main { padding: 14px; }
+  .controls { padding: 10px 14px; }
+  .header-title h1 { font-size: 18px; }
+  table { display: none; }
+  .card-list { display: flex; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#127936; NBA LIGA</h1>
+    <p>Svi NBA šampioni od 1947. do danas &mdash; prstenovi, MVP, legende</p>
+  </div>
+  <span style="font-size:28px">&#127942;</span>
+</header>
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretraži tim, MVP, godinu...">
+  <div class="filter-group">
+    <span class="filter-label">Tim:</span>
+    <button class="filter-btn active" data-t="all">Svi</button>
+    <button class="filter-btn" data-t="Boston Celtics">🍀 Celtics</button>
+    <button class="filter-btn" data-t="LA Lakers">⭐ Lakers</button>
+    <button class="filter-btn" data-t="Chicago Bulls">🐂 Bulls</button>
+    <button class="filter-btn" data-t="Golden State">💛 Warriors</button>
+    <button class="filter-btn" data-t="San Antonio">🌹 Spurs</button>
+  </div>
+</div>
+<div class="main">
+  <p class="note">&#9432; Boston Celtics 18 titula &mdash; rekord NBA. <span style="color:var(--gold)">&#9733;</span> Nikola Jokić i Denver Nuggets 2023. &mdash; srpski šampion!</p>
+  <div class="results-count" id="resultsCount"></div>
+  <div id="tableWrap"></div>
+  <div class="card-list" id="cardList"></div>
+</div>
+<script>
+var DATA = [
+  {s:"1946/47", champ:"Philadelphia Warriors",   runner:"Chicago Stags",          mvp:"—",                    fact:"Osnovan NBA (tada BAA). Joe Fulks 23.2 poena — rekord ere."},
+  {s:"1947/48", champ:"Baltimore Bullets",        runner:"Philadelphia Warriors",   mvp:"—",                    fact:"Baltimore jedina titula u istoriji."},
+  {s:"1948/49", champ:"Minneapolis Lakers",       runner:"Washington Capitols",    mvp:"—",                    fact:"Džordž Mikan dominira — prvi NBA superstar."},
+  {s:"1949/50", champ:"Minneapolis Lakers",       runner:"Syracuse Nationals",     mvp:"—",                    fact:"Mikan nastavlja dominaciju."},
+  {s:"1950/51", champ:"Rochester Royals",         runner:"NY Knicks",              mvp:"—",                    fact:"Jedina titula Royalsa (danas Sacramento Kings)."},
+  {s:"1951/52", champ:"Minneapolis Lakers",       runner:"NY Knicks",              mvp:"—",                    fact:"Mikan treća titula."},
+  {s:"1952/53", champ:"Minneapolis Lakers",       runner:"NY Knicks",              mvp:"—",                    fact:"Lakers čak 3 finala zaredom vs Knicks."},
+  {s:"1953/54", champ:"Minneapolis Lakers",       runner:"Syracuse Nationals",     mvp:"—",                    fact:"Mikan 5. i poslednja titula. Penzionisao se."},
+  {s:"1954/55", champ:"Syracuse Nationals",       runner:"Fort Wayne Pistons",     mvp:"—",                    fact:"Jedina titula Nationalsa (danas Philadelphia 76ers)."},
+  {s:"1955/56", champ:"Philadelphia Warriors",    runner:"Fort Wayne Pistons",     mvp:"—",                    fact:"Paul Arizin predvodi Warriors."},
+  {s:"1956/57", champ:"Boston Celtics",           runner:"St. Louis Hawks",        mvp:"—",                    fact:"Početak Celtics ere! Bill Rasel dolazi. Prva od 17 titula.", highlight:true},
+  {s:"1957/58", champ:"St. Louis Hawks",          runner:"Boston Celtics",         mvp:"—",                    fact:"Jedina godina prekida Celtics dominacije u Raselovoj eri. Petti Hovard MVP."},
+  {s:"1958/59", champ:"Boston Celtics",           runner:"Minneapolis Lakers",     mvp:"—",                    fact:"Celtics se vraćaju. Rased + Cousy + Sam Jones."},
+  {s:"1959/60", champ:"Boston Celtics",           runner:"St. Louis Hawks",        mvp:"—",                    fact:"Celtics treća titula."},
+  {s:"1960/61", champ:"Boston Celtics",           runner:"St. Louis Hawks",        mvp:"—",                    fact:"Celtics nastavlja."},
+  {s:"1961/62", champ:"Boston Celtics",           runner:"LA Lakers",              mvp:"—",                    fact:"Wilt Chamberlain 100 poena u jednoj utakmici te sezone! Ali Celtics uzeli titulu."},
+  {s:"1962/63", champ:"Boston Celtics",           runner:"LA Lakers",              mvp:"—",                    fact:"Celtics sedma uzastopna! Rased-Cousy era."},
+  {s:"1963/64", champ:"Boston Celtics",           runner:"San Francisco Warriors", mvp:"—",                    fact:"Celtics osma."},
+  {s:"1964/65", champ:"Boston Celtics",           runner:"LA Lakers",              mvp:"—",                    fact:"Celtics deveta. Havlicek 'steals the ball!'"},
+  {s:"1965/66", champ:"Boston Celtics",           runner:"LA Lakers",              mvp:"—",                    fact:"Celtics deseta uzastopna titula — NBA rekord!"},
+  {s:"1966/67", champ:"Philadelphia 76ers",       runner:"San Francisco Warriors", mvp:"—",                    fact:"Wilt Chamberlain prekida Celtics dominaciju!"},
+  {s:"1967/68", champ:"Boston Celtics",           runner:"LA Lakers",              mvp:"—",                    fact:"Rased kapiten i trener — dvostruka uloga."},
+  {s:"1968/69", champ:"Boston Celtics",           runner:"LA Lakers",              mvp:"Jerry West",           fact:"West MVP finala uprkos porazu Lakersa! Jedini put u istoriji MVP je bio sa poraženima."},
+  {s:"1969/70", champ:"NY Knicks",                runner:"LA Lakers",              mvp:"Willis Reed",          fact:"Willis Reed izlazi na teren sa povredom — legendarni moment Madison Sq. Gardena."},
+  {s:"1970/71", champ:"Milwaukee Bucks",          runner:"Baltimore Bullets",      mvp:"Kareem Abdul-Jabbar",  fact:"Kareem (tada Lew Alcindor) — 1. MVP finala. Oscar Robertson saigrac."},
+  {s:"1971/72", champ:"LA Lakers",                runner:"NY Knicks",              mvp:"Wilt Chamberlain",     fact:"Lakers rekordnih 33 uzastopnih pobeda te sezone. Wilt zadnja titula."},
+  {s:"1972/73", champ:"NY Knicks",                runner:"LA Lakers",              mvp:"Willis Reed",          fact:"Jedini Kniksov ponovljeni naslov."},
+  {s:"1973/74", champ:"Boston Celtics",           runner:"Milwaukee Bucks",        mvp:"John Havlicek",        fact:"Celtics se vraćaju bez Raseda."},
+  {s:"1974/75", champ:"Golden State Warriors",    runner:"Washington Bullets",     mvp:"Rick Barry",           fact:"Rik Bari — čudak koji je šutao slobodna 'underhanded'. Golden State prva titula."},
+  {s:"1975/76", champ:"Boston Celtics",           runner:"Phoenix Suns",           mvp:"Jo Jo White",          fact:"Celtics 13. titula."},
+  {s:"1976/77", champ:"Portland Trail Blazers",   runner:"Philadelphia 76ers",     mvp:"Bill Walton",          fact:"Blazers jedina titula. Bil Volton MVP finala."},
+  {s:"1977/78", champ:"Washington Bullets",       runner:"Seattle SuperSonics",    mvp:"Elvin Hayes",          fact:"Bullets jedina titula."},
+  {s:"1978/79", champ:"Seattle SuperSonics",      runner:"Washington Bullets",     mvp:"Dennis Johnson",       fact:"Jedina titula Supersonicsa (danas Oklahoma City)."},
+  {s:"1979/80", champ:"LA Lakers",                runner:"Philadelphia 76ers",     mvp:"Magic Johnson",        fact:"Magic debitovao kao starter centra u finalu sa 19 godina — 42 poena, 15 skokova!", highlight:true},
+  {s:"1980/81", champ:"Boston Celtics",           runner:"Houston Rockets",        mvp:"Cedric Maxwell",       fact:"Bird era počinje. Celtics 14."},
+  {s:"1981/82", champ:"LA Lakers",                runner:"Philadelphia 76ers",     mvp:"Magic Johnson",        fact:"Showtime Lakers. Magic + Kareem."},
+  {s:"1982/83", champ:"Philadelphia 76ers",       runner:"LA Lakers",              mvp:"Moses Malone",         fact:"Mozes Melon: 'Fo', Fo, Fo' — metle sve rivale. Julius Erving konačno dobija prsten."},
+  {s:"1983/84", champ:"Boston Celtics",           runner:"LA Lakers",              mvp:"Larry Bird",           fact:"Bird vs Magic finale — najuzbudljivije ikad. Celtics u 7 mečeva."},
+  {s:"1984/85", champ:"LA Lakers",                runner:"Boston Celtics",         mvp:"Kareem Abdul-Jabbar",  fact:"Kareem MVP finala sa 38 godina! Lakers revanš Celticsu."},
+  {s:"1985/86", champ:"Boston Celtics",           runner:"Houston Rockets",        mvp:"Larry Bird",           fact:"Bird 3 uzastopna MVP — Celtics 16. titula."},
+  {s:"1986/87", champ:"LA Lakers",                runner:"Boston Celtics",         mvp:"Magic Johnson",        fact:"Magic sky hook vs. Celtics u finalu — nezaboravan trenutak."},
+  {s:"1987/88", champ:"LA Lakers",                runner:"Detroit Pistons",        mvp:"James Worthy",         fact:"Lakers 5. titula u deceniji. Džejms Verti 3 gola u finalu G7."},
+  {s:"1988/89", champ:"Detroit Pistons",          runner:"LA Lakers",              mvp:"Joe Dumars",           fact:"'Bad Boys' Pistons! Džo Dumars MVP — Džordan nema odgovora na Pistonse."},
+  {s:"1989/90", champ:"Detroit Pistons",          runner:"Portland Trail Blazers", mvp:"Isiah Thomas",         fact:"Pistons odbranili! Pajton i Dumars uz Ajzijaha Tomasa."},
+  {s:"1990/91", champ:"Chicago Bulls",            runner:"LA Lakers",              mvp:"Michael Jordan",       fact:"Jordan KONAČNO prvak! 6. finalni meč. Kraj Madzikovog Showtime-a.", highlight:true},
+  {s:"1991/92", champ:"Chicago Bulls",            runner:"Portland Trail Blazers", mvp:"Michael Jordan",       fact:"Jordan čuveni šrug u finalu — pogodio 6 trojki u prvom poluvremenu."},
+  {s:"1992/93", champ:"Chicago Bulls",            runner:"Phoenix Suns",           mvp:"Michael Jordan",       fact:"Jordan 3. titula pa odlazi na bejzbol. Prvy drei-pit."},
+  {s:"1993/94", champ:"Houston Rockets",          runner:"NY Knicks",              mvp:"Hakeem Olajuwon",      fact:"Hakeem — Dream Shake. Jordan na bejzbolu. Njujork blizu titule."},
+  {s:"1994/95", champ:"Houston Rockets",          runner:"Orlando Magic",          mvp:"Hakeem Olajuwon",      fact:"Hakeem odbranio! Šakilov Orlando u finalu. Jordan se vratio pa ponovo otišao."},
+  {s:"1995/96", champ:"Chicago Bulls",            runner:"Seattle SuperSonics",    mvp:"Michael Jordan",       fact:"Bulls 72 pobede — rekord NBA! Jordan se vratio. Pipenu i Rodman saigaci.", highlight:true},
+  {s:"1996/97", champ:"Chicago Bulls",            runner:"Utah Jazz",              mvp:"Michael Jordan",       fact:"'Flu Game' — Jordan igrao sa temperaturom 39. 38 poena. Legendaran."},
+  {s:"1997/98", champ:"Chicago Bulls",            runner:"Utah Jazz",              mvp:"Michael Jordan",       fact:"'The Last Dance' — Jordan zadnji šut, zadnja titula. 6/6 u finalima.", highlight:true},
+  {s:"1998/99", champ:"San Antonio Spurs",        runner:"NY Knicks",              mvp:"Tim Duncan",           fact:"Lokautovana sezona — 50 utakmica. Duncan i Robinsonova 'Twin Towers'."},
+  {s:"1999/00", champ:"LA Lakers",                runner:"Indiana Pacers",         mvp:"Shaquille O'Neal",     fact:"Shaq + Kobe era! Shaq 38 poena prosek u finalu. 3-peat počinje."},
+  {s:"2000/01", champ:"LA Lakers",                runner:"Philadelphia 76ers",     mvp:"Shaquille O'Neal",     fact:"Ajverson 48 poena u G1 — ali Siti uzeo 4-1. Ajverson jedini pobedio."},
+  {s:"2001/02", champ:"LA Lakers",                runner:"NJ Nets",                mvp:"Shaquille O'Neal",     fact:"Tri uzastopne titule za Shaq i Kobija. Nets u finalu."},
+  {s:"2002/03", champ:"San Antonio Spurs",        runner:"NJ Nets",                mvp:"Tim Duncan",           fact:"Duncan 2. titula. Gigantov Džejson Kid u finalu."},
+  {s:"2003/04", champ:"Detroit Pistons",          runner:"LA Lakers",              mvp:"Chauncey Billups",     fact:"Timski Pistons pobedio superskvad Lakersa (Kobe+Shaq+Karl Malone+Gary Payton)!"},
+  {s:"2004/05", champ:"San Antonio Spurs",        runner:"Detroit Pistons",        mvp:"Tim Duncan",           fact:"Duncan 3. titula. Manu Đinobili i Parker saigaci."},
+  {s:"2005/06", champ:"Miami Heat",               runner:"Dallas Mavericks",       mvp:"Dwyane Wade",          fact:"Vejd 2006 —3:2 zaostatak pa 3 uzastopne pobede. 'Flash' ikona."},
+  {s:"2006/07", champ:"San Antonio Spurs",        runner:"Cleveland Cavaliers",    mvp:"Tony Parker",          fact:"Parker MVP — 24.5 poena prosek. Lebron samotni vs. Spursa."},
+  {s:"2007/08", champ:"Boston Celtics",           runner:"LA Lakers",              mvp:"Paul Pierce",          fact:"'Big Three' — Garnet, Pirs, Alen. Celtics 17. titula posle 22 godine!"},
+  {s:"2008/09", champ:"LA Lakers",                runner:"Orlando Magic",          mvp:"Kobe Bryant",          fact:"Kobi KONAČNO bez Šaka! 5. titula, 1. bez Šaka. Magik u finalu."},
+  {s:"2009/10", champ:"LA Lakers",                runner:"Boston Celtics",         mvp:"Kobe Bryant",          fact:"Kobi 5. prsten, 2. MVP finala. Celtics rivali opet."},
+  {s:"2010/11", champ:"Dallas Mavericks",         runner:"Miami Heat",             mvp:"Dirk Nowitzki",        fact:"Novicki MVP — Šveđanin sa jednim zasukanim šutom i srcem. LeBron se zakucao. Dallas jedina titula.", highlight:true},
+  {s:"2011/12", champ:"Miami Heat",               runner:"Oklahoma City Thunder",  mvp:"LeBron James",         fact:"LeBron KONAČNO prvak! Posle sramotnog 'Deceision'. LeBron + Wade + Boš."},
+  {s:"2012/13", champ:"Miami Heat",               runner:"San Antonio Spurs",      mvp:"LeBron James",         fact:"LeBron odbranio! Čuveni Ray Allen trojka u G6 — najlepši šut NBA istorije?", highlight:true},
+  {s:"2013/14", champ:"San Antonio Spurs",        runner:"Miami Heat",             mvp:"Kawhi Leonard",        fact:"Spursi revanš! Siti 'prelepa košarka' vs. Hita. Kaj Leonard MVP sa 22 godine."},
+  {s:"2014/15", champ:"Golden State Warriors",    runner:"Cleveland Cavaliers",    mvp:"Andre Iguodala",       fact:"Warriors se bude! Keri + Grin + Igudala. Kaj Leonard se povredeo."},
+  {s:"2015/16", champ:"Cleveland Cavaliers",      runner:"Golden State Warriors",  mvp:"LeBron James",         fact:"3:1 zaostatak — LeBron i Kliv preokrenuli! Najdramatičniji playoff u modernoj NBA.", highlight:true},
+  {s:"2016/17", champ:"Golden State Warriors",    runner:"Cleveland Cavaliers",    mvp:"Kevin Durant",         fact:"KD prešao ka Wariorima — kontroverza. 3-1 avenija."},
+  {s:"2017/18", champ:"Golden State Warriors",    runner:"Cleveland Cavaliers",    mvp:"Kevin Durant",         fact:"Warriors 3. titula u 4 godine. LeBron sam nosio Kliv do finala."},
+  {s:"2018/19", champ:"Toronto Raptors",          runner:"Golden State Warriors",  mvp:"Kawhi Leonard",        fact:"Kanada prvak! Kaj Leonard 'Bounce' u plej-ofu. Warriors bez Anta i Durantove povrede.", highlight:true},
+  {s:"2019/20", champ:"LA Lakers",                runner:"Miami Heat",             mvp:"LeBron James",         fact:"Bubble! NBA mehur u Orlanda zbog COVID-a. LeBron sa Lakersom — 4. prsten, 4. MVP."},
+  {s:"2020/21", champ:"Milwaukee Bucks",          runner:"Phoenix Suns",           mvp:"Giannis Antetokounmpo",fact:"Janis — 'Greek Freak' — 50 poena u finalu! Baksovi jedina titula u 50 godina."},
+  {s:"2021/22", champ:"Golden State Warriors",    runner:"Boston Celtics",         mvp:"Stephen Curry",        fact:"Keri MVP finala posle 4 titule bez tog trofeja. Warriors 4. titula ere."},
+  {s:"2022/23", champ:"Denver Nuggets",           runner:"Miami Heat",             mvp:"Nikola Jokić",         fact:"NAŠI! Jokić MVP finala! Nuggets prva titula u istoriji. Srbija šampion NBA!", nasi:true, highlight:true},
+  {s:"2023/24", champ:"Boston Celtics",           runner:"Dallas Mavericks",       mvp:"Jaylen Brown",         fact:"Celtics 18. titula — apsolutni rekord NBA. Džejlen Braun MVP finala."},
+];
+
+var state = { team: "all", search: "" };
+
+function getItems() {
+  var items = DATA.slice();
+  if (state.team !== "all") items = items.filter(function(d){ return d.champ.startsWith(state.team) || d.champ.includes(state.team); });
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    items = items.filter(function(d){
+      return d.s.includes(q) || d.champ.toLowerCase().includes(q) || d.runner.toLowerCase().includes(q) ||
+             d.mvp.toLowerCase().includes(q) || d.fact.toLowerCase().includes(q);
+    });
+  }
+  return items;
+}
+
+function render() {
+  var items = getItems();
+  document.getElementById("resultsCount").textContent = items.length + " sezona";
+
+  var html = "<table><thead><tr><th>Sezona</th><th>\u0160ampion</th><th>Finalista</th><th>MVP finala</th><th>Zanimljivost</th></tr></thead><tbody>";
+  var cards = "";
+  for (var i = 0; i < items.length; i++) {
+    var d = items[i];
+    var rowcls = (d.nasi ? " class=\"nasi\"" : d.highlight ? " class=\"highlight\"" : "");
+    html += "<tr" + rowcls + ">";
+    html += "<td class=\"td-season\">" + d.s + "</td>";
+    html += "<td class=\"td-champ\">" + d.champ + "</td>";
+    html += "<td class=\"td-runner\">" + d.runner + "</td>";
+    html += "<td class=\"td-mvp\">" + d.mvp + "</td>";
+    html += "<td class=\"td-fact\">" + d.fact + "</td>";
+    html += "</tr>";
+
+    var mcls = "m-card" + (d.nasi ? " nasi" : "") + (d.highlight ? " highlight" : "");
+    cards += "<div class=\"" + mcls + "\">";
+    cards += "<div class=\"m-season\">" + d.s + "</div>";
+    cards += "<div class=\"m-champ\">" + d.champ + "</div>";
+    cards += "<div class=\"m-runner\">Finalista: " + d.runner + "</div>";
+    if (d.mvp !== "—") cards += "<div class=\"m-mvp\">MVP: " + d.mvp + "</div>";
+    cards += "<div class=\"m-fact\">" + d.fact + "</div>";
+    cards += "</div>";
+  }
+  html += "</tbody></table>";
+  if (!items.length) { html = "<div class=\"no-results\">\u2606 Nema rezultata.</div>"; cards = ""; }
+  document.getElementById("tableWrap").innerHTML = html;
+  document.getElementById("cardList").innerHTML = cards;
+}
+
+document.getElementById("searchBox").addEventListener("input", function(){ state.search = this.value.trim(); render(); });
+document.querySelectorAll("[data-t]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.team = this.getAttribute("data-t");
+    document.querySelectorAll("[data-t]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
+render();
+</script>
+</body>
+</html>

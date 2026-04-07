@@ -170,6 +170,29 @@ body {
   white-space: nowrap;
 }
 
+/* ── SPORT FILTER BAR ────────────────────────────────── */
+.sport-filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding: 14px 0 16px;
+  border-bottom: 1px solid var(--border2);
+}
+.sf-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  color: var(--muted);
+  padding: 7px 16px;
+  font-family: Georgia, serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.sf-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+.sf-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+
 /* ── TOPIC CARDS ─────────────────────────────────────── */
 .topics-grid {
   display: grid;
@@ -808,8 +831,14 @@ footer {
       </div>
       <span class="round-badge">Runda 5</span>
     </div>
-    <div class="topics-grid">
-      <a href="sport/domacini/index.html" class="topic-card">
+    <div class="sport-filter-bar" id="sportFilterBar">
+      <button class="sf-btn active" data-sc="all">Sve</button>
+      <button class="sf-btn" data-sc="oi">&#127941; OI</button>
+      <button class="sf-btn" data-sc="fudbal">&#9917; Fudbal</button>
+      <button class="sf-btn" data-sc="kosarka">&#127936; Ko&#353;arka</button>
+    </div>
+    <div class="topics-grid" id="sportTopicsGrid">
+      <a href="sport/domacini/index.html" class="topic-card" data-sc="oi">
         <div class="topic-card-top" style="background: linear-gradient(135deg, #060e1a, #0d2035);">
           &#127758;
           <span class="topic-badge new">Novo</span>
@@ -820,7 +849,7 @@ footer {
         </div>
         <div class="topic-card-footer"><span>Istra&#382;i gradove</span><span class="arrow">&#8594;</span></div>
       </a>
-      <a href="sport/medalje/index.html" class="topic-card">
+      <a href="sport/medalje/index.html" class="topic-card" data-sc="oi">
         <div class="topic-card-top" style="background: linear-gradient(135deg, #1a1400, #2e2400);">
           &#129351;
           <span class="topic-badge new">Novo</span>
@@ -831,7 +860,7 @@ footer {
         </div>
         <div class="topic-card-footer"><span>Istra&#382;i tabelu</span><span class="arrow">&#8594;</span></div>
       </a>
-      <a href="sport/sportovi/index.html" class="topic-card">
+      <a href="sport/sportovi/index.html" class="topic-card" data-sc="oi">
         <div class="topic-card-top" style="background: linear-gradient(135deg, #081a08, #0d3010);">
           &#127939;
           <span class="topic-badge new">Novo</span>
@@ -842,7 +871,7 @@ footer {
         </div>
         <div class="topic-card-footer"><span>Istra&#382;i sportove</span><span class="arrow">&#8594;</span></div>
       </a>
-      <a href="sport/nasi/index.html" class="topic-card">
+      <a href="sport/nasi/index.html" class="topic-card" data-sc="oi">
         <div class="topic-card-top" style="background: linear-gradient(135deg, #1a0808, #2e1010);">
           &#127981;
           <span class="topic-badge new">Novo</span>
@@ -851,7 +880,84 @@ footer {
           <h3>Na&#353;i olimpijci</h3>
           <p>Jugoslovenski i srpski olimpijski medaljisti kroz istoriju</p>
         </div>
-        <div class="topic-card-footer"><span>Istra&#382;i atletičare</span><span class="arrow">&#8594;</span></div>
+        <div class="topic-card-footer"><span>Istra&#382;i atleti&#269;are</span><span class="arrow">&#8594;</span></div>
+      </a>
+      <a href="sport/svetskikup/index.html" class="topic-card" data-sc="fudbal">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #0a1a05, #122e08);">
+          &#127942;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>FIFA Svetski kup</h3>
+          <p>Svi turniri od 1930. &mdash; pobednici, finalisti, top-strelci i nezaboravni momenti</p>
+        </div>
+        <div class="topic-card-footer"><span>Istra&#382;i turnire</span><span class="arrow">&#8594;</span></div>
+      </a>
+      <a href="sport/ligasampiona/index.html" class="topic-card" data-sc="fudbal">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #1a1200, #2e2000);">
+          &#11088;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>UEFA Liga &#353;ampiona</h3>
+          <p>Sve sezone od 1956. &mdash; Real Madrid 15 titula, Crvena Zvezda 1991!</p>
+        </div>
+        <div class="topic-card-footer"><span>Istra&#382;i sezone</span><span class="arrow">&#8594;</span></div>
+      </a>
+      <a href="sport/fudbalskelegende/index.html" class="topic-card" data-sc="fudbal">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #1a0a00, #301500);">
+          &#127952;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Fudbalske legende</h3>
+          <p>Pel&#233;, Maradona, Mesi, Ronaldo &mdash; 16 najve&#263;ih igra&#269;a svih vremena</p>
+        </div>
+        <div class="topic-card-footer"><span>Istra&#382;i legende</span><span class="arrow">&#8594;</span></div>
+      </a>
+      <a href="sport/evropskelige/index.html" class="topic-card" data-sc="fudbal">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #001a10, #003020);">
+          &#127963;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Evropske fudbalske lige</h3>
+          <p>Premier League, La Liga, Bundesliga, Serie A, Ligue 1 &mdash; rekordi i legende</p>
+        </div>
+        <div class="topic-card-footer"><span>Istra&#382;i lige</span><span class="arrow">&#8594;</span></div>
+      </a>
+      <a href="sport/nba/index.html" class="topic-card" data-sc="kosarka">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #1a0505, #2e0a08);">
+          &#127936;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>NBA liga</h3>
+          <p>Svi &#353;ampioni od 1947. &mdash; Jordan, LeBron, Celtics, Lakers i Joki&#263;!</p>
+        </div>
+        <div class="topic-card-footer"><span>Istra&#382;i NBA</span><span class="arrow">&#8594;</span></div>
+      </a>
+      <a href="sport/kosarkaske/index.html" class="topic-card" data-sc="kosarka">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #050518, #0a0a2e);">
+          &#127934;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Ko&#353;arka&#353;ke legende</h3>
+          <p>Jordan, LeBron, Magic, Bird i na&#353;i: Joki&#263;, Petrovi&#263;, Divac, Bo&#273;iroga</p>
+        </div>
+        <div class="topic-card-footer"><span>Istra&#382;i legende</span><span class="arrow">&#8594;</span></div>
+      </a>
+      <a href="sport/fiba/index.html" class="topic-card" data-sc="kosarka">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #001218, #002030);">
+          &#127760;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>FIBA takmi&#269;enja</h3>
+          <p>Svetska i Evropska ko&#353;arka&#353;ka &#353;ampionstva &mdash; Jugoslavija rekorder!</p>
+        </div>
+        <div class="topic-card-footer"><span>Istra&#382;i FIBA</span><span class="arrow">&#8594;</span></div>
       </a>
     </div>
   </div>
@@ -971,7 +1077,7 @@ var rounds = [
   { id: 'geografija', icon: '&#127758;', name: 'Geografija',   num: 'Runda 2', count: '2 teme' },
   { id: 'knjizevnost',icon: '&#128218;', name: 'Knji\u017Eevnost', num: 'Runda 3', count: '3 teme' },
   { id: 'svastara1',  icon: '&#127914;', name: 'Sva\u0161tara I', num: 'Runda 4', count: 'Uskoro' },
-  { id: 'sport',      icon: '&#127942;', name: 'Sport',        num: 'Runda 5', count: '4 teme' },
+  { id: 'sport',      icon: '&#127942;', name: 'Sport',        num: 'Runda 5', count: '11 tema' },
   { id: 'istorija',   icon: '&#9876;',   name: 'Istorija',     num: 'Runda 6', count: '3 teme' },
   { id: 'muzika',     icon: '&#127932;', name: 'Muzika',       num: 'Runda 7', count: 'Uskoro' },
   { id: 'svastara2',  icon: '&#9889;',   name: 'Sva\u0161tara II', num: 'Runda 8', count: 'Uskoro' }
@@ -1008,6 +1114,13 @@ var TOPICS = [
   { title: 'OI medalje po dr\u017Eavama', desc: 'Sve vreme \u2014 zlatne, srebrne i bronzane medalje po zemljama', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#129351;', gradient: 'linear-gradient(135deg, #1a1400, #2e2400)', url: 'sport/medalje/index.html', available: true },
   { title: 'Olimpijski sportovi', desc: 'Svi sportovi na Letnjim OI \u2014 aktivni, uklonjeni i privremeni', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#127939;', gradient: 'linear-gradient(135deg, #081a08, #0d3010)', url: 'sport/sportovi/index.html', available: true },
   { title: 'Na\u0161i olimpijci', desc: 'Jugoslovenski i srpski olimpijski medaljisti kroz istoriju', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#127981;', gradient: 'linear-gradient(135deg, #1a0808, #2e1010)', url: 'sport/nasi/index.html', available: true },
+  { title: 'FIFA Svetski kup', desc: 'Svi turniri od 1930. \u2014 pobednici, finalisti, top-strelci', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#127942;', gradient: 'linear-gradient(135deg, #0a1a05, #122e08)', url: 'sport/svetskikup/index.html', available: true },
+  { title: 'UEFA Liga \u0161ampiona', desc: 'Sve sezone od 1956. \u2014 Real Madrid 15 titula, Crvena Zvezda 1991!', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#11088;', gradient: 'linear-gradient(135deg, #1a1200, #2e2000)', url: 'sport/ligasampiona/index.html', available: true },
+  { title: 'Fudbalske legende', desc: 'Pel\u00E9, Maradona, Mesi, Ronaldo \u2014 16 najve\u0107ih igra\u010Da svih vremena', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#127952;', gradient: 'linear-gradient(135deg, #1a0a00, #301500)', url: 'sport/fudbalskelegende/index.html', available: true },
+  { title: 'Evropske fudbalske lige', desc: 'Premier League, La Liga, Bundesliga, Serie A, Ligue 1 \u2014 rekordi i legende', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#127963;', gradient: 'linear-gradient(135deg, #001a10, #003020)', url: 'sport/evropskelige/index.html', available: true },
+  { title: 'NBA liga', desc: 'Svi \u0161ampioni od 1947. \u2014 Jordan, LeBron, Celtics, Lakers i Joki\u0107!', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#127936;', gradient: 'linear-gradient(135deg, #1a0505, #2e0a08)', url: 'sport/nba/index.html', available: true },
+  { title: 'Ko\u0161arka\u0161ke legende', desc: 'Jordan, LeBron, Magic, Bird i na\u0161i: Joki\u0107, Petrovi\u0107, Divac, Bo\u0111iroga', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#127934;', gradient: 'linear-gradient(135deg, #050518, #0a0a2e)', url: 'sport/kosarkaske/index.html', available: true },
+  { title: 'FIBA takmi\u010Denja', desc: 'Svetska i Evropska ko\u0161arka\u0161ka \u0161ampionstva \u2014 Jugoslavija rekorder!', round: 'Sport', roundIcon: '&#127942;', roundId: 'sport', icon: '&#127760;', gradient: 'linear-gradient(135deg, #001218, #002030)', url: 'sport/fiba/index.html', available: true },
   { title: 'Srpski pisci', desc: 'Najve\u0107a imena srpske knji\u017Eevnosti kroz vekove', round: 'Knji\u017Eevnost', roundIcon: '&#128218;', roundId: 'knjizevnost', icon: '&#128196;', gradient: 'linear-gradient(135deg, #0a0a1a, #1b1b2e)', url: null, available: false },
   { title: 'II Svetski rat', desc: 'Interaktivni tajmlajn klju\u010Dnih doga\u0111aja od 1939. do 1945.', round: 'Istorija', roundIcon: '&#9876;', roundId: 'istorija', icon: '&#9876;', gradient: 'linear-gradient(135deg, #0e0808, #1e1008)', url: 'istorija/wwii/index.html', available: true },
   { title: 'Stari vek', desc: 'Gr\u010Dka, Rim, Egipat — civilizacije koje su postavile temelje', round: 'Istorija', roundIcon: '&#9876;', roundId: 'istorija', icon: '&#127981;', gradient: 'linear-gradient(135deg, #12100a, #22201a)', url: null, available: false }
@@ -1083,6 +1196,25 @@ function switchPanel(id, tab) {
   var panel = document.getElementById('panel-' + id);
   if (panel) panel.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Sport filter bar
+var sportFilterBar = document.getElementById('sportFilterBar');
+if (sportFilterBar) {
+  sportFilterBar.addEventListener('click', function(e) {
+    var btn = e.target.closest('.sf-btn');
+    if (!btn) return;
+    var sc = btn.dataset.sc;
+    sportFilterBar.querySelectorAll('.sf-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.querySelectorAll('#sportTopicsGrid .topic-card').forEach(function(card) {
+      if (sc === 'all') {
+        card.style.display = '';
+      } else {
+        card.style.display = card.dataset.sc === sc ? '' : 'none';
+      }
+    });
+  });
 }
 </script>
 </body>

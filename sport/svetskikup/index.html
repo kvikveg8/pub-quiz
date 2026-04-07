@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>FIFA Svetski kup — Pub Quiz</title>
+<style>
+:root {
+  --bg: #1a0f05; --surface: #241508; --surface2: #2e1c0a;
+  --gold: #c9a227; --gold2: #e8c84a;
+  --text: #f0e6d0; --text2: #b89a70;
+  --border: #3a2a12; --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+header { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 16px 24px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100; }
+.header-back { color: var(--gold); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; transition: background 0.2s; }
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.controls { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.search-box { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; color: var(--text); font-family: Georgia, serif; font-size: 14px; outline: none; }
+.search-box:focus { border-color: var(--gold); }
+.search-box::placeholder { color: var(--text2); }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label { color: var(--text2); font-size: 12px; align-self: center; text-transform: uppercase; letter-spacing: 1px; }
+.filter-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text2); padding: 6px 12px; font-family: Georgia, serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+.main { padding: 24px; max-width: 1000px; margin: 0 auto; }
+.results-count { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead tr { background: var(--surface); border-bottom: 2px solid var(--gold); }
+th { padding: 10px 12px; text-align: left; color: var(--gold); font-weight: normal; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+tbody tr:hover { background: var(--hover); }
+tbody tr.cancelled { opacity: 0.5; }
+tbody tr.highlight { background: #1e1800 !important; }
+td { padding: 10px 12px; vertical-align: top; }
+.td-year { font-weight: bold; color: var(--gold2); white-space: nowrap; }
+.td-host { color: var(--text2); }
+.td-winner { font-weight: bold; color: var(--text); }
+.td-runner { color: var(--text2); }
+.td-score { color: var(--gold2); font-weight: bold; white-space: nowrap; }
+.td-scorer { color: var(--text2); font-size: 12px; }
+.td-fact { color: var(--text2); font-size: 12px; line-height: 1.4; }
+.flag { font-size: 16px; margin-right: 4px; }
+/* Mobile cards */
+.card-list { display: none; flex-direction: column; gap: 8px; }
+.m-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.m-card.cancelled { opacity: 0.5; border-style: dashed; }
+.m-card.highlight { background: #1e1800; }
+.m-year { font-size: 22px; font-weight: bold; color: var(--gold2); }
+.m-host { font-size: 12px; color: var(--text2); margin-bottom: 8px; }
+.m-winner { font-size: 16px; font-weight: bold; color: var(--text); margin-bottom: 2px; }
+.m-score { font-size: 13px; color: var(--gold2); margin-bottom: 2px; }
+.m-runner { font-size: 13px; color: var(--text2); margin-bottom: 6px; }
+.m-scorer { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+.m-fact { font-size: 11px; color: var(--text2); line-height: 1.4; padding-top: 6px; border-top: 1px solid var(--border); }
+.no-results { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 16px; }
+@media (max-width: 700px) {
+  .main { padding: 14px; }
+  .controls { padding: 10px 14px; }
+  .header-title h1 { font-size: 18px; }
+  table { display: none; }
+  .card-list { display: flex; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#9917; FIFA SVETSKI KUP</h1>
+    <p>Svi turniri od 1930. do danas &mdash; pobednici, strelci, fakta</p>
+  </div>
+  <span style="font-size:28px">&#127942;</span>
+</header>
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretraži godinu, zemlju, strelca...">
+  <div class="filter-group">
+    <span class="filter-label">Pobednik:</span>
+    <button class="filter-btn active" data-w="all">Svi</button>
+    <button class="filter-btn" data-w="Brazil">🇧🇷 Brazil</button>
+    <button class="filter-btn" data-w="Nemačka">🇩🇪 Nemačka</button>
+    <button class="filter-btn" data-w="Italija">🇮🇹 Italija</button>
+    <button class="filter-btn" data-w="Argentina">🇦🇷 Argentina</button>
+    <button class="filter-btn" data-w="Francuska">🇫🇷 Francuska</button>
+  </div>
+</div>
+<div class="main">
+  <div class="results-count" id="resultsCount"></div>
+  <div id="tableWrap"></div>
+  <div class="card-list" id="cardList"></div>
+</div>
+<script>
+var DATA = [
+  {year:1930, host:"Urugvaj",      winner:"Urugvaj",    wflag:"🇺🇾", runner:"Argentina",   rflag:"🇦🇷", score:"4–2",        scorer:"G. Stábile (ARG) 8",  fact:"Prvo Svetsko prvenstvo. 13 zemalja. Urugvaj domaćin i prvak. Bez Evropljana jer nisu hteli da putuju brodom."},
+  {year:1934, host:"Italija",      winner:"Italija",    wflag:"🇮🇹", runner:"Čehoslovačka", rflag:"🇨🇿", score:"2–1 (prod.)", scorer:"O. Nejedlý (CZE) 5",   fact:"Mussolinijev turnir. Urugvaj bojkotovao. Italija odbranila titulu 1938."},
+  {year:1938, host:"Francuska",    winner:"Italija",    wflag:"🇮🇹", runner:"Mađarska",     rflag:"🇭🇺", score:"4–2",        scorer:"Leônidas (BRA) 7",     fact:"Poslednji SP pre rata. Brazil nije stigao do finala. Leônidas izmislio 'Scissor kick'."},
+  {year:1942, host:"—",            winner:"—",          wflag:"",   runner:"—",             rflag:"", score:"nije odr.",    scorer:"—",                    fact:"Nije održano zbog Drugog svetskog rata.", cancelled:true},
+  {year:1946, host:"—",            winner:"—",          wflag:"",   runner:"—",             rflag:"", score:"nije odr.",    scorer:"—",                    fact:"Nije održano zbog Drugog svetskog rata.", cancelled:true},
+  {year:1950, host:"Brazil",       winner:"Urugvaj",    wflag:"🇺🇾", runner:"Brazil",        rflag:"🇧🇷", score:"2–1*",       scorer:"Ademir (BRA) 9",       fact:"'Maracanazo' — Urugvaj pobedio Brazil pred 200.000 u Marakanai. *Nije bilo finala, već round-robin. Jugoslavija pobedila Brazil 2-0 u grupi!"},
+  {year:1954, host:"Švajcarska",   winner:"Nemačka (Z)", wflag:"🇩🇪",runner:"Mađarska",     rflag:"🇭🇺", score:"3–2",        scorer:"S. Kocsis (HUN) 11",   fact:"'Bern čudo' — Mađarska bila nepobeđena 4 godine, ali Nemačka pobedila u finalu. Kocsis: 11 golova — rekord koji traje."},
+  {year:1958, host:"Švedska",      winner:"Brazil",     wflag:"🇧🇷", runner:"Švedska",       rflag:"🇸🇪", score:"5–2",        scorer:"J. Fontaine (FRA) 13", fact:"Pelé debitovao sa 17 — hat-trick u polufinalu. Fontaine: 13 golova, rekord koji nikad nije oborenom."},
+  {year:1962, host:"Čile",         winner:"Brazil",     wflag:"🇧🇷", runner:"Čehoslovačka",  rflag:"🇨🇿", score:"3–1",        scorer:"Garrincha/Vavá (BRA) 4",fact:"Brazil odbranio titulu. Garrincha bio zvezda. Jugoslavija u četvrtfinalu (izgubila od SSSR 2-0 u reprizi)."},
+  {year:1966, host:"Engleska",     winner:"Engleska",   wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", runner:"Nemačka (Z)", rflag:"🇩🇪", score:"4–2 (prod.)", scorer:"Eusébio (POR) 9",     fact:"Jedini engleski naslov. Kontroverzni treći gol u finalu (lopta iza linije?). Eusébio plakao na terenu."},
+  {year:1970, host:"Meksiko",      winner:"Brazil",     wflag:"🇧🇷", runner:"Italija",       rflag:"🇮🇹", score:"4–1",        scorer:"G. Müller (ZPN) 10",   fact:"Brazil 3. titula — zlatna Žule Trophy za stalno. Pelé, Rivelino, Tostão — 'najlepša ekipa ikad'."},
+  {year:1974, host:"Nemačka (Z)",  winner:"Nemačka (Z)", wflag:"🇩🇪",runner:"Holandija",    rflag:"🇳🇱", score:"2–1",        scorer:"G. Müller (ZPN) 4",    fact:"Kraj Totalne fudbalske ere. Cruyff predvodio Holandiju do srebra. Beckenbauer kapiten pobednika."},
+  {year:1978, host:"Argentina",    winner:"Argentina",  wflag:"🇦🇷", runner:"Holandija",    rflag:"🇳🇱", score:"3–1 (prod.)", scorer:"M. Kempes (ARG) 6",    fact:"Kempes odveo Argentinu. Kontroverzan turnir — domaća vojska je bila na vlasti. Holandija opet srebro."},
+  {year:1982, host:"Španija",      winner:"Italija",    wflag:"🇮🇹", runner:"Nemačka (Z)",   rflag:"🇩🇪", score:"3–1",        scorer:"P. Rossi (ITA) 6",     fact:"Paolo Rossi: 0 golova u grupi, 6 golova u nokautu — hat-trick vs. Brazil. 'Noć u Španiji'."},
+  {year:1986, host:"Meksiko",      winner:"Argentina",  wflag:"🇦🇷", runner:"Nemačka (Z)",   rflag:"🇩🇪", score:"3–2",        scorer:"G. Lineker (ENG) 6",   fact:"Maradona SP — 'Ruka Božja' i 'Gol veka' vs. Engleska u istom meču. Argentini doneo titulu gotovo sam.", highlight:true},
+  {year:1990, host:"Italija",      winner:"Nemačka (Z)", wflag:"🇩🇪",runner:"Argentina",    rflag:"🇦🇷", score:"1–0",        scorer:"S. Schillaci (ITA) 6",  fact:"Najdefanzivniji SP. Jedan penal u finalu. Maradona plakao. Schillaci: niko nije bio ubedljiviji od njega."},
+  {year:1994, host:"SAD",          winner:"Brazil",     wflag:"🇧🇷", runner:"Italija",       rflag:"🇮🇹", score:"0–0 (pen.)", scorer:"O. Salenko/Stoičkov 6", fact:"Baggio promašio odlučujući penal — slika koja definuše karijeru. Romario i Brazil. Prvo SP u SAD."},
+  {year:1998, host:"Francuska",    winner:"Francuska",  wflag:"🇫🇷", runner:"Brazil",        rflag:"🇧🇷", score:"3–0",        scorer:"D. Šuker (HRV) 6",     fact:"Zidane 2 gola u finalu. Ronaldo (BRA) tajanstveno bolestan pred finale. Šuker — zlatna kopačka za Hrvatsku.", highlight:true},
+  {year:2002, host:"Japan/S. Koreja", winner:"Brazil", wflag:"🇧🇷", runner:"Nemačka",       rflag:"🇩🇪", score:"2–0",        scorer:"Ronaldo (BRA) 8",      fact:"Ronaldo R9 — 8 golova posle teških povreda. Turska bronza, Koreja 4. mesto (domaćin). Senegal u četvrtfinalu!"},
+  {year:2006, host:"Nemačka",      winner:"Italija",    wflag:"🇮🇹", runner:"Francuska",     rflag:"🇫🇷", score:"1–1 (pen.)", scorer:"M. Klose (NEM) 5",     fact:"Zidane udario Materazija glavom u finalu — poslednji čin karijere. Italija 5. titula posle penala.", highlight:true},
+  {year:2010, host:"Južna Afrika", winner:"Španija",    wflag:"🇪🇸", runner:"Holandija",     rflag:"🇳🇱", score:"1–0 (prod.)", scorer:"T. Müller/D. Villa 5", fact:"Prvo SP na afričkom tlu. Španija 'tiki-taka' revolucija. Vuvuzele. Iniesta gol u finalu. Holandija žestoka."},
+  {year:2014, host:"Brazil",       winner:"Nemačka",    wflag:"🇩🇪", runner:"Argentina",     rflag:"🇦🇷", score:"1–0 (prod.)", scorer:"J. Rodríguez (KOL) 6", fact:"Brazil 7:1 Nemačka u polufinalu — 'Mineirazo'. Götzov gol u finalu. Messi MVP, ali trofej nije uzeo.", highlight:true},
+  {year:2018, host:"Rusija",       winner:"Francuska",  wflag:"🇫🇷", runner:"Hrvatska",      rflag:"🇭🇷", score:"4–2",        scorer:"H. Kane (ENG) 6",      fact:"Hrvatska fantastično SP. Mbappé debitovao u finalu sa 19. Modric MVP. Velika srpska zajednica u Rusiji."},
+  {year:2022, host:"Katar",        winner:"Argentina",  wflag:"🇦🇷", runner:"Francuska",     rflag:"🇫🇷", score:"3–3 (pen.)", scorer:"K. Mbappé (FRA) 8",    fact:"Messi napokon! Argentina posle 36 godina. Mbappé hat-trick u finalu ali nije bilo dovoljno. Finale kakvo nikad.", highlight:true},
+];
+
+var state = { winner: "all", search: "" };
+
+function getItems() {
+  var items = DATA.slice();
+  if (state.winner !== "all") items = items.filter(function(d){ return d.winner && d.winner.startsWith(state.winner); });
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    items = items.filter(function(d){
+      return String(d.year).includes(q) || (d.host||"").toLowerCase().includes(q) ||
+             (d.winner||"").toLowerCase().includes(q) || (d.scorer||"").toLowerCase().includes(q) ||
+             (d.fact||"").toLowerCase().includes(q);
+    });
+  }
+  return items;
+}
+
+function render() {
+  var items = getItems();
+  document.getElementById("resultsCount").textContent = items.length + " turnira";
+
+  var html = "<table><thead><tr><th>Godina</th><th>Doma\u0107in</th><th>Pobednik</th><th>Finalista</th><th>Rezultat</th><th>Top strelac (golovi)</th><th>Zanimljivost</th></tr></thead><tbody>";
+  var cards = "";
+
+  for (var i = 0; i < items.length; i++) {
+    var d = items[i];
+    var cls = (d.cancelled ? " class=\"cancelled\"" : d.highlight ? " class=\"highlight\"" : "");
+    html += "<tr" + cls + ">";
+    html += "<td class=\"td-year\">" + d.year + "</td>";
+    html += "<td class=\"td-host\">" + d.host + "</td>";
+    html += "<td class=\"td-winner\">" + (d.wflag ? d.wflag+" " : "") + d.winner + "</td>";
+    html += "<td class=\"td-runner\">" + (d.rflag ? d.rflag+" " : "") + d.runner + "</td>";
+    html += "<td class=\"td-score\">" + d.score + "</td>";
+    html += "<td class=\"td-scorer\">" + d.scorer + "</td>";
+    html += "<td class=\"td-fact\">" + d.fact + "</td>";
+    html += "</tr>";
+
+    var mcls = "m-card" + (d.cancelled ? " cancelled" : "") + (d.highlight ? " highlight" : "");
+    cards += "<div class=\"" + mcls + "\">";
+    cards += "<div class=\"m-year\">" + d.year + "</div>";
+    cards += "<div class=\"m-host\">" + d.host + "</div>";
+    if (!d.cancelled) {
+      cards += "<div class=\"m-winner\">" + (d.wflag||"") + " " + d.winner + "</div>";
+      cards += "<div class=\"m-score\">" + d.score + "</div>";
+      cards += "<div class=\"m-runner\">Finalista: " + (d.rflag||"") + " " + d.runner + "</div>";
+      cards += "<div class=\"m-scorer\">\ud83d\udccd Top strelac: " + d.scorer + " gol.</div>";
+    }
+    cards += "<div class=\"m-fact\">" + d.fact + "</div>";
+    cards += "</div>";
+  }
+  html += "</tbody></table>";
+  if (!items.length) { html = "<div class=\"no-results\">\u2606 Nema rezultata.</div>"; cards = ""; }
+  document.getElementById("tableWrap").innerHTML = html;
+  document.getElementById("cardList").innerHTML = cards;
+}
+
+document.getElementById("searchBox").addEventListener("input", function(){ state.search = this.value.trim(); render(); });
+document.querySelectorAll("[data-w]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.winner = this.getAttribute("data-w");
+    document.querySelectorAll("[data-w]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
+render();
+</script>
+</body>
+</html>

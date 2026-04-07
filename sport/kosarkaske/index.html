@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Košarkaške legende — Pub Quiz</title>
+<style>
+:root {
+  --bg: #1a0f05; --surface: #241508; --surface2: #2e1c0a; --surface3: #3a2410;
+  --gold: #c9a227; --gold2: #e8c84a;
+  --text: #f0e6d0; --text2: #b89a70;
+  --border: #3a2a12; --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+header { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 16px 24px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100; }
+.header-back { color: var(--gold); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; transition: background 0.2s; }
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.controls { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.search-box { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; color: var(--text); font-family: Georgia, serif; font-size: 14px; outline: none; }
+.search-box:focus { border-color: var(--gold); }
+.search-box::placeholder { color: var(--text2); }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label { color: var(--text2); font-size: 12px; align-self: center; text-transform: uppercase; letter-spacing: 1px; }
+.filter-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text2); padding: 6px 12px; font-family: Georgia, serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+.main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+.results-count { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.leg-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+.leg-card:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(201,162,39,0.15); }
+.leg-card.open { border-color: var(--gold); }
+.leg-card.nasi { background: #1a0e04; border-color: #4a2a08; }
+.leg-card.nasi:hover { border-color: var(--gold); }
+.card-head { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.card-flag { font-size: 32px; width: 48px; text-align: center; flex-shrink: 0; }
+.card-info { flex: 1; }
+.card-name { font-size: 17px; color: var(--gold2); font-weight: bold; }
+.card-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.card-tags { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+.pos-tag { font-size: 10px; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; }
+.pos-bek    { background: #08121e; color: #70a0e0; border: 1px solid #103050; }
+.pos-krilo  { background: #081808; color: #70c080; border: 1px solid #103010; }
+.pos-centar { background: #1e0808; color: #e07070; border: 1px solid #401010; }
+.era-tag { font-size: 10px; padding: 3px 8px; border-radius: 3px; }
+.era-klasicna { background: #1a1008; color: #c09050; border: 1px solid #3a2010; }
+.era-moderna  { background: #080e20; color: #6080c0; border: 1px solid #102040; }
+.nasi-badge { font-size: 10px; padding: 2px 7px; border-radius: 3px; background: #2a1a00; color: var(--gold2); border: 1px solid var(--gold); }
+.goat-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 3px; background: linear-gradient(135deg, #2a1a00, #3a2a00); color: var(--gold2); border: 1px solid var(--gold); margin-left: 8px; vertical-align: middle; }
+.arrow-toggle { color: var(--text2); font-size: 14px; transition: transform 0.3s; margin-left: 6px; }
+.leg-card.open .arrow-toggle { transform: rotate(180deg); }
+.card-expand { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+.leg-card.open .card-expand { max-height: 600px; }
+.card-body { border-top: 1px solid var(--border); padding: 14px 16px; }
+.card-desc { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 12px; }
+.card-facts { display: flex; flex-direction: column; gap: 6px; }
+.fact-row { display: flex; gap: 8px; font-size: 13px; }
+.fact-label { color: var(--text2); min-width: 120px; flex-shrink: 0; }
+.fact-val { color: var(--text); }
+.no-results { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 16px; }
+@media (max-width: 600px) {
+  .main { padding: 14px; }
+  .controls { padding: 10px 14px; }
+  .header-title h1 { font-size: 18px; }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#127936; KO&#352;ARKA&#352;KE LEGENDE</h1>
+    <p>NBA i svetske legende — statistike, prstenovi, rekodi</p>
+  </div>
+  <span style="font-size:28px">&#127942;</span>
+</header>
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretraži ime, tim, zemlja...">
+  <div class="filter-group">
+    <span class="filter-label">Pozicija:</span>
+    <button class="filter-btn active" data-pos="all">Sve</button>
+    <button class="filter-btn" data-pos="bek">Bekovi</button>
+    <button class="filter-btn" data-pos="krilo">Krila</button>
+    <button class="filter-btn" data-pos="centar">Centri</button>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Era:</span>
+    <button class="filter-btn active" data-era="all">Sve</button>
+    <button class="filter-btn" data-era="klasicna">Klasična</button>
+    <button class="filter-btn" data-era="moderna">Moderna</button>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Poreklo:</span>
+    <button class="filter-btn active" data-reg="all">Sve</button>
+    <button class="filter-btn" data-reg="nasi">&#127479;&#127480; Naši</button>
+  </div>
+</div>
+<div class="main">
+  <div class="results-count" id="resultsCount"></div>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+var DATA = [
+  {name:"Michael Jordan", flag:"🇺🇸", country:"SAD", pos:"bek", era:"klasicna", goat:true, nasi:false,
+   sub:"Shooting Guard · 1984–2003 · Chicago Bulls, Washington Wizards",
+   desc:"'His Airness' — 6 NBA titula, 6 puta MVP finala (100% uspešnost). Nije izgubio nijednu finalnu seriju. Stvorio Air Jordan marku i modernu NBA.",
+   facts:[{l:"NBA prstenovi",v:"6 (1991–93, 1996–98)"},{l:"MVP finala",v:"6 — rekord (nikad nije izgubio finale)"},{l:"Regularni sezon MVP",v:"5 puta"},{l:"Poeni po utakmici",v:"30.1 — rekord NBA karijere"},{l:"Posebno",v:"'The Shot', 'The Flu Game', 'The Last Dance' — legendarni momenti"}]},
+  {name:"LeBron James", flag:"🇺🇸", country:"SAD", pos:"krilo", era:"moderna", goat:true, nasi:false,
+   sub:"Small Forward · 2003–danas · Cavaliers, Heat, Lakers",
+   desc:"'King James' — 4 NBA titule sa 3 različita tima. Rekorder NBA-e po poenima (38.652+). Najsvestraniji igrač u istoriji.",
+   facts:[{l:"NBA prstenovi",v:"4 (2012, 2013, 2016, 2020)"},{l:"Poeni",v:"38.652+ — apsolutni rekorder NBA"},{l:"MVP finala",v:"4 puta"},{l:"MVP sezone",v:"4 puta"},{l:"Posebno",v:"2016 — doveo Klivlend do titule iz 1:3 zaostatka, prvo u istoriji NBA"}]},
+  {name:"Kobe Bryant", flag:"🇺🇸", country:"SAD", pos:"bek", era:"moderna", nasi:false,
+   sub:"Shooting Guard · 1996–2016 · Los Angeles Lakers",
+   desc:"'Black Mamba' — mentalitet koji je postao legenda. 5 NBA titula, 81 poen u jednoj utakmici. Karijeru proveo samo u Lakersima.",
+   facts:[{l:"NBA prstenovi",v:"5 (2000–02, 2009–10)"},{l:"Rekord utakmice",v:"81 poen vs. Toronto 2006 — 2. u istoriji"},{l:"Poeni po utakmici",v:"25.0 karijera"},{l:"Olimpijsko zlato",v:"2008, 2012 (SAD)"},{l:"Posebno",v:"Tragično poginuo 2020 — NBA dvorana u Los Anđelesu nosi njegovo ime"}]},
+  {name:"Magic Johnson", flag:"🇺🇸", country:"SAD", pos:"bek", era:"klasicna", nasi:false,
+   sub:"Point Guard · 1979–1996 · Los Angeles Lakers",
+   desc:"'Showtime' Lakers motor — redefinisao poziciju pleja. 5 NBA titula. HIV pozitivan 1991 — povukao se, vratio, pa se povukao ponovo.",
+   facts:[{l:"NBA prstenovi",v:"5 (1980, 1982, 1985, 1987, 1988)"},{l:"MVP finala",v:"3 puta"},{l:"MVP sezone",v:"3 puta"},{l:"Asistencije",v:"10.4 po utakmici karijera — rekord dugo"},{l:"Posebno",v:"U debiju finala NBA: 42 poena, 15 skokova kao 19-godišnjak"}]},
+  {name:"Larry Bird", flag:"🇺🇸", country:"SAD", pos:"krilo", era:"klasicna", nasi:false,
+   sub:"Small Forward · 1979–1992 · Boston Celtics",
+   desc:"'Larry Legend' — rivalstvo sa Magicom definisalo eru. 3 NBA titule, 3 MVP sezone. Rekao: 'Sinoć mi se prisnio da sam dobar koliko što jesam.'",
+   facts:[{l:"NBA prstenovi",v:"3 (1981, 1984, 1986)"},{l:"MVP sezone",v:"3 uzastopna (1984–86)"},{l:"MVP finala",v:"2 puta"},{l:"Šut za 3",v:"Pobedio u prvom ikad All-Star takmičenju trica (1986)"},{l:"Posebno",v:"Igrao sve mečeve sa bolnim leđima u poslednjim godinama — neustrašivo"}]},
+  {name:"Kareem Abdul-Jabbar", flag:"🇺🇸", country:"SAD", pos:"centar", era:"klasicna", nasi:false,
+   sub:"Centar · 1969–1989 · Milwaukee Bucks, LA Lakers",
+   desc:"Rekorder NBA po poenima (38.387) sve do 2023. — čuvao rekord 39 godina! 'Skyhook' potez koji niko nije mogao da odbrani.",
+   facts:[{l:"NBA prstenovi",v:"6 (1971, 1980, 1982, 1985, 1987, 1988)"},{l:"Poeni",v:"38.387 — bio rekord 39 godina (do LeBrona 2023)"},{l:"MVP sezone",v:"6 puta — rekord"},{l:"Skyhook",v:"Najteže udarac u istoriji košarke — neodbranjiv"},{l:"Posebno",v:"Igrao 20 NBA sezona — u finalima sa 41 godinom"}]},
+  {name:"Shaquille O'Neal", flag:"🇺🇸", country:"SAD", pos:"centar", era:"moderna", nasi:false,
+   sub:"Centar · 1992–2011 · Orlando, LA Lakers, Miami, Phoenix...",
+   desc:"'The Diesel' — fizička dominacija kakvu NBA nije videla. 4 NBA titule, 3 MVP finala. U finalu 2000. imao prosek 38 poena.",
+   facts:[{l:"NBA prstenovi",v:"4 (2000, 2001, 2002, 2006)"},{l:"MVP finala",v:"3 (2000, 2001, 2002)"},{l:"MVP sezone",v:"2000."},{l:"Finale 2000",v:"38.0 poena, 16.7 skokova prosek"},{l:"Posebno",v:"Snimao rap albume, doktorirao, bio policajac — ličnost"}]},
+  {name:"Tim Duncan", flag:"🇺🇸", country:"SAD", pos:"centar", era:"moderna", nasi:false,
+   sub:"Power Forward/Centar · 1997–2016 · San Antonio Spurs",
+   desc:"'The Big Fundamental' — karijeru proveo samo u Spursu. 5 NBA titula sa Spursom. Najtiši, najefikasniji igrač generacije.",
+   facts:[{l:"NBA prstenovi",v:"5 (1999, 2003, 2005, 2007, 2014)"},{l:"MVP finala",v:"3 puta"},{l:"MVP sezone",v:"2 puta (2002, 2003)"},{l:"Posebno",v:"Nikad nije napustio Spurse — primer lojalnosti u NBA"},{l:"Stil",v:"Bankov šut i fundamentalna igra — odatle nadimak"}]},
+  {name:"Stephen Curry", flag:"🇺🇸", country:"SAD", pos:"bek", era:"moderna", nasi:false,
+   sub:"Point Guard · 2009–danas · Golden State Warriors",
+   desc:"Revolucionisao NBA šutem za 3. 4 NBA titule, 2 MVP sezone (jedan jedoglasno). Promenio način na koji se košarka igra.",
+   facts:[{l:"NBA prstenovi",v:"4 (2015, 2017, 2018, 2022)"},{l:"MVP sezone",v:"2 (2015, 2016) — 2016 jedoglasno"},{l:"Trice",v:"Rekorder po tricama u sezoni (402) i karijeri (3.747+)"},{l:"Rekord",v:"2016 — Warriors 73 pobede, rekord NBA"},{l:"Posebno",v:"Igra iz daleka što je potpuno promenilo odbrambene strategije u NBA"}]},
+  {name:"Nikola Jokić", flag:"🇷🇸", country:"Srbija", pos:"centar", era:"moderna", nasi:true,
+   sub:"Centar · 2015–danas · Denver Nuggets",
+   desc:"'The Joker' iz Sombora — 3 puta MVP NBA, šampion 2023. Revolutionisao poziciju centra vizijom i pasovima koji prevazilaze sve bekove.",
+   facts:[{l:"NBA prvak",v:"2023 — Denver Nuggets (prvi u istoriji kluba)"},{l:"MVP finala",v:"2023."},{l:"MVP sezone",v:"3 puta (2021, 2022, 2024)"},{l:"Tačnost pasa",v:"9.0 asistencija po utakmici — rekord za centre"},{l:"Posebno",v:"Izabran u 41. rundi drafta 2014 — najuspešnija kasna selekcija ikad"}]},
+  {name:"Dražen Petrović", flag:"🇭🇷", country:"Hrvatska/Jugoslavija", pos:"bek", era:"klasicna", nasi:true,
+   sub:"Shooting Guard · 1983–1993 · Real Madrid, Portland, New Jersey Nets",
+   desc:"'Peta Brzina' — pionir evropske košarke u NBA. Tragično poginuo 1993. na vrhuncu karijere. Uveden u Kuću slavnih NBA i FIBA.",
+   facts:[{l:"NBA",v:"New Jersey Nets — 22.3 poena po utakmici 1992/93"},{l:"Jugoslo./Hrv.",v:"Višestruki Evropski prvak, Olimpijsko srebro 1992."},{l:"Uveden u",v:"NBA Kuća slavnih, FIBA Kuća slavnih"},{l:"Posebno",v:"Poginuo 1993. u saobraćajnoj nesreći — kratka ali blistava karijera"},{l:"Rekord",v:"67 uzastopnih mečeva sa 10+ poena u NBA"}]},
+  {name:"Vlade Divac", flag:"🇷🇸", country:"Srbija/Jugoslavija", pos:"centar", era:"klasicna", nasi:true,
+   sub:"Centar · 1989–2005 · LA Lakers, Sacramento Kings, Charlotte",
+   desc:"Pionir NBA-e iz Srbije. Elegantni centar sa vizijom plejšmejkera. Uveden u FIBA Kuću slavnih. Kasnije generalni menadžer Kingsa.",
+   facts:[{l:"NBA",v:"16 sezona; 7 asistencija centara"},{l:"Lakers",v:"Prvak 2000. (veteran na klupi)"},{l:"Jug./Srbija",v:"Olimpijsko zlato 1988, srebro 1996"},{l:"FIBA",v:"Uveden u Kuću slavnih 2010."},{l:"Posebno",v:"Poznat po 'Divac krivici' — scena iz 2002 playoff-a vs. Lakers"}]},
+  {name:"Aleksandar Đorđević", flag:"🇷🇸", country:"Srbija/Jugoslavija", pos:"bek", era:"klasicna", nasi:true,
+   sub:"Point Guard · 1987–2007 · Partizan, Olimpija, Roma, Portland...",
+   desc:"Kapiten 'Bele košarke' — Jugoslo./Srbija legendarna generacija. Svetski prvak, Evropski prvak. Defanzivni playmaker koji je upravljao sve.",
+   facts:[{l:"Titule",v:"Svetski prvak 1998, 2002; Evropski prvak 1995, 1997, 2001"},{l:"Olimpijada",v:"Srebro 1996. Atlanta"},{l:"Partizan",v:"UCL (Euroliga) titula 1992."},{l:"Posebno",v:"Najuspešniji evropski plej svog vremena"},{l:"Sada",v:"Selektor košarkaške reprezentacije Srbije"}]},
+  {name:"Dejan Bodiroga", flag:"🇷🇸", country:"Srbija/Jugoslavija", pos:"krilo", era:"moderna", nasi:true,
+   sub:"Small Forward/SG · 1990–2006 · Partizan, Barcelona, Virtus Bologna...",
+   desc:"'Bogi' — smatran najboljim evropskim košarkašem svog doba. Višestruki Euroliga šampion, Svetski i Evropski prvak sa Jugoslo./Srbijom.",
+   facts:[{l:"Euroliga",v:"Prvak 1997 (Barselona), 1998, 2002 (Virtus Bologna)"},{l:"Svetski kup",v:"Zlato 1998, 2002 (Srbija/Jug.)"},{l:"FIBA MVP",v:"Svetskog kupa 2002."},{l:"Posebno",v:"Smatran najboljim Evropljaninom koji nikad nije igrao NBA"},{l:"Sada",v:"Predsednik KK Crvena Zvezda"}]},
+];
+
+var state = { pos: "all", era: "all", reg: "all", search: "" };
+
+function getItems() {
+  var items = DATA.slice();
+  if (state.pos !== "all") items = items.filter(function(d){ return d.pos === state.pos; });
+  if (state.era !== "all") items = items.filter(function(d){ return d.era === state.era; });
+  if (state.reg === "nasi") items = items.filter(function(d){ return d.nasi; });
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    items = items.filter(function(d){
+      return d.name.toLowerCase().includes(q) || d.country.toLowerCase().includes(q) || d.sub.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q);
+    });
+  }
+  return items;
+}
+
+var POS_CLS = {bek:"pos-bek", krilo:"pos-krilo", centar:"pos-centar"};
+var POS_LBL = {bek:"Bek", krilo:"Krilo", centar:"Centar"};
+
+function render() {
+  var items = getItems();
+  document.getElementById("resultsCount").textContent = items.length + " legendi";
+  var grid = document.getElementById("grid");
+  if (!items.length) { grid.innerHTML = "<div class=\"no-results\">\u2606 Nema rezultata.</div>"; return; }
+  var html = "";
+  for (var i = 0; i < items.length; i++) {
+    var d = items[i];
+    html += "<div class=\"leg-card" + (d.nasi ? " nasi" : "") + "\" onclick=\"toggle(this)\">";
+    html += "<div class=\"card-head\">";
+    html += "<div class=\"card-flag\">" + d.flag + "</div>";
+    html += "<div class=\"card-info\">";
+    html += "<div class=\"card-name\">" + d.name + (d.goat ? "<span class=\"goat-badge\">GOAT</span>" : "") + "</div>";
+    html += "<div class=\"card-sub\">" + d.sub + "</div>";
+    html += "</div>";
+    html += "<div class=\"card-tags\">";
+    html += "<span class=\"pos-tag " + (POS_CLS[d.pos]||"") + "\">" + (POS_LBL[d.pos]||"") + "</span>";
+    html += "<span class=\"era-tag era-" + d.era + "\">" + (d.era==="moderna"?"Moderna":"Klasična") + "</span>";
+    if (d.nasi) html += "<span class=\"nasi-badge\">\ud83c\uddf7\ud83c\uddf8 Naši</span>";
+    html += "</div>";
+    html += "<span class=\"arrow-toggle\">&#9660;</span>";
+    html += "</div>";
+    html += "<div class=\"card-expand\"><div class=\"card-body\">";
+    html += "<div class=\"card-desc\">" + d.desc + "</div>";
+    html += "<div class=\"card-facts\">";
+    for (var j = 0; j < d.facts.length; j++) {
+      html += "<div class=\"fact-row\"><span class=\"fact-label\">" + d.facts[j].l + "</span><span class=\"fact-val\">" + d.facts[j].v + "</span></div>";
+    }
+    html += "</div></div></div></div>";
+  }
+  grid.innerHTML = html;
+}
+
+function toggle(card) { card.classList.toggle("open"); }
+
+document.getElementById("searchBox").addEventListener("input", function(){ state.search = this.value.trim(); render(); });
+document.querySelectorAll("[data-pos]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.pos = this.getAttribute("data-pos");
+    document.querySelectorAll("[data-pos]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
+document.querySelectorAll("[data-era]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.era = this.getAttribute("data-era");
+    document.querySelectorAll("[data-era]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
+document.querySelectorAll("[data-reg]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.reg = this.getAttribute("data-reg");
+    document.querySelectorAll("[data-reg]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
+render();
+</script>
+</body>
+</html>

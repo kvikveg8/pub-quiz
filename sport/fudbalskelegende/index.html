@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Fudbalske legende — Pub Quiz</title>
+<style>
+:root {
+  --bg: #1a0f05; --surface: #241508; --surface2: #2e1c0a; --surface3: #3a2410;
+  --gold: #c9a227; --gold2: #e8c84a;
+  --text: #f0e6d0; --text2: #b89a70;
+  --border: #3a2a12; --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+header { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 16px 24px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100; }
+.header-back { color: var(--gold); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; transition: background 0.2s; }
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.controls { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.search-box { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; color: var(--text); font-family: Georgia, serif; font-size: 14px; outline: none; }
+.search-box:focus { border-color: var(--gold); }
+.search-box::placeholder { color: var(--text2); }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label { color: var(--text2); font-size: 12px; align-self: center; text-transform: uppercase; letter-spacing: 1px; }
+.filter-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text2); padding: 6px 12px; font-family: Georgia, serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+.main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+.results-count { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.leg-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+.leg-card:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(201,162,39,0.15); }
+.leg-card.open { border-color: var(--gold); }
+.card-head { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.card-flag { font-size: 32px; width: 48px; text-align: center; flex-shrink: 0; }
+.card-info { flex: 1; }
+.card-name { font-size: 17px; color: var(--gold2); font-weight: bold; }
+.card-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.card-tags { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+.pos-tag { font-size: 10px; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+.pos-napadac  { background: #1e0808; color: #e07070; border: 1px solid #401010; }
+.pos-vezni    { background: #08121e; color: #70a0e0; border: 1px solid #103050; }
+.pos-odbrana  { background: #081808; color: #70c080; border: 1px solid #103010; }
+.pos-golman   { background: #1a1600; color: #c0a030; border: 1px solid #3a3000; }
+.era-tag { font-size: 10px; padding: 3px 8px; border-radius: 3px; }
+.era-klasicna { background: #1a1008; color: #c09050; border: 1px solid #3a2010; }
+.era-moderna  { background: #080e20; color: #6080c0; border: 1px solid #102040; }
+.arrow-toggle { color: var(--text2); font-size: 14px; transition: transform 0.3s; margin-left: 6px; }
+.leg-card.open .arrow-toggle { transform: rotate(180deg); }
+.card-expand { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+.leg-card.open .card-expand { max-height: 600px; }
+.card-body { border-top: 1px solid var(--border); padding: 14px 16px; }
+.card-desc { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 12px; }
+.card-facts { display: flex; flex-direction: column; gap: 6px; }
+.fact-row { display: flex; gap: 8px; font-size: 13px; }
+.fact-label { color: var(--text2); min-width: 120px; flex-shrink: 0; }
+.fact-val { color: var(--text); }
+.goat-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 3px; background: linear-gradient(135deg, #2a1a00, #3a2a00); color: var(--gold2); border: 1px solid var(--gold); margin-left: 8px; vertical-align: middle; }
+.no-results { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 16px; }
+@media (max-width: 600px) {
+  .main { padding: 14px; }
+  .controls { padding: 10px 14px; }
+  .header-title h1 { font-size: 18px; }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#9917; FUDBALSKE LEGENDE</h1>
+    <p>Najveći fudbaleri svih vremena — statistike, nagrade, karijere</p>
+  </div>
+  <span style="font-size:28px">&#127942;</span>
+</header>
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretraži ime, zemlja, klub...">
+  <div class="filter-group">
+    <span class="filter-label">Pozicija:</span>
+    <button class="filter-btn active" data-pos="all">Sve</button>
+    <button class="filter-btn" data-pos="napadac">Napadači</button>
+    <button class="filter-btn" data-pos="vezni">Vezni</button>
+    <button class="filter-btn" data-pos="odbrana">Odbrana</button>
+    <button class="filter-btn" data-pos="golman">Golmani</button>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Era:</span>
+    <button class="filter-btn active" data-era="all">Sve</button>
+    <button class="filter-btn" data-era="klasicna">Klasična</button>
+    <button class="filter-btn" data-era="moderna">Moderna</button>
+  </div>
+</div>
+<div class="main">
+  <div class="results-count" id="resultsCount"></div>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+var DATA = [
+  {name:"Pelé", flag:"🇧🇷", country:"Brazil", pos:"napadac", era:"klasicna", goat:true,
+   sub:"Napadač · 1956–1977 · Santos, NY Cosmos",
+   desc:"Jedini fudbaler sa 3 titule svetskog prvaka (1958, 1962, 1970). Više od 1.000 golova u karijeri. Mnogi ga smatraju najboljim fudbalerom svih vremena.",
+   facts:[{l:"Pušteno ime",v:"Edson Arantes do Nascimento"},{l:"Golovi",v:"~1.281 (zvanično 767 za Santos)"},{l:"Svetski kupovi",v:"3 zlatne medalje (1958, 1962, 1970)"},{l:"Rekord",v:"Jedini sa 3 svetska kupa"},{l:"Posebno",v:"Debitovao na SP sa 17 godina — 1958. hat-trick u polufinalu"}]},
+  {name:"Diego Maradona", flag:"🇦🇷", country:"Argentina", pos:"napadac", era:"klasicna", goat:true,
+   sub:"Napadač/Vezni · 1976–1997 · Napoli, Barcelona, Boca",
+   desc:"'Ruka Božja' i 'Gol veka' — oba na istoj utakmici 1986. Odveo Argentinu do titule SP 1986. i Napoli do primera scudetta u istoriji kluba.",
+   facts:[{l:"Svetski kup",v:"Zlato 1986. Meksiko, srebro 1990."},{l:"Napoli",v:"Doveo do 2 titule Serie A (1987, 1990)"},{l:"Gol veka",v:"vs. Engleska 1986 — proglašen najboljim golom SP ikad"},{l:"Ruka Božja",v:"Isti meč, isti minut — rukom dao gol koji je priznat"},{l:"Posebno",v:"Ballon d'Or 1986; FIFA i navijači: suvlasnik titule GOAT"}]},
+  {name:"Lionel Messi", flag:"🇦🇷", country:"Argentina", pos:"napadac", era:"moderna", goat:true,
+   sub:"Napadač · 2004–danas · Barcelona, PSG, Inter Miami",
+   desc:"8 puta dobitnik Zlatne lopte (rekord). Osvajač Svetskog kupa 2022. i Copa Americe 2021. — kompletirao karijeru. Rekorder La Lige po golovima.",
+   facts:[{l:"Zlatna lopta",v:"8 puta (rekord): 2009–12, 2015, 2019, 2021, 2023"},{l:"Svetski kup",v:"Zlato 2022. Katar (MVP turnira)"},{l:"La Liga golovi",v:"474 gola — apsolutni rekord"},{l:"UCL",v:"4 titule sa Barselonom"},{l:"Posebno",v:"Proglašen najboljim na SP 2022. sa 35 godina"}]},
+  {name:"Cristiano Ronaldo", flag:"🇵🇹", country:"Portugalija", pos:"napadac", era:"moderna",
+   sub:"Napadač · 2002–danas · Man Utd, Real Madrid, Juventus, Al Nassr",
+   desc:"5 puta dobitnik Zlatne lopte, 5 puta prvak Evrope sa Realom. Rekorder po golovima u istoriji fudbala. Profesionalizam i discipline kao uzor.",
+   facts:[{l:"Zlatna lopta",v:"5 puta: 2008, 2013–14, 2016–17"},{l:"Svetski kup",v:"Nikad zlatni — polufinale 2006."},{l:"EURO",v:"Zlato 2016. sa Portugalom"},{l:"UCL",v:"5 titula (1× Man Utd, 4× Real Madrid)"},{l:"Golovi",v:"~900 zvaničnih — rekorder svih vremena"}]},
+  {name:"Zinedine Zidane", flag:"🇫🇷", country:"Francuska", pos:"vezni", era:"moderna",
+   sub:"Vezni · 1988–2006 · Juventus, Real Madrid",
+   desc:"Svetski prvak 1998, prvak Evrope 2000. Kao menadžer Reala — 3 uzastopne UCL titule. Stil igre: elegancija i tehnika kao umetnost.",
+   facts:[{l:"Svetski kup",v:"Zlato 1998. (MVP turnira)"},{l:"EURO",v:"Zlato 2000."},{l:"UCL",v:"1 kao igrač (2002), 3 kao menadžer Reala"},{l:"Ballon d'Or",v:"1998."},{l:"Posebno",v:"Finale SP 2006 — udarac glavom Materaziju u poslednjem meču"}]},
+  {name:"Ronaldo Nazário (R9)", flag:"🇧🇷", country:"Brazil", pos:"napadac", era:"moderna",
+   sub:"Napadač · 1993–2011 · Barcelona, Inter, Real Madrid",
+   desc:"'Il Fenomeno' — fudbaler koji je redefinisao napad. Dva puta MVP Svetskog kupa (1994 nije igrao, 1998 i 2002). Pobedio teške povrede i vratio se na vrh.",
+   facts:[{l:"Svetski kup",v:"Zlato 1994, 2002; finalist 1998 (bolest pred finale)"},{l:"MVP SP",v:"1998. i 2002."},{l:"Ballon d'Or",v:"1997, 2002."},{l:"FIFA igrač godine",v:"3 puta (1996, 1997, 2002)"},{l:"Posebno",v:"8 golova na SP 2002 — rekord koji je trajao 12 godina"}]},
+  {name:"Franz Beckenbauer", flag:"🇩🇪", country:"Nemačka", pos:"odbrana", era:"klasicna",
+   sub:"Libero/Levi bek · 1964–1983 · Bayern, NY Cosmos, Hamburg",
+   desc:"'Der Kaiser' — redefinisao ulogu odbrambenog igrača. Jedini koji je SP osvajao i kao kapiten (1974) i kao menadžer (1990).",
+   facts:[{l:"Svetski kup",v:"Zlato 1974. (kapiten), Zlato 1990. (menadžer)"},{l:"Bayern",v:"3 uzastopne UCL titule (1974–76)"},{l:"Ballon d'Or",v:"1972, 1976."},{l:"Posebno",v:"Igrao polufinale SP 1970. sa povredom ramena — ruka vezana"}]},
+  {name:"Johan Cruyff", flag:"🇳🇱", country:"Holandija", pos:"napadac", era:"klasicna",
+   sub:"Napadač/Vezni · 1964–1984 · Ajax, Barcelona",
+   desc:"Tvorac 'Totalne fudbalske filozofije'. Tri uzastopne UCL titule sa Ajaxom. Kao menadžer — izgradio Barselonin 'Dream Team'.",
+   facts:[{l:"Svetski kup",v:"Srebro 1974. — bolji od pobednika po mišljenju većine"},{l:"Ajax",v:"3 UCL titule (1971–73)"},{l:"Ballon d'Or",v:"3 puta (1971, 1973, 1974)"},{l:"Posebno",v:"'Cruyff okret' — tehnička inovacija nazvana po njemu"},{l:"Kao menadžer",v:"4 La Liga titule sa Barcelonom, UCL 1992."}]},
+  {name:"Gerd Müller", flag:"🇩🇪", country:"Nemačka", pos:"napadac", era:"klasicna",
+   sub:"Napadač · 1963–1981 · Bayern Munich, Fort Lauderdale",
+   desc:"'Der Bomber' — rekorder golova SP pre Klosea. 85 golova za reprezentaciju u 62 utakmice. Golgeter po prirodi.",
+   facts:[{l:"Svetski kup",v:"Zlato 1974; 10 golova 1970. (rekord u to vreme)"},{l:"Bundesliga",v:"365 golova — rekord koji je stajao 49 godina"},{l:"Ballon d'Or",v:"1970."},{l:"Posebno",v:"Gol u finalu SP 1974 — Nemačka 2-1 Holandija"}]},
+  {name:"Miroslav Klose", flag:"🇩🇪", country:"Nemačka", pos:"napadac", era:"moderna",
+   sub:"Napadač · 1999–2016 · Kaiserslautern, Werder, Bayern, Lazio",
+   desc:"Rekorder po golovima na Svetskim kupovima — 16 golova na 4 SP. Tihi, profesionalni, pouzdan. Fair play ikona.",
+   facts:[{l:"SP golovi",v:"16 — apsolutni rekord"},{l:"Svetski kup",v:"Zlato 2014, srebro 2002, bronza 2006, 2010"},{l:"SP 2014",v:"Srušio Ronaldov rekord od 15 golova"},{l:"Fair play",v:"Jednom vratio autogol na koji sudija nije reagovao"}]},
+  {name:"Eusébio", flag:"🇵🇹", country:"Portugalija", pos:"napadac", era:"klasicna",
+   sub:"Napadač · 1960–1979 · Benfica",
+   desc:"'Pantera Negra' iz Mozambika — Benfica legenda. 4. mesto na SP 1966. u Engleskoj; 9 golova za šampiona strelaca.",
+   facts:[{l:"Svetski kup",v:"4. mesto 1966. — 9 golova, zlatna kopačka"},{l:"Ballon d'Or",v:"1965."},{l:"Benfica",v:"11 ligaških titula, UCL 1962."},{l:"Posebno",v:"473 gola u 440 utakmica za Benfiku"}]},
+  {name:"Roberto Baggio", flag:"🇮🇹", country:"Italija", pos:"vezni", era:"moderna",
+   sub:"Vezni/Napadač · 1982–2004 · Fiorentina, Juventus, Milan, Inter...",
+   desc:"'Il Divin Codino' — božanski rep. Penali koji je promašio u finalu SP 1994. prate ga, ali je pre toga odveo Italiju do finala gotovo sam.",
+   facts:[{l:"Svetski kup",v:"Finalist 1994; 5 golova u nokaut fazi sam"},{l:"Ballon d'Or",v:"1993."},{l:"Posebno",v:"Promašen penal u finalu SP 1994 — jedno od najpoznatijih slika fudbala"},{l:"Serija A",v:"Igrao za 9 različitih klubova"}]},
+  {name:"Lev Jašin", flag:"🇷🇺", country:"SSSR", pos:"golman", era:"klasicna",
+   sub:"Golman · 1949–1971 · Dinamo Moskva",
+   desc:"Jedini golman dobitnik Zlatne lopte (1963). 'Crna puma' — više od 150 penala odbijenih u karijeri. Redefinisao ulogu golmana.",
+   facts:[{l:"Ballon d'Or",v:"1963 — jedini golman ikad"},{l:"Svetski kup",v:"4. mesto 1966; Olimpijsko zlato 1956."},{l:"Penali",v:"Odbio više od 150 penala u karijeri"},{l:"Posebno",v:"Nosio karakteristični crni dres — 'Crni pajac'"}]},
+  {name:"Thierry Henry", flag:"🇫🇷", country:"Francuska", pos:"napadac", era:"moderna",
+   sub:"Napadač · 1994–2012 · Monaco, Juventus, Arsenal, Barcelona",
+   desc:"Arsenal legenda — rekorder po golovima i asistencijama. Svetski prvak 1998. i prvak Evrope 2000. 'Invincibles' kapiten 2003/04.",
+   facts:[{l:"Svetski kup",v:"Zlato 1998, EURO zlato 2000."},{l:"Arsenal",v:"228 golova — rekorder kluba (potom Wrightov rekord)"},{l:"Invincibles",v:"Kapiten ekipe koja nije izgubila ni jedan meč u sezoni 2003/04"},{l:"UCL",v:"Zlato sa Barselonom 2009."}]},
+  {name:"Paolo Maldini", flag:"🇮🇹", country:"Italija", pos:"odbrana", era:"moderna",
+   sub:"Levi bek/Libero · 1985–2009 · AC Milan",
+   desc:"Simbol odanosti — 25 godina samo za Milan. 5 UCL titula, 7 scudetta. Odbrambeni igrač koji je redefinisao poziciju.",
+   facts:[{l:"AC Milan",v:"25 sezona — 902 utakmice"},{l:"UCL",v:"5 titula (1989, 1990, 1994, 2003, 2007)"},{l:"Serie A",v:"7 scudetta"},{l:"Svetski kup",v:"Finalist 1994; bronza 1990."},{l:"Posebno",v:"Nikad nije dobio crveni karton u UCL"}]},
+  {name:"Ronaldinho", flag:"🇧🇷", country:"Brazil", pos:"vezni", era:"moderna",
+   sub:"Vezni · 1998–2015 · Barselona, AC Milan, PSG, Atletico MG",
+   desc:"Fudbaler radosti — tehnika, osmeh i magija na terenu. Svetski kup 2002. Ballon d'Or 2004. u jeku Barsine vladavine.",
+   facts:[{l:"Svetski kup",v:"Zlato 2002."},{l:"Ballon d'Or",v:"2004, 2005."},{l:"Barcelon",v:"UCL 2006; La Liga 2005, 2006."},{l:"Posebno",v:"Na El Clasicu mu aplaudiou madridski navijači — jedino u istoriji"}]},
+];
+
+var state = { pos: "all", era: "all", search: "" };
+
+function getItems() {
+  var items = DATA.slice();
+  if (state.pos !== "all") items = items.filter(function(d){ return d.pos === state.pos; });
+  if (state.era !== "all") items = items.filter(function(d){ return d.era === state.era; });
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    items = items.filter(function(d){
+      return d.name.toLowerCase().includes(q) || d.country.toLowerCase().includes(q) || d.sub.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q);
+    });
+  }
+  return items;
+}
+
+var POS_CLS = {napadac:"pos-napadac", vezni:"pos-vezni", odbrana:"pos-odbrana", golman:"pos-golman"};
+var POS_LBL = {napadac:"Napadač", vezni:"Vezni", odbrana:"Odbrana", golman:"Golman"};
+
+function render() {
+  var items = getItems();
+  document.getElementById("resultsCount").textContent = items.length + " legendi";
+  var grid = document.getElementById("grid");
+  if (!items.length) { grid.innerHTML = "<div class=\"no-results\">\u2606 Nema rezultata.</div>"; return; }
+  var html = "";
+  for (var i = 0; i < items.length; i++) {
+    var d = items[i];
+    html += "<div class=\"leg-card\" onclick=\"toggle(this)\">";
+    html += "<div class=\"card-head\">";
+    html += "<div class=\"card-flag\">" + d.flag + "</div>";
+    html += "<div class=\"card-info\">";
+    html += "<div class=\"card-name\">" + d.name + (d.goat ? "<span class=\"goat-badge\">GOAT</span>" : "") + "</div>";
+    html += "<div class=\"card-sub\">" + d.sub + "</div>";
+    html += "</div>";
+    html += "<div class=\"card-tags\">";
+    html += "<span class=\"pos-tag " + (POS_CLS[d.pos]||"") + "\">" + (POS_LBL[d.pos]||"") + "</span>";
+    html += "<span class=\"era-tag era-" + d.era + "\">" + (d.era==="moderna"?"Moderna":"Klasična") + "</span>";
+    html += "</div>";
+    html += "<span class=\"arrow-toggle\">&#9660;</span>";
+    html += "</div>";
+    html += "<div class=\"card-expand\"><div class=\"card-body\">";
+    html += "<div class=\"card-desc\">" + d.desc + "</div>";
+    html += "<div class=\"card-facts\">";
+    for (var j = 0; j < d.facts.length; j++) {
+      html += "<div class=\"fact-row\"><span class=\"fact-label\">" + d.facts[j].l + "</span><span class=\"fact-val\">" + d.facts[j].v + "</span></div>";
+    }
+    html += "</div></div></div></div>";
+  }
+  grid.innerHTML = html;
+}
+
+function toggle(card) { card.classList.toggle("open"); }
+
+document.getElementById("searchBox").addEventListener("input", function(){ state.search = this.value.trim(); render(); });
+document.querySelectorAll("[data-pos]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.pos = this.getAttribute("data-pos");
+    document.querySelectorAll("[data-pos]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
+document.querySelectorAll("[data-era]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.era = this.getAttribute("data-era");
+    document.querySelectorAll("[data-era]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
+render();
+</script>
+</body>
+</html>

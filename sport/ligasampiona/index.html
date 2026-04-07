@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>UEFA Liga šampiona — Pub Quiz</title>
+<style>
+:root {
+  --bg: #1a0f05; --surface: #241508; --surface2: #2e1c0a;
+  --gold: #c9a227; --gold2: #e8c84a;
+  --text: #f0e6d0; --text2: #b89a70;
+  --border: #3a2a12; --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+header { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 16px 24px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100; }
+.header-back { color: var(--gold); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; transition: background 0.2s; }
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.controls { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.search-box { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; color: var(--text); font-family: Georgia, serif; font-size: 14px; outline: none; }
+.search-box:focus { border-color: var(--gold); }
+.search-box::placeholder { color: var(--text2); }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label { color: var(--text2); font-size: 12px; align-self: center; text-transform: uppercase; letter-spacing: 1px; }
+.filter-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text2); padding: 6px 12px; font-family: Georgia, serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+.main { padding: 24px; max-width: 1000px; margin: 0 auto; }
+.results-count { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+.note { font-size: 11px; color: var(--text2); margin-bottom: 14px; padding: 8px 12px; border: 1px dashed var(--border); border-radius: 4px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead tr { background: var(--surface); border-bottom: 2px solid var(--gold); }
+th { padding: 10px 12px; text-align: left; color: var(--gold); font-weight: normal; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+tbody tr:hover { background: var(--hover); }
+tbody tr.highlight { background: #1e1800 !important; }
+tbody tr.nasi { background: #1a0e18 !important; border-left: 3px solid #a03060; }
+td { padding: 8px 12px; vertical-align: top; }
+.td-season { color: var(--gold2); font-weight: bold; white-space: nowrap; font-size: 13px; }
+.td-winner { font-weight: bold; color: var(--text); }
+.td-runner { color: var(--text2); }
+.td-score { color: var(--gold2); font-weight: bold; white-space: nowrap; }
+.td-venue { color: var(--text2); font-size: 12px; }
+.td-fact { color: var(--text2); font-size: 12px; line-height: 1.4; }
+/* Mobile cards */
+.card-list { display: none; flex-direction: column; gap: 8px; }
+.m-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.m-card.highlight { background: #1e1800; }
+.m-card.nasi { background: #1a0e18; border-left: 3px solid #a03060; }
+.m-season { font-size: 15px; font-weight: bold; color: var(--gold2); }
+.m-winner { font-size: 15px; color: var(--text); font-weight: bold; margin: 4px 0 2px; }
+.m-score { font-size: 13px; color: var(--gold2); }
+.m-runner { font-size: 12px; color: var(--text2); }
+.m-fact { font-size: 11px; color: var(--text2); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); line-height: 1.4; }
+.no-results { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 16px; }
+@media (max-width: 700px) {
+  .main { padding: 14px; }
+  .controls { padding: 10px 14px; }
+  .header-title h1 { font-size: 18px; }
+  table { display: none; }
+  .card-list { display: flex; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#9917; UEFA LIGA &#352;AMPIONA</h1>
+    <p>Svi pobednici Kupa evropskih šampiona / UCL 1956&ndash;2024</p>
+  </div>
+  <span style="font-size:28px">&#127942;</span>
+</header>
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretraži tim, grad, godinu...">
+  <div class="filter-group">
+    <span class="filter-label">Zemlja:</span>
+    <button class="filter-btn active" data-c="all">Sve</button>
+    <button class="filter-btn" data-c="Španija">🇪🇸 Španija</button>
+    <button class="filter-btn" data-c="Engleska">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Engleska</button>
+    <button class="filter-btn" data-c="Italija">🇮🇹 Italija</button>
+    <button class="filter-btn" data-c="Nemačka">🇩🇪 Nemačka</button>
+  </div>
+</div>
+<div class="main">
+  <p class="note">&#9432; 1956&ndash;1992: Kup evropskih šampiona. Od 1992/93: UEFA Liga šampiona. <span style="color:#c06080">&#9632;</span> Crvena Zvezda Beograd &mdash; jedini pobednik iz Srbije/Jugoslavije (1991).</p>
+  <div class="results-count" id="resultsCount"></div>
+  <div id="tableWrap"></div>
+  <div class="card-list" id="cardList"></div>
+</div>
+<script>
+var DATA = [
+  {s:"1955/56", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Stade de Reims",      rflag:"🇫🇷",  score:"4–3",        venue:"Pariz",         fact:"Prvo finale Kupa. Di Stéfano i Rial predvode Real."},
+  {s:"1956/57", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Fiorentina",          rflag:"🇮🇹",  score:"2–0",        venue:"Madrid",        fact:"Drugi uzastopni kup. Real gradi dinastiju."},
+  {s:"1957/58", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"AC Milan",            rflag:"🇮🇹",  score:"3–2 (prod.)",venue:"Brisel",        fact:"Di Stéfano hat-trick u finalu!"},
+  {s:"1958/59", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Stade de Reims",      rflag:"🇫🇷",  score:"2–0",        venue:"Štutgart",      fact:"Četvrti uzastopni trofej."},
+  {s:"1959/60", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Eintracht Frankfurt", rflag:"🇩🇪",  score:"7–3",        venue:"Glasgow",       fact:"Finale svih finala — 7:3 u Hampden Parku pred 127.000! Di Stéfano 3, Puskas 4 gola."},
+  {s:"1960/61", winner:"Benfica",             wflag:"🇵🇹",wc:"Ostalo",   runner:"Barcelona",           rflag:"🇪🇸",  score:"3–2",        venue:"Bern",          fact:"Kraj Realove vladavine. Benfica na scenu."},
+  {s:"1961/62", winner:"Benfica",             wflag:"🇵🇹",wc:"Ostalo",   runner:"Real Madrid",         rflag:"🇪🇸",  score:"5–3",        venue:"Amsterdam",     fact:"Eusébio 2 gola u finalu. Benfica odbranila trofej."},
+  {s:"1962/63", winner:"AC Milan",            wflag:"🇮🇹",wc:"Italija",  runner:"Benfica",             rflag:"🇵🇹",  score:"2–1",        venue:"Wembli",        fact:"Milan donosi Kup u Italiju. Altafini 2 gola."},
+  {s:"1963/64", winner:"Inter Milan",         wflag:"🇮🇹",wc:"Italija",  runner:"Real Madrid",         rflag:"🇪🇸",  score:"3–1",        venue:"Beč",           fact:"Herera i 'Grande Inter' — Italian defensive masterclass."},
+  {s:"1964/65", winner:"Inter Milan",         wflag:"🇮🇹",wc:"Italija",  runner:"Benfica",             rflag:"🇵🇹",  score:"1–0",        venue:"Milano",        fact:"Inter odbranio trofej."},
+  {s:"1965/66", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Partizan",            rflag:"🇾🇺",  score:"2–1",        venue:"Brisel",        fact:"Partizan Beograd u finalu! Jedini jugoslovenski finali... Real uzeo 6. Kup.", nasi:true},
+  {s:"1966/67", winner:"Celtic",              wflag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",wc:"Engleska", runner:"Inter Milan",        rflag:"🇮🇹",  score:"2–1",        venue:"Lisabon",       fact:"'Lisabonski lavovi' — svi igrači sa ostrva Irska! Prva britanska ekipa u finalu i pobednici."},
+  {s:"1967/68", winner:"Man. United",         wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Benfica",           rflag:"🇵🇹",  score:"4–1 (prod.)",venue:"Wembli",        fact:"Besti, Charlton, Kidd. 10 godina od Minhen katastrofe — Busbyjevi momci pobeđuju."},
+  {s:"1968/69", winner:"AC Milan",            wflag:"🇮🇹",wc:"Italija",  runner:"Ajax",                rflag:"🇳🇱",  score:"4–1",        venue:"Madrid",        fact:"Rivera i Sormani. Ajax je tek u nastajanju."},
+  {s:"1969/70", winner:"Feyenoord",           wflag:"🇳🇱",wc:"Ostalo",   runner:"Celtic",              rflag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",  score:"2–1 (prod.)",venue:"Milano",        fact:"Holandska košarka počinje. Feyenoord iznenađenje."},
+  {s:"1970/71", winner:"Ajax",                wflag:"🇳🇱",wc:"Ostalo",   runner:"Panathinaikos",       rflag:"🇬🇷",  score:"2–0",        venue:"Wembli",        fact:"Cruyff i Totalni fudbal. Ajax uzima vlast."},
+  {s:"1971/72", winner:"Ajax",                wflag:"🇳🇱",wc:"Ostalo",   runner:"Inter Milan",         rflag:"🇮🇹",  score:"2–0",        venue:"Rotterdam",     fact:"Ajax drugi uzastopni."},
+  {s:"1972/73", winner:"Ajax",                wflag:"🇳🇱",wc:"Ostalo",   runner:"Juventus",            rflag:"🇮🇹",  score:"1–0",        venue:"Beograd",       fact:"Finale u Beogradu! Ajax treći uzastopni. Cruyff napustio Ajax posle ovoga.", nasi:true},
+  {s:"1973/74", winner:"Bayern Munich",       wflag:"🇩🇪",wc:"Nemačka",  runner:"Atlético Madrid",    rflag:"🇪🇸",  score:"1–1; 4–0",   venue:"Brisel",        fact:"Repriza finala. Müller i Beckenbauer. Bayern gradi novu dinastiju."},
+  {s:"1974/75", winner:"Bayern Munich",       wflag:"🇩🇪",wc:"Nemačka",  runner:"Leeds",               rflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",  score:"2–0",        venue:"Pariz",         fact:"Bayern odbranio trofej."},
+  {s:"1975/76", winner:"Bayern Munich",       wflag:"🇩🇪",wc:"Nemačka",  runner:"Saint-Étienne",      rflag:"🇫🇷",  score:"1–0",        venue:"Glasgow",       fact:"Bayern treći uzastopni. Roth gol u finalu."},
+  {s:"1976/77", winner:"Liverpool",           wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Borussia MG",        rflag:"🇩🇪",  score:"3–1",        venue:"Rim",           fact:"Bob Pejzli i Dalglish era počinje. Keegan odlazi."},
+  {s:"1977/78", winner:"Liverpool",           wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Club Brugge",        rflag:"🇧🇪",  score:"1–0",        venue:"Wembli",        fact:"Liverpool odbranio trofej. Dalglish uzeo trofej."},
+  {s:"1978/79", winner:"Nottingham Forest",   wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Malmö",              rflag:"🇸🇪",  score:"1–0",        venue:"Minhen",        fact:"Brian Klaf i Forest — čudo iz Nottinghama. Malo ko ih je čuo pre toga."},
+  {s:"1979/80", winner:"Nottingham Forest",   wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Hamburg",            rflag:"🇩🇪",  score:"1–0",        venue:"Madrid",        fact:"Forest odbranio trofej. Robertson gol."},
+  {s:"1980/81", winner:"Liverpool",           wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Real Madrid",        rflag:"🇪🇸",  score:"1–0",        venue:"Pariz",         fact:"Liverpool 3. trofej. Alan Kenedi jedini gol u finalu."},
+  {s:"1981/82", winner:"Aston Villa",         wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Bayern Munich",      rflag:"🇩🇪",  score:"1–0",        venue:"Rotterdam",     fact:"Neočekivani pobednik. Peter Vihe gol u finalu."},
+  {s:"1982/83", winner:"Hamburg",             wflag:"🇩🇪",wc:"Nemačka",  runner:"Juventus",            rflag:"🇮🇹",  score:"1–0",        venue:"Atina",         fact:"Magath jedini gol. Hamburg jedina nemačka ekipa van Bajerna sa naslovom."},
+  {s:"1983/84", winner:"Liverpool",           wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"AS Roma",            rflag:"🇮🇹",  score:"1–1 (pen.)", venue:"Rim",           fact:"Finale u Rimu — domaćin. Liverpool pravi čudo. Graeme Souness kapiten."},
+  {s:"1984/85", winner:"Juventus",            wflag:"🇮🇹",wc:"Italija",  runner:"Liverpool",           rflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",  score:"1–0",        venue:"Brisel",        fact:"Hejselska tragedija — 39 poginulih. Penali Platinija. Engleski klubovi zabranjeni 5 godina."},
+  {s:"1985/86", winner:"Steaua București",    wflag:"🇷🇴",wc:"Ostalo",   runner:"Barcelona",           rflag:"🇪🇸",  score:"0–0 (pen.)", venue:"Sevilja",       fact:"Steaua — prvi klub iz Istočne Evrope! Golman Duckadam odbio 4 penala Barselone."},
+  {s:"1986/87", winner:"Porto",               wflag:"🇵🇹",wc:"Ostalo",   runner:"Bayern Munich",       rflag:"🇩🇪",  score:"2–1",        venue:"Beč",           fact:"Žoze Murinjov početak na portovom klupi? Ne, ali rani Porto zlatni era."},
+  {s:"1987/88", winner:"PSV Eindhoven",       wflag:"🇳🇱",wc:"Ostalo",   runner:"Benfica",             rflag:"🇵🇹",  score:"0–0 (pen.)", venue:"Stuttgart",     fact:"PSV — holandska iznenađenje dekade."},
+  {s:"1988/89", winner:"AC Milan",            wflag:"🇮🇹",wc:"Italija",  runner:"Steaua București",    rflag:"🇷🇴",  score:"4–0",        venue:"Barselona",     fact:"Gullit i van Basten — Grande Milan! 4:0 vs. Steaua."},
+  {s:"1989/90", winner:"AC Milan",            wflag:"🇮🇹",wc:"Italija",  runner:"Benfica",             rflag:"🇵🇹",  score:"1–0",        venue:"Beč",           fact:"Milan odbranio trofej. Klaudijevo jedini gol."},
+  {s:"1990/91", winner:"Crvena Zvezda",       wflag:"🇾🇺",wc:"Ostalo",   runner:"Marseille",           rflag:"🇫🇷",  score:"0–0 (pen.)", venue:"Bari",          fact:"NAŠI! Crvena Zvezda Beograd — jedini srpski/jugoslovenski prvak Evrope! Darko Pančev i legendarni penali.", nasi:true, highlight:true},
+  {s:"1991/92", winner:"Barcelona",           wflag:"🇪🇸",wc:"Španija",  runner:"Sampdoria",           rflag:"🇮🇹",  score:"1–0 (prod.)",venue:"Wembli",        fact:"Kreif's Barcelona — Sanja Laporta era."},
+  {s:"1992/93", winner:"Marseille",           wflag:"🇫🇷",wc:"Ostalo",   runner:"AC Milan",            rflag:"🇮🇹",  score:"1–0",        venue:"Minhen",        fact:"Marseille — jedini, ali posle skandala (podmićivanje) kažnjeni ispadanjem iz Ligue 1."},
+  {s:"1993/94", winner:"AC Milan",            wflag:"🇮🇹",wc:"Italija",  runner:"Barcelona",           rflag:"🇪🇸",  score:"4–0",        venue:"Atina",         fact:"Grande Milan 4:0 Barseloni! Šuker jednog od favorita ikad."},
+  {s:"1994/95", winner:"Ajax",                wflag:"🇳🇱",wc:"Ostalo",   runner:"AC Milan",            rflag:"🇮🇹",  score:"1–0",        venue:"Beč",           fact:"Mladi Ajax — Kluivert, Davids, Sijera. Poslednji put Ajax prvak Evrope."},
+  {s:"1995/96", winner:"Juventus",            wflag:"🇮🇹",wc:"Italija",  runner:"Ajax",                rflag:"🇳🇱",  score:"1–1 (pen.)", venue:"Rim",           fact:"Delpiero i Del Piero era. Juventus posle 12 godina."},
+  {s:"1996/97", winner:"Borussia Dortmund",   wflag:"🇩🇪",wc:"Nemačka",  runner:"Juventus",            rflag:"🇮🇹",  score:"3–1",        venue:"Minhen",        fact:"Rih i Moler 2:0 u 20 minuta. Dortmund iznenađenje."},
+  {s:"1997/98", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Juventus",            rflag:"🇮🇹",  score:"1–0",        venue:"Amsterdam",     fact:"Predrag Mijatović! Jedini gol u finalu. Srpski igrač daje gol koji vratio Real na vrh Evrope.", nasi:true, highlight:true},
+  {s:"1998/99", winner:"Man. United",         wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Bayern Munich",      rflag:"🇩🇪",  score:"2–1",        venue:"Barselona",     fact:"'Treble' u Barseloni. United 1:0 do 90+1 minuta, pa dva gola u nadoknadi. Ferguson čudo."},
+  {s:"1999/00", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Valencia",            rflag:"🇪🇸",  score:"3–0",        venue:"Pariz",         fact:"Raul i Morientes. Spanjolski finale."},
+  {s:"2000/01", winner:"Bayern Munich",       wflag:"🇩🇪",wc:"Nemačka",  runner:"Valencia",            rflag:"🇪🇸",  score:"1–1 (pen.)", venue:"Milano",        fact:"Efenberg kapiten. Oliver Kahn heroj na penalima."},
+  {s:"2001/02", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Bayer Leverkusen",   rflag:"🇩🇪",  score:"2–1",        venue:"Glasgow",       fact:"Zidane volej — jedan od najlepših golova u istoriji! 'Taj gol' iz 45. minuta."},
+  {s:"2002/03", winner:"AC Milan",            wflag:"🇮🇹",wc:"Italija",  runner:"Juventus",            rflag:"🇮🇹",  score:"0–0 (pen.)", venue:"Manchester",    fact:"Italijanski finale. Šesić odbio penale. Milan posle 30 godina."},
+  {s:"2003/04", winner:"Porto",               wflag:"🇵🇹",wc:"Ostalo",   runner:"Monaco",              rflag:"🇲🇨",  score:"3–0",        venue:"Gelzenkirhen",  fact:"Žoze Murinjou — treće finale u 3 finala, 100% uspešnost. 'Special One' na scenu."},
+  {s:"2004/05", winner:"Liverpool",           wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"AC Milan",           rflag:"🇮🇹",  score:"3–3 (pen.)", venue:"Istanbul",      fact:"'Istanbul čudo' — Liverpool 0:3 u poluvremenu, pa preokret na penale. Rafael Benites čudo.", highlight:true},
+  {s:"2005/06", winner:"Barcelona",           wflag:"🇪🇸",wc:"Španija",  runner:"Arsenal",             rflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",  score:"2–1",        venue:"Pariz",         fact:"Ronaldinho era. Larson gol Arsenal pa Barsa preokret."},
+  {s:"2006/07", winner:"AC Milan",            wflag:"🇮🇹",wc:"Italija",  runner:"Liverpool",           rflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",  score:"2–1",        venue:"Atina",         fact:"Milan revanš za Istanbul! Inzagi 2 gola u finalu."},
+  {s:"2007/08", winner:"Man. United",         wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Chelsea",            rflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",  score:"1–1 (pen.)", venue:"Moskva",        fact:"Ronaldo pogodio u finalu. Džon Teri promašio penal. Englesko finale."},
+  {s:"2008/09", winner:"Barcelona",           wflag:"🇪🇸",wc:"Španija",  runner:"Man. United",         rflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",  score:"2–0",        venue:"Rim",           fact:"Gvardiola tiki-taka. Messi i Eto'o. Treble sezone."},
+  {s:"2009/10", winner:"Inter Milan",         wflag:"🇮🇹",wc:"Italija",  runner:"Bayern Munich",       rflag:"🇩🇪",  score:"2–0",        venue:"Madrid",        fact:"Murinjou i Inter — Treble! Milito 2 gola u finalu. 'Special One' odlazi ka Realu."},
+  {s:"2010/11", winner:"Barcelona",           wflag:"🇪🇸",wc:"Španija",  runner:"Man. United",         rflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",  score:"3–1",        venue:"Wembli",        fact:"Messi na Wembliju — Best 1968 rekord obarao. Gvardiola tiki-taka vrhunac."},
+  {s:"2011/12", winner:"Chelsea",             wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Bayern Munich",      rflag:"🇩🇪",  score:"1–1 (pen.)", venue:"Minhen",        fact:"Chelsea u Bajernovoj areni — penali. Drogba jedini gol u finalu. Robić propustio penal."},
+  {s:"2012/13", winner:"Bayern Munich",       wflag:"🇩🇪",wc:"Nemačka",  runner:"Borussia Dortmund",  rflag:"🇩🇪",  score:"2–1",        venue:"Wembli",        fact:"Nemačko finale! Mandžukić i Arjin. Bayern treble."},
+  {s:"2013/14", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Atlético Madrid",    rflag:"🇪🇸",  score:"4–1 (prod.)",venue:"Lisabon",       fact:"'La Décima' — 10. trofej Reala! 93. minut Ramos izjednačio, pa produžetak i 4:1.", highlight:true},
+  {s:"2014/15", winner:"Barcelona",           wflag:"🇪🇸",wc:"Španija",  runner:"Juventus",            rflag:"🇮🇹",  score:"3–1",        venue:"Berlin",        fact:"MSN trident — Messi, Suarez, Neymar. Barsa Treble."},
+  {s:"2015/16", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Atlético Madrid",    rflag:"🇪🇸",  score:"1–1 (pen.)", venue:"Milano",        fact:"Ronaldo odbio poslednji penal. Još jedno Real-Atletico finale."},
+  {s:"2016/17", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Juventus",            rflag:"🇮🇹",  score:"4–1",        venue:"Cardiff",       fact:"Real odbranio trofej! Ronaldo 2 gola. Zidane — prvi koji je odbranio UCL kao menadžer."},
+  {s:"2017/18", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Liverpool",           rflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",  score:"3–1",        venue:"Kijev",         fact:"Treći uzastopni! Ronaldo 2 gola. Karius katastrofalne greške. Bale volej iz vazduha.", highlight:true},
+  {s:"2018/19", winner:"Liverpool",           wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Tottenham",          rflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",  score:"2–0",        venue:"Madrid",        fact:"Englesko finale. Salah penal, Origi potvrdio. Klopp napokon uzeo UCL."},
+  {s:"2019/20", winner:"Bayern Munich",       wflag:"🇩🇪",wc:"Nemačka",  runner:"Paris Saint-Germain", rflag:"🇫🇷",  score:"1–0",        venue:"Lisabon",       fact:"Sve u Lisabonu zbog COVID-19. Kingsley Koman jedini gol — vs. svog bivšeg kluba!"},
+  {s:"2020/21", winner:"Chelsea",             wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Man. City",          rflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",  score:"1–0",        venue:"Porto",         fact:"Englesko finale u Portugalu. Hajverd gol. Gvardiola bez UCL trofeja."},
+  {s:"2021/22", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Liverpool",           rflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",  score:"1–0",        venue:"Pariz",         fact:"Real opet! Vinicius Jr. gol. Kortua legendarno poluvreme vs. Man. City u četvrtfinalu."},
+  {s:"2022/23", winner:"Man. City",           wflag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",wc:"Engleska", runner:"Inter Milan",        rflag:"🇮🇹",  score:"1–0",        venue:"Istanbul",      fact:"Gvardiola napokon UCL sa Sitijem! Rodri gol. Treble sezona. Haaland rekorder."},
+  {s:"2023/24", winner:"Real Madrid",         wflag:"🇪🇸",wc:"Španija",  runner:"Borussia Dortmund",  rflag:"🇩🇪",  score:"2–0",        venue:"London",        fact:"15. trofej Reala! Karvajal i Vinicius Jr. Real dominantan u nokaut fazi.", highlight:true},
+];
+
+var state = { country: "all", search: "" };
+
+function getItems() {
+  var items = DATA.slice();
+  if (state.country !== "all") items = items.filter(function(d){ return d.wc === state.country; });
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    items = items.filter(function(d){
+      return d.s.toLowerCase().includes(q) || d.winner.toLowerCase().includes(q) ||
+             d.runner.toLowerCase().includes(q) || (d.venue||"").toLowerCase().includes(q) || d.fact.toLowerCase().includes(q);
+    });
+  }
+  return items;
+}
+
+function render() {
+  var items = getItems();
+  document.getElementById("resultsCount").textContent = items.length + " sezona";
+
+  var html = "<table><thead><tr><th>Sezona</th><th>Pobednik</th><th>Finalista</th><th>Rezultat</th><th>Grad finala</th><th>Zanimljivost</th></tr></thead><tbody>";
+  var cards = "";
+
+  for (var i = 0; i < items.length; i++) {
+    var d = items[i];
+    var rowcls = (d.nasi ? " class=\"nasi\"" : d.highlight ? " class=\"highlight\"" : "");
+    html += "<tr" + rowcls + ">";
+    html += "<td class=\"td-season\">" + d.s + "</td>";
+    html += "<td class=\"td-winner\">" + d.wflag + " " + d.winner + "</td>";
+    html += "<td class=\"td-runner\">" + d.rflag + " " + d.runner + "</td>";
+    html += "<td class=\"td-score\">" + d.score + "</td>";
+    html += "<td class=\"td-venue\">" + d.venue + "</td>";
+    html += "<td class=\"td-fact\">" + d.fact + "</td>";
+    html += "</tr>";
+
+    var mcls = "m-card" + (d.nasi ? " nasi" : "") + (d.highlight ? " highlight" : "");
+    cards += "<div class=\"" + mcls + "\">";
+    cards += "<div class=\"m-season\">" + d.s + "</div>";
+    cards += "<div class=\"m-winner\">" + d.wflag + " " + d.winner + "</div>";
+    cards += "<div class=\"m-score\">" + d.score + "</div>";
+    cards += "<div class=\"m-runner\">Finalista: " + d.rflag + " " + d.runner + "</div>";
+    cards += "<div class=\"m-fact\">" + d.fact + "</div>";
+    cards += "</div>";
+  }
+  html += "</tbody></table>";
+  if (!items.length) { html = "<div class=\"no-results\">\u2606 Nema rezultata.</div>"; cards = ""; }
+  document.getElementById("tableWrap").innerHTML = html;
+  document.getElementById("cardList").innerHTML = cards;
+}
+
+document.getElementById("searchBox").addEventListener("input", function(){ state.search = this.value.trim(); render(); });
+document.querySelectorAll("[data-c]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.country = this.getAttribute("data-c");
+    document.querySelectorAll("[data-c]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
+render();
+</script>
+</body>
+</html>

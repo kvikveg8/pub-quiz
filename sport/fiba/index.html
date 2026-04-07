@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>FIBA takmičenja — Pub Quiz</title>
+<style>
+:root {
+  --bg: #1a0f05; --surface: #241508; --surface2: #2e1c0a; --surface3: #3a2410;
+  --gold: #c9a227; --gold2: #e8c84a;
+  --text: #f0e6d0; --text2: #b89a70;
+  --border: #3a2a12; --hover: #3a2010;
+  --nasi: #4a1a6a; --nasi-border: #9b4fc8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+header { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 16px 24px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100; }
+.header-back { color: var(--gold); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; transition: background 0.2s; }
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.controls { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label { color: var(--text2); font-size: 12px; align-self: center; text-transform: uppercase; letter-spacing: 1px; }
+.filter-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text2); padding: 8px 16px; font-family: Georgia, serif; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+
+.main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+.section-block { display: none; }
+.section-block.active { display: block; }
+
+.section-intro { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; display: flex; gap: 20px; align-items: center; }
+.intro-icon { font-size: 48px; min-width: 64px; text-align: center; }
+.intro-info h2 { font-size: 20px; color: var(--gold2); margin-bottom: 6px; }
+.intro-info p { font-size: 13px; color: var(--text); line-height: 1.6; }
+
+.stats-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.mini-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 16px; text-align: center; flex: 1; min-width: 120px; }
+.mini-stat .ms-val { font-size: 20px; color: var(--gold2); font-weight: bold; }
+.mini-stat .ms-lbl { font-size: 11px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Table */
+.table-wrap { overflow-x: auto; margin-bottom: 24px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--surface3); color: var(--gold); font-weight: normal; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--gold); white-space: nowrap; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+tr:hover td { background: var(--hover); }
+tr.highlight td { background: #1e1800; }
+tr.nasi td { border-left: 3px solid var(--nasi-border); background: rgba(74,26,106,0.15); }
+tr.nasi:hover td { background: rgba(74,26,106,0.25); }
+tr.cancelled td { color: var(--text2); font-style: italic; }
+.flag-cell { font-size: 18px; }
+.nasi-badge { background: var(--nasi); color: var(--nasi-border); font-size: 10px; padding: 2px 6px; border-radius: 3px; border: 1px solid var(--nasi-border); white-space: nowrap; }
+.gold-badge { background: #1e1800; color: var(--gold); font-size: 10px; padding: 2px 6px; border-radius: 3px; border: 1px solid var(--gold); white-space: nowrap; }
+
+/* Winners summary */
+.winners-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.winner-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; text-align: center; }
+.winner-card.top { border-color: var(--gold); background: var(--surface2); }
+.winner-card.nasi-card { border-color: var(--nasi-border); background: rgba(74,26,106,0.2); }
+.wc-flag { font-size: 28px; margin-bottom: 6px; }
+.wc-name { font-size: 13px; color: var(--gold2); font-weight: bold; margin-bottom: 3px; }
+.wc-count { font-size: 22px; color: var(--gold); font-weight: bold; }
+.wc-years { font-size: 11px; color: var(--text2); margin-top: 3px; line-height: 1.4; }
+
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; font-size: 12px; color: var(--text2); }
+.legend span { display: flex; align-items: center; gap: 6px; }
+.leg-box { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+.leg-nasi { background: rgba(74,26,106,0.4); border: 1px solid var(--nasi-border); }
+.leg-hl { background: #1e1800; border: 1px solid var(--gold); }
+
+/* Mobile cards */
+@media (max-width: 700px) {
+  table { display: none; }
+  .mob-cards { display: flex; flex-direction: column; gap: 8px; }
+}
+@media (min-width: 701px) {
+  .mob-cards { display: none; }
+}
+.mob-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.mob-card.highlight { background: #1e1800; border-color: var(--gold); }
+.mob-card.nasi { border-left: 3px solid var(--nasi-border); background: rgba(74,26,106,0.2); }
+.mob-year { font-size: 16px; color: var(--gold2); font-weight: bold; margin-bottom: 4px; }
+.mob-winner { font-size: 14px; color: var(--text); margin-bottom: 2px; }
+.mob-detail { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+.mob-fact { font-size: 12px; color: var(--text2); border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px; font-style: italic; }
+
+@media (max-width: 600px) {
+  .section-intro { flex-direction: column; text-align: center; }
+  .stats-row { gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../" class="header-back">← Nazad</a>
+  <div class="header-title">
+    <h1>🏀 FIBA TAKMIČENJA</h1>
+    <p>Svetsko košarkaško prvenastvo · EuroBasket · Jugoslovenske legende</p>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="filter-group" id="secFilter">
+    <span class="filter-label">Takmičenje:</span>
+    <button class="filter-btn active" data-sec="svetsko">🌍 Svetsko (1950–2023)</button>
+    <button class="filter-btn" data-sec="eurobasket">🇪🇺 EuroBasket (1935–2022)</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ============ SVETSKO KOŠARKAŠKO ============ -->
+<div class="section-block active" id="blk-svetsko">
+
+  <div class="section-intro">
+    <div class="intro-icon">🌍🏆</div>
+    <div class="intro-info">
+      <h2>FIBA Svetsko košarkaško prvenstvo</h2>
+      <p>Organizuje se svake 4 godine od 1950. (od 2019. svake 4 god. — prethodno svake 4). SAD dominiraju sa NBA zvezdama od 1994. ("Dream Team" era). Pre toga, <strong>Jugoslavija je bila supersila</strong> — 3× svetski prvak (1970, 1978, 1990), višestruki finalista. Srbija nastavlja nasleđe.</p>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="mini-stat"><div class="ms-val">19</div><div class="ms-lbl">turnira (1950–2023)</div></div>
+    <div class="mini-stat"><div class="ms-val">6×</div><div class="ms-lbl">SAD — rekorder</div></div>
+    <div class="mini-stat"><div class="ms-val">3×</div><div class="ms-lbl">Jugoslavija — prvak</div></div>
+    <div class="mini-stat"><div class="ms-val">1×</div><div class="ms-lbl">Srbija — srebro 2002, 2014</div></div>
+  </div>
+
+  <div class="section-title" style="font-size:14px;color:var(--gold);letter-spacing:1px;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">🏅 POBEDNICI PO BROJU TITULA</div>
+  <div class="winners-grid">
+    <div class="winner-card top"><div class="wc-flag">🇺🇸</div><div class="wc-name">SAD</div><div class="wc-count">6×</div><div class="wc-years">1954, 1986, 1994, 1998, 2010, 2014</div></div>
+    <div class="winner-card nasi-card"><div class="wc-flag">🇾🇺</div><div class="wc-name">Jugoslavija</div><div class="wc-count">3×</div><div class="wc-years">1970, 1978, 1990</div></div>
+    <div class="winner-card"><div class="wc-flag">🇧🇷</div><div class="wc-name">Brazil</div><div class="wc-count">2×</div><div class="wc-years">1959, 1963</div></div>
+    <div class="winner-card"><div class="wc-flag">🇷🇺</div><div class="wc-name">SSSR/Rusija</div><div class="wc-count">2×</div><div class="wc-years">1967, 1974</div></div>
+    <div class="winner-card"><div class="wc-flag">🇦🇷</div><div class="wc-name">Argentina</div><div class="wc-count">1×</div><div class="wc-years">2002</div></div>
+    <div class="winner-card"><div class="wc-flag">🇩🇪</div><div class="wc-name">Nemačka</div><div class="wc-count">1×</div><div class="wc-years">2023</div></div>
+    <div class="winner-card"><div class="wc-flag">🇪🇸</div><div class="wc-name">Španija</div><div class="wc-count">1×</div><div class="wc-years">2006, 2019</div></div>
+    <div class="winner-card"><div class="wc-flag">🇷🇸</div><div class="wc-name">Srbija</div><div class="wc-count">—</div><div class="wc-years">Srebro 2002*, 2014</div></div>
+  </div>
+
+  <div class="legend">
+    <span><div class="leg-box leg-nasi"></div> Naši (Jugoslavija/Srbija)</span>
+    <span><div class="leg-box leg-hl"></div> Ključni turniri</span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Godina</th><th>Domaćin</th><th>Pobednik</th><th></th><th>Finalista</th><th></th><th>Rezultat</th><th>Zanimljivost</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1950</td><td>🇦🇷 Argentina</td><td>Argentina</td><td class="flag-cell">🇦🇷</td><td>SAD</td><td class="flag-cell">🇺🇸</td><td>—</td><td>Prvi svetski kup košarke; SAD nisu učestvovale!</td></tr>
+        <tr><td>1954</td><td>🇧🇷 Brazil</td><td>SAD</td><td class="flag-cell">🇺🇸</td><td>Brazil</td><td class="flag-cell">🇧🇷</td><td>—</td><td>Prva američka titula — amaterska selekcija</td></tr>
+        <tr><td>1959</td><td>🇨🇱 Čile</td><td>Brazil</td><td class="flag-cell">🇧🇷</td><td>SAD</td><td class="flag-cell">🇺🇸</td><td>—</td><td>Brazil postaje sila svetske košarke</td></tr>
+        <tr><td>1963</td><td>🇧🇷 Brazil</td><td>Brazil</td><td class="flag-cell">🇧🇷</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>—</td><td>Jug. srebro — početak jugoslovenske ere</td></tr>
+        <tr><td>1967</td><td>🇺🇾 Urugvaj</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>—</td><td>Jugoslav. ponovo srebro — 2 uzastopna</td></tr>
+        <tr class="nasi highlight"><td>1970</td><td>🇾🇺 Jugoslavija</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>Brazil</td><td class="flag-cell">🇧🇷</td><td>—</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> PRVO SVETSKO ZLATO! Domaćin i prvak!</td></tr>
+        <tr><td>1974</td><td>🇵🇷 Porto Riko</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>—</td><td>Jug. treće uzastopno srebro</td></tr>
+        <tr><td>1978</td><td>🇵🇭 Filipini</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>—</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Drugo jugoslav. zlato — Kićanović, Dalipagić</td></tr>
+        <tr><td>1982</td><td>🇨🇴 Kolumbija</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>SAD</td><td class="flag-cell">🇺🇸</td><td>—</td><td>Poslednja SSSR titula</td></tr>
+        <tr class="highlight"><td>1986</td><td>🇪🇸 Španija</td><td>SAD</td><td class="flag-cell">🇺🇸</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>—</td><td>SAD počinju dominaciju — college zvezde</td></tr>
+        <tr class="nasi highlight"><td>1990</td><td>🇦🇷 Argentina</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>—</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> TREĆE ZLATO! Petrović, Divac, Kukoč, Đorđević!</td></tr>
+        <tr class="highlight"><td>1994</td><td>🇨🇦 Kanada</td><td>SAD</td><td class="flag-cell">🇺🇸</td><td>Rusija</td><td class="flag-cell">🇷🇺</td><td>—</td><td>Dream Team II — Shaq, Ewing, Stockton, Pippen</td></tr>
+        <tr><td>1998</td><td>🇬🇷 Grčka</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>Rusija</td><td class="flag-cell">🇷🇺</td><td>—</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> SAD bojkot (NBA lockout) — Jug. uzima zlato!</td></tr>
+        <tr class="nasi highlight"><td>2002</td><td>🇺🇸 SAD</td><td>Argentina</td><td class="flag-cell">🇦🇷</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>84:77</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Srbija finale! Argentina šok pobeda nad SAD!</td></tr>
+        <tr class="highlight"><td>2006</td><td>🇯🇵 Japan</td><td>Španija</td><td class="flag-cell">🇪🇸</td><td>Grčka</td><td class="flag-cell">🇬🇷</td><td>70:47</td><td>Španija dominira — Gasol, Navarro, Reyes. SAD brončani.</td></tr>
+        <tr><td>2010</td><td>🇬🇷 Turska</td><td>SAD</td><td class="flag-cell">🇺🇸</td><td>Turska</td><td class="flag-cell">🇹🇷</td><td>81:64</td><td>Durant MVP — nova generacija NBA zvezdama</td></tr>
+        <tr class="nasi highlight"><td>2014</td><td>🇪🇸 Španija</td><td>SAD</td><td class="flag-cell">🇺🇸</td><td>Srbija</td><td class="flag-cell">🇷🇸</td><td>129:92</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Srbija finale! Jokić debituje — počinje nova era!</td></tr>
+        <tr><td>2019</td><td>🇨🇳 Kina</td><td>Španija</td><td class="flag-cell">🇪🇸</td><td>Argentina</td><td class="flag-cell">🇦🇷</td><td>95:75</td><td>SAD eliminisane u četvrtfinalu! Španija majstori</td></tr>
+        <tr class="nasi"><td>2023</td><td>🇵🇭🇯🇵🇮🇩 Azija</td><td>Nemačka</td><td class="flag-cell">🇩🇪</td><td>Srbija</td><td class="flag-cell">🇷🇸</td><td>83:77</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> <span class="gold-badge">JOKIĆ!</span> Srbija finale — Nikola Jokić MVP turnira!</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile cards -->
+  <div class="mob-cards">
+    <div class="mob-card nasi highlight"><div class="mob-year">🏆 1970 — Beograd</div><div class="mob-winner">🇾🇺 Jugoslavija</div><div class="mob-detail">Finalista: 🇧🇷 Brazil</div><div class="mob-fact">PRVO SVETSKO ZLATO! Domaćin i prvak!</div></div>
+    <div class="mob-card nasi"><div class="mob-year">🥇 1978 — Filipini</div><div class="mob-winner">🇾🇺 Jugoslavija</div><div class="mob-detail">Finalista: 🇷🇺 SSSR</div><div class="mob-fact">Drugo jugoslav. zlato — Kićanović, Dalipagić</div></div>
+    <div class="mob-card nasi highlight"><div class="mob-year">🥇 1990 — Argentina</div><div class="mob-winner">🇾🇺 Jugoslavija</div><div class="mob-detail">Finalista: 🇷🇺 SSSR</div><div class="mob-fact">TREĆE ZLATO! Petrović, Divac, Kukoč, Đorđević!</div></div>
+    <div class="mob-card highlight"><div class="mob-year">🏆 1994 — Kanada</div><div class="mob-winner">🇺🇸 SAD</div><div class="mob-detail">Finalista: 🇷🇺 Rusija</div><div class="mob-fact">Dream Team II — Shaq, Ewing, Stockton, Pippen</div></div>
+    <div class="mob-card nasi"><div class="mob-year">🥈 2002 — SAD</div><div class="mob-winner">🇦🇷 Argentina (pobednik)</div><div class="mob-detail">🇾🇺 Jugoslavija: srebro · 84:77</div><div class="mob-fact">Srbija finale! Argentina šok pobeda nad SAD!</div></div>
+    <div class="mob-card nasi highlight"><div class="mob-year">🥈 2014 — Španija</div><div class="mob-winner">🇺🇸 SAD (pobednik)</div><div class="mob-detail">🇷🇸 Srbija: srebro · 129:92</div><div class="mob-fact">Jokić debituje — počinje nova era srpske košarke!</div></div>
+    <div class="mob-card nasi"><div class="mob-year">🥈 2023 — Azija</div><div class="mob-winner">🇩🇪 Nemačka (pobednik)</div><div class="mob-detail">🇷🇸 Srbija: srebro · 83:77</div><div class="mob-fact">Nikola Jokić — MVP turnira!</div></div>
+  </div>
+
+</div><!-- blk-svetsko -->
+
+<!-- ============ EUROBASKET ============ -->
+<div class="section-block" id="blk-eurobasket">
+
+  <div class="section-intro">
+    <div class="intro-icon">🇪🇺🏆</div>
+    <div class="intro-info">
+      <h2>EuroBasket — Evropsko košarkaško prvenstvo</h2>
+      <p>Organizuje se svake 2 godine (od 2017). Najstarije kontinentalno košarkaško takmičenje na svetu — od 1935. <strong>Jugoslavija je apsolutni rekorder sa 14 titula!</strong> SSSR 14, Španija 4, Litvanija 3. Srbija nastavlja tradiciju. Petrović, Divac, Kukoč — legende Eurobasketa.</p>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="mini-stat"><div class="ms-val">40+</div><div class="ms-lbl">turnira od 1935.</div></div>
+    <div class="mini-stat"><div class="ms-val">14×</div><div class="ms-lbl">Jugoslavija — rekorder</div></div>
+    <div class="mini-stat"><div class="ms-val">14×</div><div class="ms-lbl">SSSR — rekorder</div></div>
+    <div class="mini-stat"><div class="ms-val">4×</div><div class="ms-lbl">Španija — moderna sila</div></div>
+  </div>
+
+  <div class="section-title" style="font-size:14px;color:var(--gold);letter-spacing:1px;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">🏅 POBEDNICI PO BROJU TITULA</div>
+  <div class="winners-grid">
+    <div class="winner-card nasi-card"><div class="wc-flag">🇾🇺</div><div class="wc-name">Jugoslavija</div><div class="wc-count">14×</div><div class="wc-years">1963, 75, 77, 81, 83, 89, 91, 95, 97, 99, 01... (Srbija: 1995–2001)</div></div>
+    <div class="winner-card top"><div class="wc-flag">🇷🇺</div><div class="wc-name">SSSR/Rusija</div><div class="wc-count">14×</div><div class="wc-years">1951–1985 (dominacija hladnog rata)</div></div>
+    <div class="winner-card"><div class="wc-flag">🇪🇸</div><div class="wc-name">Španija</div><div class="wc-count">4×</div><div class="wc-years">2009, 2011, 2015, 2022</div></div>
+    <div class="winner-card"><div class="wc-flag">🇱🇹</div><div class="wc-name">Litvanija</div><div class="wc-count">3×</div><div class="wc-years">2003, 2011... Sabonis era</div></div>
+    <div class="winner-card"><div class="wc-flag">🇬🇷</div><div class="wc-name">Grčka</div><div class="wc-count">2×</div><div class="wc-years">1987, 2005 · Galis, Spanoulis</div></div>
+    <div class="winner-card"><div class="wc-flag">🇫🇷</div><div class="wc-name">Francuska</div><div class="wc-count">1×</div><div class="wc-years">2013 · Tony Parker MVP</div></div>
+    <div class="winner-card"><div class="wc-flag">🇩🇪</div><div class="wc-name">Nemačka</div><div class="wc-count">1×</div><div class="wc-years">1993 · Reunification era</div></div>
+    <div class="winner-card nasi-card"><div class="wc-flag">🇷🇸</div><div class="wc-name">Srbija</div><div class="wc-count">3×</div><div class="wc-years">2017, 2022 finale · moderna era</div></div>
+  </div>
+
+  <div class="legend">
+    <span><div class="leg-box leg-nasi"></div> Naši (Jugoslavija/Srbija)</span>
+    <span><div class="leg-box leg-hl"></div> Ključni turniri</span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Godina</th><th>Domaćin</th><th>Pobednik</th><th></th><th>Finalista</th><th></th><th>Zanimljivost</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1935</td><td>🇨🇭 Švajcarska</td><td>Letonija</td><td class="flag-cell">🇱🇻</td><td>Španija</td><td class="flag-cell">🇪🇸</td><td>Prvo Evropsko — 10 timova, Letonija senzacija</td></tr>
+        <tr><td>1937</td><td>🇱🇹 Litvanija</td><td>Litvanija</td><td class="flag-cell">🇱🇹</td><td>Italija</td><td class="flag-cell">🇮🇹</td><td>Domaćin i prvak</td></tr>
+        <tr><td>1939</td><td>🇱🇻 Letonija</td><td>Litvanija</td><td class="flag-cell">🇱🇹</td><td>Letonija</td><td class="flag-cell">🇱🇻</td><td>Pred WWII — balkanske države ne učestvuju</td></tr>
+        <tr><td>1946</td><td>🇨🇿 Čehoslovačka</td><td>Čehoslovačka</td><td class="flag-cell">🇨🇿</td><td>Italija</td><td class="flag-cell">🇮🇹</td><td>Posle pauze zbog rata</td></tr>
+        <tr><td>1947</td><td>🇨🇿 Čehoslovačka</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Čehoslovačka</td><td class="flag-cell">🇨🇿</td><td>Debi SSSR-a — odmah prvak! Počinje dominacija.</td></tr>
+        <tr><td>1949</td><td>🇪🇬 Egipat</td><td>Egipat</td><td class="flag-cell">🇪🇬</td><td>Francuska</td><td class="flag-cell">🇫🇷</td><td>Jedini put van Evrope — EuroBasket u Africi</td></tr>
+        <tr><td>1951</td><td>🇫🇷 Francuska</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Čehoslovačka</td><td class="flag-cell">🇨🇿</td><td>SSSR počinje eru dominacije</td></tr>
+        <tr><td>1953</td><td>🇧🇷 Brazil</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Brazil</td><td class="flag-cell">🇧🇷</td><td>Van Evrope ponovo — vanredna okolnost</td></tr>
+        <tr><td>1955</td><td>🇭🇺 Mađarska</td><td>Mađarska</td><td class="flag-cell">🇭🇺</td><td>Čehoslovačka</td><td class="flag-cell">🇨🇿</td><td>Jedina mađarska titula</td></tr>
+        <tr><td>1957</td><td>🇧🇺 Bugarska</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Bugarska</td><td class="flag-cell">🇧🇬</td><td>SSSR treća titula</td></tr>
+        <tr><td>1959</td><td>🇮🇸 Island</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Čehoslovačka</td><td class="flag-cell">🇨🇿</td><td>—</td></tr>
+        <tr><td>1961</td><td>🇷🇸 Jugoslavija</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>Jug. domaćin, srebro — raste jugosloven. košarka</td></tr>
+        <tr class="nasi highlight"><td>1963</td><td>🇷🇸 Jugoslavija</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> PRVO EVROPSKO ZLATO! Beograd domaćin!</td></tr>
+        <tr><td>1965</td><td>🇸🇴 SSSR</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>Jug. srebro</td></tr>
+        <tr><td>1967</td><td>🇫🇮 Finska</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>—</td></tr>
+        <tr><td>1969</td><td>🇮🇹 Italija</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>Jug. bronca</td></tr>
+        <tr><td>1971</td><td>🇩🇪 Nemačka</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>—</td></tr>
+        <tr><td>1973</td><td>🇪🇸 Španija</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Jugoslav. povratak na vrh</td></tr>
+        <tr class="nasi"><td>1975</td><td>🇷🇸 Jugoslavija</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Domaćin i prvak ponovo!</td></tr>
+        <tr class="nasi"><td>1977</td><td>🇧🇪 Belgija</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Treće uzastopno — Jug. era počinje</td></tr>
+        <tr><td>1979</td><td>🇮🇹 Italija</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Italija</td><td class="flag-cell">🇮🇹</td><td>SSSR povratak</td></tr>
+        <tr class="nasi"><td>1981</td><td>🇨🇿 Čehoslovačka</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Dalipagić, Kićanović — zlatna generacija</td></tr>
+        <tr class="nasi"><td>1983</td><td>🇫🇷 Francuska</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Peto evropsko zlato!</td></tr>
+        <tr><td>1985</td><td>🇩🇪 Nemačka</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Čehoslovačka</td><td class="flag-cell">🇨🇿</td><td>Poslednja SSSR titula</td></tr>
+        <tr><td>1987</td><td>🇬🇷 Grčka</td><td>Grčka</td><td class="flag-cell">🇬🇷</td><td>SSSR</td><td class="flag-cell">🇷🇺</td><td>Galis era — Grčka senzacija domaćina!</td></tr>
+        <tr class="nasi highlight"><td>1989</td><td>🇷🇸 Jugoslavija</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>Grčka</td><td class="flag-cell">🇬🇷</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Petrović, Divac, Kukoč — zlatna generacija!</td></tr>
+        <tr class="nasi highlight"><td>1991</td><td>🇮🇹 Italija</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>Italija</td><td class="flag-cell">🇮🇹</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Poslednji nastup Jug. — raspad države. Zlatni završetak!</td></tr>
+        <tr><td>1993</td><td>🇩🇪 Nemačka</td><td>Nemačka</td><td class="flag-cell">🇩🇪</td><td>Rusija</td><td class="flag-cell">🇷🇺</td><td>Reunifikacija Nemačke — titula za proslavu</td></tr>
+        <tr class="nasi highlight"><td>1995</td><td>🇬🇷 Grčka</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>Litvanija</td><td class="flag-cell">🇱🇹</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Pod embargom UN — Srbija/Crna Gora nastupa kao "Jug."</td></tr>
+        <tr class="nasi"><td>1997</td><td>🇪🇸 Španija</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>Rusija</td><td class="flag-cell">🇷🇺</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Dejan Bodiroga MVP</td></tr>
+        <tr class="nasi"><td>1999</td><td>🇫🇷 Francuska</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>Italija</td><td class="flag-cell">🇮🇹</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Đorđević, Bodiroga, Rebrača, Jaric — sjajni tim</td></tr>
+        <tr class="nasi"><td>2001</td><td>🇹🇷 Turska</td><td>Jugoslavija</td><td class="flag-cell">🇾🇺</td><td>Turska</td><td class="flag-cell">🇹🇷</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Poslednja titula kao Jug. — 4 uzastopne!</td></tr>
+        <tr><td>2003</td><td>🇸🇪 Švedska</td><td>Litvanija</td><td class="flag-cell">🇱🇹</td><td>Španija</td><td class="flag-cell">🇪🇸</td><td>Srbija i CG sada — bronca. Litvanija senzacija!</td></tr>
+        <tr><td>2005</td><td>🇷🇸 Srbija</td><td>Grčka</td><td class="flag-cell">🇬🇷</td><td>Nemačka</td><td class="flag-cell">🇩🇪</td><td>Spanoulis — Srbija domaćin, bronca</td></tr>
+        <tr><td>2007</td><td>🇪🇸 Španija</td><td>Rusija</td><td class="flag-cell">🇷🇺</td><td>Španija</td><td class="flag-cell">🇪🇸</td><td>Kirilenko MVP</td></tr>
+        <tr class="highlight"><td>2009</td><td>🇵🇱 Poljska</td><td>Španija</td><td class="flag-cell">🇪🇸</td><td>Srbija</td><td class="flag-cell">🇷🇸</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Srbija finale! Španija (Gasol, Navarro) pobednik</td></tr>
+        <tr><td>2011</td><td>🇱🇹 Litvanija</td><td>Španija</td><td class="flag-cell">🇪🇸</td><td>Francuska</td><td class="flag-cell">🇫🇷</td><td>Španija 2× uzastopno</td></tr>
+        <tr><td>2013</td><td>🇸🇮 Slovenija</td><td>Francuska</td><td class="flag-cell">🇫🇷</td><td>Litvanija</td><td class="flag-cell">🇱🇹</td><td>Tony Parker MVP — karijerno dostignuće</td></tr>
+        <tr><td>2015</td><td>🇫🇷 Francuska</td><td>Španija</td><td class="flag-cell">🇪🇸</td><td>Litvanija</td><td class="flag-cell">🇱🇹</td><td>Španija treća titula</td></tr>
+        <tr class="nasi highlight"><td>2017</td><td>🇮🇱 Izrael/Fin.</td><td>Slovenija</td><td class="flag-cell">🇸🇮</td><td>Srbija</td><td class="flag-cell">🇷🇸</td><td><span class="nasi-badge">🇷🇸 NAŠI</span> Srbija finale — Dončić (Slov.) senzacija; Bogdan MVP</td></tr>
+        <tr class="nasi"><td>2022</td><td>🇩🇪🇨🇿 Više zem.</td><td>Španija</td><td class="flag-cell">🇪🇸</td><td>Francuska</td><td class="flag-cell">🇫🇷</td><td>Srbija bronca — Jokić, Bogdanović, Micić sjajni</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile cards highlights -->
+  <div class="mob-cards">
+    <div class="mob-card nasi highlight"><div class="mob-year">🥇 1963 — Beograd</div><div class="mob-winner">🇾🇺 Jugoslavija</div><div class="mob-detail">Finalista: 🇷🇺 SSSR</div><div class="mob-fact">PRVO EVROPSKO ZLATO! Beograd domaćin!</div></div>
+    <div class="mob-card nasi"><div class="mob-year">🥇 1975–1977–1981–1983</div><div class="mob-winner">🇾🇺 Jugoslavija (4 titule)</div><div class="mob-detail">Zlatna generacija — Dalipagić, Kićanović</div><div class="mob-fact">Dominacija Evrope kroz 70-te i 80-te</div></div>
+    <div class="mob-card nasi highlight"><div class="mob-year">🥇 1989 — Beograd</div><div class="mob-winner">🇾🇺 Jugoslavija</div><div class="mob-detail">Finalista: 🇬🇷 Grčka</div><div class="mob-fact">Petrović, Divac, Kukoč — zlatna generacija!</div></div>
+    <div class="mob-card nasi highlight"><div class="mob-year">🥇 1991 — Italija</div><div class="mob-winner">🇾🇺 Jugoslavija</div><div class="mob-detail">Finalista: 🇮🇹 Italija</div><div class="mob-fact">Poslednji nastup Jug. — raspad države. Zlatni završetak!</div></div>
+    <div class="mob-card nasi"><div class="mob-year">🥇 1995–1997–1999–2001</div><div class="mob-winner">🇾🇺 Jug. / Srbija (4 titule)</div><div class="mob-detail">Pod embargom, pa kao Srbija i Crna Gora</div><div class="mob-fact">4 uzastopne titule — nezapamćena dominacija!</div></div>
+    <div class="mob-card nasi highlight"><div class="mob-year">🥈 2009 — Poljska</div><div class="mob-winner">🇷🇸 Srbija (srebro)</div><div class="mob-detail">Pobednik: 🇪🇸 Španija</div><div class="mob-fact">Srbija finale — Španija (Gasol, Navarro) pobednik</div></div>
+    <div class="mob-card nasi highlight"><div class="mob-year">🥈 2017 — Izrael</div><div class="mob-winner">🇷🇸 Srbija (srebro)</div><div class="mob-detail">Pobednik: 🇸🇮 Slovenija (Dončić)</div><div class="mob-fact">Bogdan Bogdanović — MVP turnira!</div></div>
+  </div>
+
+</div><!-- blk-eurobasket -->
+
+</div><!-- main -->
+
+<script>
+document.getElementById('secFilter').addEventListener('click', function(e) {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  const sec = btn.dataset.sec;
+
+  this.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('.section-block').forEach(b => {
+    b.classList.toggle('active', b.id === 'blk-' + sec);
+  });
+});
+</script>
+</body>
+</html>

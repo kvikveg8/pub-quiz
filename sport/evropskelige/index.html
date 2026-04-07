@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Evropske fudbalske lige — Pub Quiz</title>
+<style>
+:root {
+  --bg: #1a0f05; --surface: #241508; --surface2: #2e1c0a; --surface3: #3a2410;
+  --gold: #c9a227; --gold2: #e8c84a;
+  --text: #f0e6d0; --text2: #b89a70;
+  --border: #3a2a12; --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+header { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 16px 24px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100; }
+.header-back { color: var(--gold); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; transition: background 0.2s; }
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+/* Tab navigation */
+.tab-nav { background: var(--surface); border-bottom: 2px solid var(--border); padding: 0 24px; display: flex; gap: 0; overflow-x: auto; }
+.tab-btn { background: none; border: none; border-bottom: 3px solid transparent; color: var(--text2); padding: 14px 18px; font-family: Georgia, serif; font-size: 14px; cursor: pointer; white-space: nowrap; transition: all 0.2s; margin-bottom: -2px; }
+.tab-btn:hover { color: var(--gold); }
+.tab-btn.active { color: var(--gold2); border-bottom-color: var(--gold); font-weight: bold; }
+
+.main { padding: 24px; max-width: 1000px; margin: 0 auto; }
+.league-section { display: none; }
+.league-section.active { display: block; }
+
+/* League hero */
+.league-hero { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 24px; }
+.league-badge { font-size: 56px; text-align: center; min-width: 80px; }
+.league-info h2 { font-size: 26px; color: var(--gold2); letter-spacing: 1px; margin-bottom: 6px; }
+.league-info .league-founded { font-size: 13px; color: var(--text2); margin-bottom: 8px; }
+.league-info .league-desc { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+/* Stat cards */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+.stat-card .stat-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.stat-card .stat-value { font-size: 22px; color: var(--gold2); font-weight: bold; margin-bottom: 4px; }
+.stat-card .stat-sub { font-size: 12px; color: var(--text2); }
+
+/* Record holder */
+.record-card { background: var(--surface2); border: 1px solid var(--gold); border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: flex-start; }
+.record-flag { font-size: 36px; min-width: 50px; text-align: center; margin-top: 2px; }
+.record-info h3 { font-size: 16px; color: var(--gold2); margin-bottom: 4px; }
+.record-info p { font-size: 13px; color: var(--text); line-height: 1.5; }
+.record-badge { background: var(--gold); color: var(--bg); font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 3px; text-transform: uppercase; margin-bottom: 6px; display: inline-block; }
+
+/* Clubs grid */
+.section-title { font-size: 16px; color: var(--gold); letter-spacing: 1px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.clubs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.club-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; }
+.club-card.notable { border-left: 3px solid var(--gold); }
+.club-icon { font-size: 28px; min-width: 40px; text-align: center; }
+.club-info .club-name { font-size: 14px; color: var(--gold2); font-weight: bold; margin-bottom: 3px; }
+.club-info .club-detail { font-size: 12px; color: var(--text2); line-height: 1.4; }
+
+/* Facts */
+.facts-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.fact-item { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; color: var(--text); line-height: 1.5; }
+.fact-item::before { content: "⚡ "; }
+.fact-item.gold::before { content: "🏆 "; }
+.fact-item.star::before { content: "⭐ "; }
+
+/* Champions table */
+.champ-table-wrap { overflow-x: auto; margin-bottom: 24px; }
+.champ-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.champ-table th { background: var(--surface3); color: var(--gold); font-weight: normal; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--gold); white-space: nowrap; }
+.champ-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+.champ-table tr:hover td { background: var(--hover); }
+.champ-table tr.highlight td { background: #1e1800; }
+.champ-table .rank-1 { color: #ffd700; font-weight: bold; }
+.champ-table .rank-2 { color: #c0c0c0; }
+.champ-table .rank-3 { color: #cd7f32; }
+
+@media (max-width: 600px) {
+  .league-hero { flex-direction: column; text-align: center; }
+  .league-badge { font-size: 48px; }
+  .league-info h2 { font-size: 20px; }
+  .tab-btn { padding: 12px 12px; font-size: 13px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../" class="header-back">← Nazad</a>
+  <div class="header-title">
+    <h1>⚽ EVROPSKE FUDBALSKE LIGE</h1>
+    <p>5 najvećih liga — istorija, rekordi, legende</p>
+  </div>
+</header>
+
+<nav class="tab-nav" id="tabNav">
+  <button class="tab-btn active" data-tab="pl">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
+  <button class="tab-btn" data-tab="laliga">🇪🇸 La Liga</button>
+  <button class="tab-btn" data-tab="bundesliga">🇩🇪 Bundesliga</button>
+  <button class="tab-btn" data-tab="seriea">🇮🇹 Serie A</button>
+  <button class="tab-btn" data-tab="ligue1">🇫🇷 Ligue 1</button>
+</nav>
+
+<div class="main">
+
+<!-- ===== PREMIER LEAGUE ===== -->
+<section class="league-section active" id="sec-pl">
+  <div class="league-hero">
+    <div class="league-badge">🏴󠁧󠁢󠁥󠁮󠁧󠁿</div>
+    <div class="league-info">
+      <h2>Premier League</h2>
+      <div class="league-founded">Osnovana 1992 (Football League od 1888) · Engleska · 20 klubova</div>
+      <div class="league-desc">Najpraćenija liga na svetu sa publikom u 188 zemalja. Nastala odvajanjem od Football League 1992. godine kada su 22 tima formirala Premier League radi direktnih TV ugovora. Poznata po neverovatnom tempu igre, fizičkoj snazi i globalnim zvezdama.</div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Sezona</div><div class="stat-value">1888</div><div class="stat-sub">prva Football League sezona</div></div>
+    <div class="stat-card"><div class="stat-label">Premier League od</div><div class="stat-value">1992</div><div class="stat-sub">22 osnivačka kluba</div></div>
+    <div class="stat-card"><div class="stat-label">Rekorder titula (PL)</div><div class="stat-value">14</div><div class="stat-sub">Manchester United (PL era)</div></div>
+    <div class="stat-card"><div class="stat-label">Gol rekord (sezona)</div><div class="stat-value">34</div><div class="stat-sub">Andrew Cole & Alan Shearer</div></div>
+  </div>
+
+  <div class="section-title">🏆 REKORDER UKUPNO — Manchester United</div>
+  <div class="record-card">
+    <div class="record-flag">😈</div>
+    <div class="record-info">
+      <div class="record-badge">Rekorder titula</div>
+      <h3>Manchester United — 20 titula prvaka Engleske</h3>
+      <p>Od toga 13 u Premier League eri (1993–2013), sve pod menadžerom Sir Alexom Fergusonom. United je dominirao 90-ima i 2000-ima, osvajajući tri titule zaredom dva puta. Nakon odlaska Fergusona 2013, Manchester City je preuzeo primat.</p>
+    </div>
+  </div>
+
+  <div class="section-title">⚽ ČUVENI KLUBOVI</div>
+  <div class="clubs-grid">
+    <div class="club-card notable">
+      <div class="club-icon">😈</div>
+      <div class="club-info"><div class="club-name">Manchester United</div><div class="club-detail">20 titula ukupno · Treble 1999 · Sir Alex Ferguson 27 god.</div></div>
+    </div>
+    <div class="club-card notable">
+      <div class="club-icon">🔵</div>
+      <div class="club-info"><div class="club-name">Manchester City</div><div class="club-detail">10 PL titula · Treble 2023 · Guardiola era · "115 charges"</div></div>
+    </div>
+    <div class="club-card notable">
+      <div class="club-icon">🔴</div>
+      <div class="club-info"><div class="club-name">Liverpool FC</div><div class="club-detail">19 titula ukupno · 6 Liga šampiona · Anfield atmosfera</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🔵</div>
+      <div class="club-info"><div class="club-name">Chelsea FC</div><div class="club-detail">6 PL titula · Roman Abramovič era 2003–2022 · 2× LŠ</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🔴</div>
+      <div class="club-info"><div class="club-name">Arsenal FC</div><div class="club-detail">"Invincibles" 2003/04 — cela sezona bez poraza · 49 utakmica</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🕊️</div>
+      <div class="club-info"><div class="club-name">Tottenham Hotspur</div><div class="club-detail">Bez PL titule · 2× uzastopnih LŠ finala nije dostiglo</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🦁</div>
+      <div class="club-info"><div class="club-name">Leicester City</div><div class="club-detail">5000:1 favoriti 2015/16 — šokantna titula prvaka!</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🦊</div>
+      <div class="club-info"><div class="club-name">Blackburn Rovers</div><div class="club-detail">Titula 1994/95 uz Jack Walkera i Alana Shearera</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">🥇 TOP STRELCI SVIH VREMENA (Premier League)</div>
+  <div class="champ-table-wrap">
+    <table class="champ-table">
+      <thead><tr><th>#</th><th>Igrač</th><th>Zastava</th><th>Klubovi</th><th>Golovi</th></tr></thead>
+      <tbody>
+        <tr class="highlight"><td class="rank-1">1</td><td>Alan Shearer</td><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿</td><td>Blackburn, Newcastle</td><td>260</td></tr>
+        <tr><td class="rank-2">2</td><td>Wayne Rooney</td><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿</td><td>Everton, Man Utd</td><td>208</td></tr>
+        <tr><td class="rank-3">3</td><td>Andrew Cole</td><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿</td><td>Newcastle, Man Utd...</td><td>187</td></tr>
+        <tr><td>4</td><td>Frank Lampard</td><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿</td><td>West Ham, Chelsea, Man City</td><td>177</td></tr>
+        <tr><td>5</td><td>Thierry Henry</td><td>🇫🇷</td><td>Arsenal</td><td>175</td></tr>
+        <tr><td>6</td><td>Robbie Fowler</td><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿</td><td>Liverpool, Leeds...</td><td>163</td></tr>
+        <tr><td>7</td><td>Michael Owen</td><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿</td><td>Liverpool, Real, Newcastle...</td><td>150</td></tr>
+        <tr><td>8</td><td>Sergio Agüero</td><td>🇦🇷</td><td>Manchester City</td><td>184</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">⚡ ZANIMLJIVOSTI</div>
+  <div class="facts-list">
+    <div class="fact-item gold">Arsenal "Invincibles" 2003/04 — 38 utakmica, 26 pobeda, 12 remija, 0 poraza. Rekord koji još nije oboren.</div>
+    <div class="fact-item">Manchester City postigao gol u 93:20 u finišu sezone 2011/12 (Agüero gol vs QPR) i uzeo titulu od United-a razlikom golova.</div>
+    <div class="fact-item star">Leicester City 2015/16 — klub koji je prethodne sezone skoro ispao, pobednik PL po kursu 5000:1!</div>
+    <div class="fact-item">Rekord publike 83,260 na Old Trafford. Tottenham-ov novi stadion drži rekord za klupski stadion: 62,850.</div>
+    <div class="fact-item">Erling Haaland, sezona 2022/23: 36 golova u PL — oborio rekord koji je stajao 26 godina.</div>
+    <div class="fact-item gold">Klop (Liverpool) i Guardiola (City) — rivalstvo 2010-ih smatra se jednim od najvećih menadžerskih rivalstava u istoriji fudbala.</div>
+  </div>
+</section>
+
+<!-- ===== LA LIGA ===== -->
+<section class="league-section" id="sec-laliga">
+  <div class="league-hero">
+    <div class="league-badge">🇪🇸</div>
+    <div class="league-info">
+      <h2>La Liga</h2>
+      <div class="league-founded">Osnovana 1929 · Španija · 20 klubova</div>
+      <div class="league-desc">Špansko fudbalsko prvenstvo, dom dva najveća kluba na svetu — Real Madrida i Barcelone. La Liga je producirala neke od najlepših fudbalskih momenata kroz "El Clásico" rivalstvo. Poznata po tehničkom, posesivnom fudbalu (tiki-taka) i individualnoj klasi.</div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Prva sezona</div><div class="stat-value">1929</div><div class="stat-sub">10 osnivačkih klubova</div></div>
+    <div class="stat-card"><div class="stat-label">Rekorder titula</div><div class="stat-value">36</div><div class="stat-sub">Real Madrid</div></div>
+    <div class="stat-card"><div class="stat-label">Gol rekord (sezona)</div><div class="stat-value">50</div><div class="stat-sub">Lionel Messi, 2011/12</div></div>
+    <div class="stat-card"><div class="stat-label">El Clásico</div><div class="stat-value">250+</div><div class="stat-sub">odigranih utakmica od 1929</div></div>
+  </div>
+
+  <div class="section-title">🏆 REKORDER — Real Madrid</div>
+  <div class="record-card">
+    <div class="record-flag">👑</div>
+    <div class="record-info">
+      <div class="record-badge">Rekorder titula</div>
+      <h3>Real Madrid — 36 titula La Lige</h3>
+      <p>Najpopularniji klub na svetu sa navijačima u 91 zemlji. Jedanaest puta pobednik Kupa/Lige šampiona. Galácticos era (Zidane, Ronaldo, Beckham, Figo), potom Real za Mourinhom, pa Zidaneova tripleta. Bernabéu — hram fudbala.</p>
+    </div>
+  </div>
+
+  <div class="section-title">⚽ ČUVENI KLUBOVI</div>
+  <div class="clubs-grid">
+    <div class="club-card notable">
+      <div class="club-icon">👑</div>
+      <div class="club-info"><div class="club-name">Real Madrid</div><div class="club-detail">36 La Liga · 15 Liga šampiona · Bernabéu · Los Blancos</div></div>
+    </div>
+    <div class="club-card notable">
+      <div class="club-icon">🔵🔴</div>
+      <div class="club-info"><div class="club-name">FC Barcelona</div><div class="club-detail">27 La Liga · Tiki-taka · Messi 17 god. · "Més que un club"</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🔴⚪</div>
+      <div class="club-info"><div class="club-name">Atlético Madrid</div><div class="club-detail">11 La Liga · Simeone · Enfant terrible španske scene</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🔴⚪</div>
+      <div class="club-info"><div class="club-name">Sevilla FC</div><div class="club-detail">6 puta pobednik UEFA Kupa/Evrope — rekord takmičenja</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🦇</div>
+      <div class="club-info"><div class="club-name">Valencia CF</div><div class="club-detail">6 titula · 2 Kupa pobednika · Finále LŠ 2000. i 2001.</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">⚽</div>
+      <div class="club-info"><div class="club-name">Athletic Club Bilbao</div><div class="club-detail">Samo baskijski igrači — politika od osnivanja 1898!</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">🥇 TOP STRELCI SVIH VREMENA (La Liga)</div>
+  <div class="champ-table-wrap">
+    <table class="champ-table">
+      <thead><tr><th>#</th><th>Igrač</th><th>Zastava</th><th>Klub</th><th>Golovi</th></tr></thead>
+      <tbody>
+        <tr class="highlight"><td class="rank-1">1</td><td>Lionel Messi</td><td>🇦🇷</td><td>Barcelona</td><td>474</td></tr>
+        <tr><td class="rank-2">2</td><td>Cristiano Ronaldo</td><td>🇵🇹</td><td>Real Madrid</td><td>311</td></tr>
+        <tr><td class="rank-3">3</td><td>Telmo Zarra</td><td>🇪🇸</td><td>Athletic Bilbao</td><td>251</td></tr>
+        <tr><td>4</td><td>Hugo Sánchez</td><td>🇲🇽</td><td>Real Madrid, Atlético</td><td>234</td></tr>
+        <tr><td>5</td><td>Raúl</td><td>🇪🇸</td><td>Real Madrid</td><td>228</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">⚡ ZANIMLJIVOSTI</div>
+  <div class="facts-list">
+    <div class="fact-item gold">Lionel Messi 2011/12: 50 golova u La Ligi u jednoj sezoni — svetski rekord za jedno ligaško takmičenje koji stoji do danas.</div>
+    <div class="fact-item">El Clásico je najgledanija klupska utakmica na svetu — svaki meč prati 600–650 miliona gledalaca globalno.</div>
+    <div class="fact-item star">Guardiola-Barcelona tiki-taka 2008–2012 — revolucija fudbala. Titula LŠ 2009, 2011, treble 2009.</div>
+    <div class="fact-item">Real Madrid je jedini klub koji nikad nije ispao iz La Lige od njenog osnivanja 1929. (uz Barcu i Athletic Bilbao)</div>
+    <div class="fact-item">Ronaldo je postigao gol protiv svakog kluba u La Ligi — 35 različitih protivnika.</div>
+  </div>
+</section>
+
+<!-- ===== BUNDESLIGA ===== -->
+<section class="league-section" id="sec-bundesliga">
+  <div class="league-hero">
+    <div class="league-badge">🇩🇪</div>
+    <div class="league-info">
+      <h2>Bundesliga</h2>
+      <div class="league-founded">Osnovana 1963 · Nemačka · 18 klubova</div>
+      <div class="league-desc">Nemačko fudbalsko prvenstvo poznato po najvećoj prosečnoj poseti navijača na svetu (43,000+ po utakmici), dostupnim cenama karata i organizovanim navijačima. Dominacija Bayerna Münchena — 11 uzastopnih titula 2013–2023. Liga kombinuje fizičku igru sa taktičkom disciplinom.</div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Prva sezona</div><div class="stat-value">1963</div><div class="stat-sub">Prethodno regionalne lige</div></div>
+    <div class="stat-card"><div class="stat-label">Rekorder titula</div><div class="stat-value">33</div><div class="stat-sub">Bayern München</div></div>
+    <div class="stat-card"><div class="stat-label">Prosečna poseta</div><div class="stat-value">43k</div><div class="stat-sub">#1 liga na svetu po poseti</div></div>
+    <div class="stat-card"><div class="stat-label">Gol rekord (sezona)</div><div class="stat-value">41</div><div class="stat-sub">Robert Lewandowski, 2020/21</div></div>
+  </div>
+
+  <div class="section-title">🏆 REKORDER — Bayern München</div>
+  <div class="record-card">
+    <div class="record-flag">🦁</div>
+    <div class="record-info">
+      <div class="record-badge">Rekorder titula · 11 uzastopnih</div>
+      <h3>Bayern München — 33 Bundesliga titule</h3>
+      <p>Dominantni klub nemačkog fudbala sa rekordnih 11 uzastopnih titula (2013–2023). Trofejni cabinet: 6 Kupova šampiona/LŠ, 1 svetski klupski kup (2020). Legendarni igrači: Beckenbauer, Müller, Robben, Ribéry, Lewandowski. "FC Hollywood" zbog skandala 90-ih.</p>
+    </div>
+  </div>
+
+  <div class="section-title">⚽ ČUVENI KLUBOVI</div>
+  <div class="clubs-grid">
+    <div class="club-card notable">
+      <div class="club-icon">🦁</div>
+      <div class="club-info"><div class="club-name">Bayern München</div><div class="club-detail">33 Bundesliga · 6 LŠ · 11 uzastopnih titula · Allianz Arena</div></div>
+    </div>
+    <div class="club-card notable">
+      <div class="club-icon">🟡⚫</div>
+      <div class="club-info"><div class="club-name">Borussia Dortmund</div><div class="club-detail">8 titula · Žuta zid — 81,365 navijača · Talentima bogat</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">⚫🔴</div>
+      <div class="club-info"><div class="club-name">Bayer Leverkusen</div><div class="club-detail">Titula 2023/24 — prva u istoriji! Bez poraza celu sezonu!</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">⚫🔴</div>
+      <div class="club-info"><div class="club-name">Borussia M'gladbach</div><div class="club-detail">5 titula 70-ih · rivali sa Kölnom · fudbalska škola</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🔴⚪</div>
+      <div class="club-info"><div class="club-name">RB Leipzig</div><div class="club-detail">Red Bull klub · Bundesliga 2016+ · moderna sila Nemačke</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">⚫⚪</div>
+      <div class="club-info"><div class="club-name">Hamburger SV</div><div class="club-detail">Jedini klub koji nikad nije ispao do 2018! Tada ispao.</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">🥇 TOP STRELCI SVIH VREMENA (Bundesliga)</div>
+  <div class="champ-table-wrap">
+    <table class="champ-table">
+      <thead><tr><th>#</th><th>Igrač</th><th>Zastava</th><th>Klub</th><th>Golovi</th></tr></thead>
+      <tbody>
+        <tr class="highlight"><td class="rank-1">1</td><td>Gerd Müller</td><td>🇩🇪</td><td>Bayern München</td><td>365</td></tr>
+        <tr><td class="rank-2">2</td><td>Robert Lewandowski</td><td>🇵🇱</td><td>Dortmund, Bayern</td><td>312</td></tr>
+        <tr><td class="rank-3">3</td><td>Klaus Fischer</td><td>🇩🇪</td><td>Schalke, Bochum...</td><td>268</td></tr>
+        <tr><td>4</td><td>Jupp Heynckes</td><td>🇩🇪</td><td>Gladbach, Hannover...</td><td>220</td></tr>
+        <tr><td>5</td><td>Manfred Burgsmüller</td><td>🇩🇪</td><td>Dortmund, Werder...</td><td>213</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">⚡ ZANIMLJIVOSTI</div>
+  <div class="facts-list">
+    <div class="fact-item gold">Robert Lewandowski, 2020/21: 41 gol u jednoj sezoni — oborio 49-godišnji rekord Gerda Müllera (40 golova, 1971/72)!</div>
+    <div class="fact-item">Signal Iduna Park (Dortmund) — gostujući sektor koji prima 9,000 navijača je najveći u Evropi. "Žuti zid" je fenomen.</div>
+    <div class="fact-item star">Bayer Leverkusen 2023/24: Prva titula u 119-godišnjoj istoriji kluba, uz to cela sezona bez poraza u ligi — 34/34 utakmica!</div>
+    <div class="fact-item">Bundesliga ima 50+1 pravilo: navijači moraju posedovati više od 50% glasačkih prava u klubu. Izuzeci: Leverkusen (Bayer), Leipzig (RB), Wolfsburg (VW).</div>
+    <div class="fact-item">Cene karata u Bundesligi su daleko najniže u top-5 ligama. Prosečna karta košta ~15€ (u PL prosek je ~55€).</div>
+  </div>
+</section>
+
+<!-- ===== SERIE A ===== -->
+<section class="league-section" id="sec-seriea">
+  <div class="league-hero">
+    <div class="league-badge">🇮🇹</div>
+    <div class="league-info">
+      <h2>Serie A</h2>
+      <div class="league-founded">Osnovana 1898 · Italija · 20 klubova</div>
+      <div class="league-desc">Italijansko fudbalsko prvenstvo, u 80-ima i 90-ima smatrano najboljom ligom na svetu. "Calcio" je u toj eri privukao Maradonu, Platinija, Van Bastena, Ronalda R9, Zidanea. Taktički, odbrambeni "Catenaccio" stil dao je Italiji reputaciju fudbalske velesile.</div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Prva sezona</div><div class="stat-value">1898</div><div class="stat-sub">Moderna liga od 1929.</div></div>
+    <div class="stat-card"><div class="stat-label">Rekorder titula</div><div class="stat-value">36</div><div class="stat-sub">Juventus</div></div>
+    <div class="stat-card"><div class="stat-label">Uzastopnih titula</div><div class="stat-value">9</div><div class="stat-sub">Juventus, 2012–2020</div></div>
+    <div class="stat-card"><div class="stat-label">Gol rekord</div><div class="stat-value">36</div><div class="stat-sub">Gonzalo Higuaín, 2015/16</div></div>
+  </div>
+
+  <div class="section-title">🏆 REKORDER — Juventus</div>
+  <div class="record-card">
+    <div class="record-flag">⚫⚪</div>
+    <div class="record-info">
+      <div class="record-badge">Rekorder titula · 9 uzastopnih</div>
+      <h3>Juventus — 36 titula Serie A</h3>
+      <p>La Vecchia Signora (Stara Dama) — najuspešniji klub u istoriji italijanskog fudbala. 9 uzastopnih titula 2012–2020. Calciopoli skandal 2006 — oduzete titule 2005 i 2006, ispadanje u B. Legende: Platini, Del Piero, Nedvěd, Buffon, Zidane, CR7 (2018–2021).</p>
+    </div>
+  </div>
+
+  <div class="section-title">⚽ ČUVENI KLUBOVI</div>
+  <div class="clubs-grid">
+    <div class="club-card notable">
+      <div class="club-icon">⚫⚪</div>
+      <div class="club-info"><div class="club-name">Juventus</div><div class="club-detail">36 Serie A · 2× LŠ · Del Piero · Buffon · CR7 era</div></div>
+    </div>
+    <div class="club-card notable">
+      <div class="club-icon">⚫🔵</div>
+      <div class="club-info"><div class="club-name">Inter Milan</div><div class="club-detail">20 titula · Treble 2010 (Mourinho) · "Grande Inter" 60-ih</div></div>
+    </div>
+    <div class="club-card notable">
+      <div class="club-icon">🔴⚫</div>
+      <div class="club-info"><div class="club-name">AC Milan</div><div class="club-detail">19 titula · 7 LŠ · Van Basten, Gullit, Baresi, Maldini era</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🔴🟡</div>
+      <div class="club-info"><div class="club-name">AS Roma</div><div class="club-detail">3 titule · Totti ikona · 2022 UEL pobednik (Mourinho)</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🔵⚪</div>
+      <div class="club-info"><div class="club-name">SSC Napoli</div><div class="club-detail">Maradona era (1987, 1990) · Titula 2023 — treća u istoriji</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🟣⚪</div>
+      <div class="club-info"><div class="club-name">ACF Fiorentina</div><div class="club-detail">2 titule · Batistuta ikona · Florence elegancija</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">🥇 TOP STRELCI SVIH VREMENA (Serie A)</div>
+  <div class="champ-table-wrap">
+    <table class="champ-table">
+      <thead><tr><th>#</th><th>Igrač</th><th>Zastava</th><th>Klub</th><th>Golovi</th></tr></thead>
+      <tbody>
+        <tr class="highlight"><td class="rank-1">1</td><td>Silvio Piola</td><td>🇮🇹</td><td>Lazio, Juventus, Novara...</td><td>274</td></tr>
+        <tr><td class="rank-2">2</td><td>Francesco Totti</td><td>🇮🇹</td><td>AS Roma (samo!)</td><td>250</td></tr>
+        <tr><td class="rank-3">3</td><td>Gunnar Nordahl</td><td>🇸🇪</td><td>AC Milan</td><td>225</td></tr>
+        <tr><td>4</td><td>Giuseppe Meazza</td><td>🇮🇹</td><td>Inter, Milan</td><td>216</td></tr>
+        <tr><td>5</td><td>José Altafini</td><td>🇧🇷</td><td>Milan, Napoli, Juventus</td><td>216</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">⚡ ZANIMLJIVOSTI</div>
+  <div class="facts-list">
+    <div class="fact-item gold">Calciopoli skandal 2006: Juventus i Milan uhvaćeni u nameštanju sudija. Juventus isp ao u B, oduzete 2 titule. Paradoks: iste te godine Italija postala svetski prvak!</div>
+    <div class="fact-item">Maradona u Napoli 1984–1991: doveo je mali južni klub do dve titule Serie A (1987, 1990), prvog u istoriji. Napoli ga obožava i danas.</div>
+    <div class="fact-item star">Inter Milan "Treble" 2010 pod Mourinhom: Liga, Kup, Liga šampiona. Jedini italijanski klub koji je to postigao.</div>
+    <div class="fact-item">Francesco Totti je proveo celu karijeru u AS Roma — od 1992 do 2017, 25 godina u jednom klubu! 250 golova samo za Romu.</div>
+    <div class="fact-item">Buffon je bio golman Juventusa od 2001 do 2018. Karijera od 1995 do 2023 — 28 godina na vrhunskom nivou!</div>
+  </div>
+</section>
+
+<!-- ===== LIGUE 1 ===== -->
+<section class="league-section" id="sec-ligue1">
+  <div class="league-hero">
+    <div class="league-badge">🇫🇷</div>
+    <div class="league-info">
+      <h2>Ligue 1</h2>
+      <div class="league-founded">Osnovana 1932 · Francuska · 18 klubova (od 2023)</div>
+      <div class="league-desc">Francusko fudbalsko prvenstvo, u poslednjih deceniju dominira Paris Saint-Germain sa katarskim vlasnicima. Liga je poznata po razvoju talentovanih igrača (Henry, Zidane, Mbappé) i istorijskim klubovima poput Olimpik Marselja, jedinog francuskog pobednika Lige šampiona.</div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Prva sezona</div><div class="stat-value">1932</div><div class="stat-sub">Division 1, mod. Ligue 1 od 2002.</div></div>
+    <div class="stat-card"><div class="stat-label">Rekorder titula</div><div class="stat-value">12</div><div class="stat-sub">Paris Saint-Germain</div></div>
+    <div class="stat-card"><div class="stat-label">Uzastopnih titula</div><div class="stat-value">10</div><div class="stat-sub">PSG, 2013–2023 (osim 2016/17)</div></div>
+    <div class="stat-card"><div class="stat-label">LŠ titula (Fr. klubovi)</div><div class="stat-value">1</div><div class="stat-sub">Olympique Marseille, 1993</div></div>
+  </div>
+
+  <div class="section-title">🏆 REKORDER — Paris Saint-Germain</div>
+  <div class="record-card">
+    <div class="record-flag">🗼</div>
+    <div class="record-info">
+      <div class="record-badge">Rekorder titula · Katarski vlasnici od 2011</div>
+      <h3>Paris Saint-Germain — 12 titula Ligue 1</h3>
+      <p>Pre katarskog preuzimanja 2011, PSG je bio osrednji klub. Posle: Ibrahimović, Beckham, Neymar (222M€ 2017 — rekord transfera), Mbappé, Messi, Cavani. Dominacija ligom uz konstantna razočaranja u LŠ — cilj koji im se otimao. Liga šampiona finale 2020.</p>
+    </div>
+  </div>
+
+  <div class="section-title">⚽ ČUVENI KLUBOVI</div>
+  <div class="clubs-grid">
+    <div class="club-card notable">
+      <div class="club-icon">🗼</div>
+      <div class="club-info"><div class="club-name">Paris Saint-Germain</div><div class="club-detail">12 titula · QSI vlasnici · Neymar 222M€ · Mbappé era</div></div>
+    </div>
+    <div class="club-card notable">
+      <div class="club-icon">⚪🔵</div>
+      <div class="club-info"><div class="club-name">Olympique Marseille</div><div class="club-detail">9 titula · JEDINI fr. LŠ pobednik 1993 · Vatrena navijačnica</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🔴⚪</div>
+      <div class="club-info"><div class="club-name">Olympique Lyonnais</div><div class="club-detail">7 uzastopnih titula 2002–2008 — dominacija pre PSG opsesije</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🟢⚪</div>
+      <div class="club-info"><div class="club-name">AS Saint-Étienne</div><div class="club-detail">10 titula — rekord (stari sistem) · "Les Verts" legendarni</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🔴⚫</div>
+      <div class="club-info"><div class="club-name">AS Monaco</div><div class="club-detail">8 titula · LŠ finale 2004 · Mbappé 2016/17 senzacija</div></div>
+    </div>
+    <div class="club-card">
+      <div class="club-icon">🔴⚪</div>
+      <div class="club-info"><div class="club-name">Girondins de Bordeaux</div><div class="club-detail">6 titula · Zidane karijeru počeo tu · Sada u nižim ligama</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">🥇 TOP STRELCI SVIH VREMENA (Ligue 1)</div>
+  <div class="champ-table-wrap">
+    <table class="champ-table">
+      <thead><tr><th>#</th><th>Igrač</th><th>Zastava</th><th>Klub</th><th>Golovi</th></tr></thead>
+      <tbody>
+        <tr class="highlight"><td class="rank-1">1</td><td>Delio Onnis</td><td>🇦🇷</td><td>Monaco, Tours, Strasbourg...</td><td>299</td></tr>
+        <tr><td class="rank-2">2</td><td>Hervé Revelli</td><td>🇫🇷</td><td>Saint-Étienne</td><td>256</td></tr>
+        <tr><td class="rank-3">3</td><td>Carlos Bianchi</td><td>🇦🇷</td><td>Reims, PSG...</td><td>210</td></tr>
+        <tr><td>4</td><td>Edinson Cavani</td><td>🇺🇾</td><td>Paris Saint-Germain</td><td>200</td></tr>
+        <tr><td>5</td><td>Kylian Mbappé</td><td>🇫🇷</td><td>Monaco, PSG</td><td>197</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">⚡ ZANIMLJIVOSTI</div>
+  <div class="facts-list">
+    <div class="fact-item gold">Olympique Marseille 1993 — jedini francuski klub koji je pobedio Ligu šampiona. Naredne godine bio bi isključen zbog finansijskog skandala (VA-OM afera).</div>
+    <div class="fact-item">Neymar transfer PSG 2017: 222 miliona evra — svetski rekord koji stoji i danas. Prethodni rekord bio je Pogba za 105M€.</div>
+    <div class="fact-item star">Monaco 2016/17: 17-godišnji Mbappé pomogao Monaku da osvoji titulu i stigne do LŠ polufinala, eliminišući Manchester City. PSG ga je kupio za 180M€.</div>
+    <div class="fact-item">AS Saint-Étienne ima rekord od 10 titula po starom sistemu, ali PSG lidera u modernoj eri. "Les Verts" iz 70-ih jedan su od simbola evropskog fudbala.</div>
+    <div class="fact-item">Kylian Mbappé je postigao gol na SP 2018 sa 19 godina — drugi tinejdžer posle Peléa koji je to uradio u finalu SP!</div>
+  </div>
+</section>
+
+</div><!-- main -->
+
+<script>
+const tabNav  = document.getElementById('tabNav');
+const sections = document.querySelectorAll('.league-section');
+
+tabNav.addEventListener('click', function(e) {
+  const btn = e.target.closest('.tab-btn');
+  if (!btn) return;
+  const tab = btn.dataset.tab;
+
+  tabNav.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  sections.forEach(s => {
+    s.classList.toggle('active', s.id === 'sec-' + tab);
+  });
+});
+</script>
+</body>
+</html>
