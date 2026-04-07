@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>NIN nagrada — Pub Quiz</title>
+<style>
+:root {
+  --bg: #1a0f05; --surface: #241508; --surface2: #2e1a08;
+  --gold: #c9a227; --gold2: #e8c84a;
+  --text: #f0e6d0; --text2: #b89a70;
+  --border: #4a3010; --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+header { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 16px 24px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100; }
+.header-back { color: var(--gold); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; transition: background 0.2s; white-space: nowrap; }
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.controls { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.search-box { flex: 1; min-width: 200px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; color: var(--text); font-family: Georgia, serif; font-size: 14px; outline: none; }
+.search-box:focus { border-color: var(--gold); }
+.search-box::placeholder { color: var(--text2); }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label { color: var(--text2); font-size: 12px; align-self: center; text-transform: uppercase; letter-spacing: 1px; }
+.filter-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text2); padding: 6px 12px; font-family: Georgia, serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+
+.main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+.results-count { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead tr { background: var(--surface); border-bottom: 2px solid var(--gold); }
+th { padding: 12px 14px; text-align: left; color: var(--gold); font-weight: normal; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; user-select: none; white-space: nowrap; }
+th:hover { color: var(--gold2); }
+th.nosort { cursor: default; }
+th .sort-arrow { margin-left: 4px; opacity: 0.5; }
+th.sorted .sort-arrow { opacity: 1; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+tbody tr:hover { background: var(--hover); }
+tbody tr.highlight td { background: #1e1800; }
+td { padding: 11px 14px; vertical-align: top; }
+td.year { color: var(--gold2); font-size: 15px; font-weight: bold; white-space: nowrap; }
+td.winner { color: var(--text); font-weight: bold; }
+td.roman { color: var(--text); font-style: italic; }
+td.poreklo { color: var(--text2); font-size: 13px; white-space: nowrap; }
+td.notes { color: var(--text2); font-size: 12px; max-width: 260px; line-height: 1.4; }
+
+.no-results { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 16px; }
+
+/* Mobile cards */
+.card-list { display: none; flex-direction: column; gap: 10px; }
+.nin-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+.nin-card.highlight { background: #1e1800; border-color: var(--gold); }
+.nin-card-top { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+.nin-card-year { font-size: 17px; font-weight: bold; color: var(--gold2); white-space: nowrap; }
+.nin-card-winner { font-size: 15px; color: var(--text); font-weight: bold; }
+.nin-card-roman { font-size: 13px; color: var(--text); font-style: italic; margin-bottom: 4px; }
+.nin-card-meta { font-size: 12px; color: var(--text2); }
+
+@media (max-width: 700px) {
+  .controls { padding: 10px 14px; }
+  .main { padding: 14px; }
+  .header-title h1 { font-size: 18px; }
+  table { display: none; }
+  .card-list { display: flex; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../" class="header-back">← Pub Quiz</a>
+  <div class="header-title">
+    <h1>📰 NIN NAGRADA</h1>
+    <p>Nagrada za najbolji roman — od 1954. do danas</p>
+  </div>
+</header>
+
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretraži autora, roman...">
+  <div class="filter-group" id="decadeFilter">
+    <span class="filter-label">Decenija:</span>
+    <button class="filter-btn active" data-decade="all">Sve</button>
+    <button class="filter-btn" data-decade="1950">1950-e</button>
+    <button class="filter-btn" data-decade="1960">1960-e</button>
+    <button class="filter-btn" data-decade="1970">1970-e</button>
+    <button class="filter-btn" data-decade="1980">1980-e</button>
+    <button class="filter-btn" data-decade="1990">1990-e</button>
+    <button class="filter-btn" data-decade="2000">2000-e</button>
+    <button class="filter-btn" data-decade="2010">2010-e</button>
+    <button class="filter-btn" data-decade="2020">2020-e</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="results-count" id="resultsCount"></div>
+  <div id="tableContainer"></div>
+  <div class="card-list" id="cardList"></div>
+</div>
+
+<script>
+var DATA = [
+  {year:1954, winner:"Mihailo Lalić", roman:"Svadba", poreklo:"🇲🇪 Crna Gora", highlight:false, notes:"Prva Ninova nagrada. Lalić — romansijer partizanskog ratnog iskustva."},
+  {year:1955, winner:"Oskar Davičo", roman:"Pesma", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Avangardni pesnik i romansijer, učesnik NOR-a."},
+  {year:1956, winner:"Dobrica Ćosić", roman:"Koren", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Početak porodične sage. Ćosić osvaja NIN više puta."},
+  {year:1957, winner:"Erih Koš", roman:"Mreža", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Satira i humor; Koš vešt stilista."},
+  {year:1958, winner:"Vladan Desnica", roman:"Proljeća Ivana Galeba", poreklo:"🇭🇷 Hrvatska", highlight:true, notes:"Filozofski roman — remek-delo jugoslovenske proze. Dalmatinski lirizam."},
+  {year:1959, winner:"Branko Ćopić", roman:"Ne tuguj, bronzana stražo", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Bosanski pisac, toplina i humor u ratnoj prozi."},
+  {year:1960, winner:"Miodrag Bulatović", roman:"Crveni petao leti prema nebu", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Mračni ekspresionizam; preveden na 30 jezika."},
+  {year:1961, winner:"Antonije Isaković", roman:"Paprat i vatra", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Ratni roman; psihološka dubina karaktera."},
+  {year:1962, winner:"Dobrica Ćosić", roman:"Deobe", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Drugi dobitak. Tema rata i ideološkog sukoba."},
+  {year:1963, winner:"Čedo Vuković", roman:"Kasni ljeti", poreklo:"🇲🇪 Crna Gora", highlight:false, notes:"Crnogorska proza."},
+  {year:1964, winner:"Branko Ćopić", roman:"Gluvi barut", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Drugi dobitak. Humoristična ratna proza."},
+  {year:1965, winner:"Slobodan Selenić", roman:"Prijatelji", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Selenić — jedan od ključnih romanopisaca srpske proze."},
+  {year:1966, winner:"Dobrica Ćosić", roman:"Bajka", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Treći dobitak. Alegorična proza."},
+  {year:1967, winner:"Meša Selimović", roman:"Derviš i smrt", poreklo:"🇧🇦 BiH", highlight:true, notes:"Jedno od najvažnijih dela jugoslovenske proze. Egzistencijalizam, šerijatski zakon, savest i vlast."},
+  {year:1968, winner:"Živojin Pavlović", roman:"Kain i Avelj", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Redatelj i pisac crnog talasa."},
+  {year:1969, winner:"Slobodan Selenić", roman:"Memoari Pere Bogalja", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Drugi dobitak. Satirična autobiografska proza."},
+  {year:1970, winner:"Borislav Pekić", roman:"Hodočašće Arsenija Njegovana", poreklo:"🇷🇸 Srbija", highlight:true, notes:"Modernistički roman. Pekić — stub srpske moderne proze."},
+  {year:1971, winner:"Mihailo Lalić", roman:"Ratna sreća", poreklo:"🇲🇪 Crna Gora", highlight:false, notes:"Drugi dobitak. Nastavak ratnog ciklusa."},
+  {year:1972, winner:"Danilo Kiš", roman:"Peščanik", poreklo:"🇷🇸 Srbija", highlight:true, notes:"Treća knjiga porodičnog ciklusa. Kiš — jedan od najvažnijih srpskih pisaca 20. veka."},
+  {year:1973, winner:"Vitomil Zupan", roman:"Menuet za gitaru", poreklo:"🇸🇮 Slovenija", highlight:false, notes:"Slovenački romansijer; egzistencijalistički roman."},
+  {year:1974, winner:"Momo Kapor", roman:"Foliranti", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Roman beogradske urbane kulture. Kultni pisac generacije."},
+  {year:1975, winner:"Aleksandar Tišma", roman:"Upotreba čoveka", poreklo:"🇷🇸 Srbija", highlight:true, notes:"Roman o holokaustu u Novom Sadu. Tišma — svetski priznat pisac."},
+  {year:1976, winner:"Miroslav Josić Višnjić", roman:"Odbrana i poslednji dani", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Postmodernistička proza."},
+  {year:1977, winner:"Filip David", roman:"Hodočašnik neba i zemlje", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Fantastika i jevrejska tradicija."},
+  {year:1978, winner:"Drago Bugarski", roman:"Rupa", poreklo:"🇷🇸 Srbija", highlight:false, notes:""},
+  {year:1979, winner:"Branimir Šćepanović", roman:"Usta puna zemlje", poreklo:"🇲🇪 CG/Srbija", highlight:false, notes:"Kratki roman; filozofska egzistencijalistička proza."},
+  {year:1980, winner:"Milisav Savić", roman:"Ujak naše varoši", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Roman o provincijskom životu."},
+  {year:1981, winner:"Slobodan Selenić", roman:"Prijatelji s Kosančićevog venca", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Treći dobitak. Beogradska saga."},
+  {year:1982, winner:"Mirko Kovač", roman:"Moja sestra Elida", poreklo:"🇭🇷 Hrvatska/CG", highlight:false, notes:"Književnik i redatelj. Tamna mediteranska proza."},
+  {year:1983, winner:"Milovan Danojlić", roman:"Kako je propao Zec", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Esejista i pesnik; igrivi roman."},
+  {year:1984, winner:"Milorad Pavić", roman:"Hazarski rečnik", poreklo:"🇷🇸 Srbija", highlight:true, notes:"Romani-leksikon; preveden na 40+ jezika. Pavić — svetski fenomen postmoderne."},
+  {year:1985, winner:"Jovan Radulović", roman:"Golubnjača", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Tema sukoba četnika i partizana. Kontroverzno u vreme objave."},
+  {year:1986, winner:"Svetlana Velmar-Janković", roman:"Bezdno", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Istorijska proza. Velmar-Janković — istaknuta srpska književnica."},
+  {year:1987, winner:"Slobodan Selenić", roman:"Očevi i oci", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Četvrti dobitak — rekord. Porodična saga kroz vek."},
+  {year:1988, winner:"Radoslav Bratić", roman:"Sluga Arsenija", poreklo:"🇷🇸 Srbija", highlight:false, notes:""},
+  {year:1989, winner:"Dragan Jeremić", roman:"Crni prasac", poreklo:"🇷🇸 Srbija", highlight:false, notes:""},
+  {year:1990, winner:"Svetlana Velmar-Janković", roman:"Lagum", poreklo:"🇷🇸 Srbija", highlight:true, notes:"Drugi dobitak. Roman o okupiranom Beogradu; istorija i intimnost."},
+  {year:1991, winner:"Radoslav Petković", roman:"Sudbina i komentari", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Istorijski roman; barokna proza."},
+  {year:1992, winner:"Dragan Babić", roman:"Kad su cvetale tikve", poreklo:"🇷🇸 Srbija", highlight:false, notes:""},
+  {year:1993, winner:"Slobodan Selenić", roman:"Timor mortis", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Peti dobitak. Nasilje, strah, raspad."},
+  {year:1994, winner:"Vladimir Arsenijević", roman:"U potpalublju", poreklo:"🇷🇸 Srbija", highlight:true, notes:"Glas generacije 90-ih. Roman droge, rata i deziluzije. Kultni status."},
+  {year:1995, winner:"David Albahari", roman:"Mamac", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Dijaspora i identitet. Albahari — srpsko-jevrejski pisac, živi u Kanadi."},
+  {year:1996, winner:"Srđan Valjarević", roman:"Dnevnik decenije", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Urbana proza; Beograd 90-ih."},
+  {year:1997, winner:"Dragan Velikić", roman:"Astragan", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Roman o gradu i pamćenju. Velikić — modern srpski romansijer."},
+  {year:1998, winner:"Uglješa Šajtinac", roman:"Đavolji vatromet", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Dramatičar i prozni pisac."},
+  {year:1999, winner:"Mirjana Novaković", roman:"Strah i njegov sluga", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Gotska proza; vampiri i barokna Srbija."},
+  {year:2000, winner:"Goran Petrović", roman:"Atlas opisan nebom", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Srpski magični realizam. Petrović — jedan od popularnijih savremenih pisaca."},
+  {year:2001, winner:"Goran Petrović", roman:"Opsada crkve Sv. Spasa", poreklo:"🇷🇸 Srbija", highlight:true, notes:"Drugi uzastopni dobitak. Kultni roman generacije — istorija i čudo."},
+  {year:2002, winner:"Vule Žurić", roman:"Šareni karavan", poreklo:"🇷🇸 Srbija", highlight:false, notes:""},
+  {year:2003, winner:"Vladimir Pištalo", roman:"Milenijum u Beogradu", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Romansijer i pisac; živi u SAD. Istorija i mit."},
+  {year:2004, winner:"Svetlana Slapšak", roman:"Ženske ikone 20. veka", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Esejistica, klasičarka i feministica."},
+  {year:2005, winner:"Svetislav Basara", roman:"Ukleta zemlja", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Postmodernizam i satira. Basara — originalni glas srpske proze."},
+  {year:2006, winner:"Mihail Radin", roman:"Sin čovečji", poreklo:"🇷🇸 Srbija", highlight:false, notes:""},
+  {year:2007, winner:"Zoran Živković", roman:"Lažni nebosi", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Spekulativna fantastika; prevedeno na 20 jezika."},
+  {year:2008, winner:"Dragan Velikić", roman:"Severni zid", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Drugi dobitak. Roman o Berlinu i identitetu."},
+  {year:2009, winner:"Saša Ilić", roman:"Pas i kontrabas", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Urbana proza; Beograd."},
+  {year:2010, winner:"Vladimir Arsenijević", roman:"Predator", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Drugi dobitak. Politički triler."},
+  {year:2011, winner:"Mileta Prodanović", roman:"Ovde, tamo i drugde", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Vizuelni umetnik i pisac."},
+  {year:2012, winner:"Uglješa Šajtinac", roman:"Porodični obrok", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Drugi dobitak."},
+  {year:2013, winner:"Biljana Srbljanović", roman:"Amerika, drugi deo", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Poznata dramska spisateljica. Proza o emigraciji."},
+  {year:2014, winner:"Dragan Velikić", roman:"Islednik", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Treći dobitak. Roman o tajnoj policiji i pamćenju."},
+  {year:2015, winner:"Slobodan Tišma", roman:"Neke druge priče", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Novosadski pisac i muzičar."},
+  {year:2016, winner:"Marko Vidojković", roman:"Kandže", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Popularan romansijer mlađe generacije."},
+  {year:2017, winner:"Rade Jovanović", roman:"Bulevar revolucije", poreklo:"🇷🇸 Srbija", highlight:false, notes:""},
+  {year:2018, winner:"Srđan Valjarević", roman:"Tamara", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Drugi dobitak. Minimalistička proza."},
+  {year:2019, winner:"Marija Knežević", roman:"Ekskurzija", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Autoficija; ženska perspektiva."},
+  {year:2020, winner:"Jelena Lengold", roman:"Valentino i ostale priče", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Kratka proza; intimna atmosfera."},
+  {year:2021, winner:"Stefan Bošković", roman:"Vrt", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Mlad autor; roman o gubitku i sećanju."},
+  {year:2022, winner:"Isidora Bjelica", roman:"Moje tuđe srce", poreklo:"🇷🇸 Srbija", highlight:false, notes:"Romansijerka i dramska spisateljica."},
+  {year:2023, winner:"Dragan Babić", roman:"Sveti na svom", poreklo:"🇷🇸 Srbija", highlight:false, notes:""}
+];
+
+var state = { decade: 'all', q: '' };
+
+function decade(y) {
+  return Math.floor(y / 10) * 10;
+}
+
+function filtered() {
+  return DATA.filter(function(d) {
+    var matchDecade = state.decade === 'all' || decade(d.year) === parseInt(state.decade);
+    var q = state.q;
+    var matchQ = !q ||
+      d.winner.toLowerCase().indexOf(q) >= 0 ||
+      d.roman.toLowerCase().indexOf(q) >= 0 ||
+      d.poreklo.toLowerCase().indexOf(q) >= 0 ||
+      d.notes.toLowerCase().indexOf(q) >= 0;
+    return matchDecade && matchQ;
+  });
+}
+
+var sortCol = 'year', sortDir = 1;
+
+function sortData(arr) {
+  return arr.slice().sort(function(a, b) {
+    var av = a[sortCol], bv = b[sortCol];
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+}
+
+function render() {
+  var data = sortData(filtered());
+  var cnt = document.getElementById('resultsCount');
+  cnt.textContent = data.length + ' ' + (data.length === 1 ? 'unos' : data.length < 5 ? 'unosa' : 'unosa');
+
+  // Table
+  var html = '<table><thead><tr>';
+  var cols = [
+    {key:'year', label:'Godina'},
+    {key:'winner', label:'Autor/ka'},
+    {key:'roman', label:'Roman'},
+    {key:'poreklo', label:'Poreklo'},
+    {key:'notes', label:'Zanimljivost', nosort:true}
+  ];
+  cols.forEach(function(c) {
+    var cls = c.nosort ? 'nosort' : (sortCol === c.key ? 'sorted' : '');
+    var arrow = c.nosort ? '' : '<span class="sort-arrow">' + (sortCol === c.key ? (sortDir === 1 ? '▲' : '▼') : '⇅') + '</span>';
+    html += '<th class="' + cls + '" data-col="' + (c.key||'') + '">' + c.label + arrow + '</th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  data.forEach(function(d) {
+    var cls = d.highlight ? ' class="highlight"' : '';
+    html += '<tr' + cls + '>' +
+      '<td class="year">' + d.year + '</td>' +
+      '<td class="winner">' + d.winner + '</td>' +
+      '<td class="roman">„' + d.roman + '"</td>' +
+      '<td class="poreklo">' + d.poreklo + '</td>' +
+      '<td class="notes">' + d.notes + '</td>' +
+      '</tr>';
+  });
+  html += '</tbody></table>';
+  if (!data.length) html = '<div class="no-results">Nema rezultata.</div>';
+  document.getElementById('tableContainer').innerHTML = html;
+
+  // Mobile cards
+  var cards = '';
+  data.forEach(function(d) {
+    var cls = 'nin-card' + (d.highlight ? ' highlight' : '');
+    cards += '<div class="' + cls + '">' +
+      '<div class="nin-card-top"><span class="nin-card-year">' + d.year + '</span><span class="nin-card-winner">' + d.winner + '</span></div>' +
+      '<div class="nin-card-roman">„' + d.roman + '"</div>' +
+      '<div class="nin-card-meta">' + d.poreklo + (d.notes ? ' · ' + d.notes : '') + '</div>' +
+      '</div>';
+  });
+  document.getElementById('cardList').innerHTML = cards || '<div class="no-results">Nema rezultata.</div>';
+
+  // Sort headers
+  document.querySelectorAll('th[data-col]').forEach(function(th) {
+    th.onclick = function() {
+      var col = this.dataset.col;
+      if (!col) return;
+      if (sortCol === col) sortDir *= -1;
+      else { sortCol = col; sortDir = 1; }
+      render();
+    };
+  });
+}
+
+// Decade filter
+document.getElementById('decadeFilter').addEventListener('click', function(e) {
+  var btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  this.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  state.decade = btn.dataset.decade;
+  render();
+});
+
+// Search
+document.getElementById('searchBox').addEventListener('input', function() {
+  state.q = this.value.trim().toLowerCase();
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

@@ -790,6 +790,20 @@ footer {
           <span class="arrow">&#8594;</span>
         </div>
       </a>
+      <a href="knjizevnost/nin/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #1a0a0e, #2e1020);">
+          &#128240;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>NIN nagrada</h3>
+          <p>Dobitnici nagrade za najbolji roman &mdash; od 1954. do danas</p>
+        </div>
+        <div class="topic-card-footer">
+          <span>Istra&#382;i dobitnike</span>
+          <span class="arrow">&#8594;</span>
+        </div>
+      </a>
       <div class="topic-card disabled">
         <div class="topic-card-top" style="background: linear-gradient(135deg, #0a0a1a, #1b1b2e);">
           &#128196;
@@ -1075,7 +1089,7 @@ if ('serviceWorker' in navigator) {
 var rounds = [
   { id: 'film',       icon: '&#127916;', name: 'Film',         num: 'Runda 1', count: '1 tema' },
   { id: 'geografija', icon: '&#127758;', name: 'Geografija',   num: 'Runda 2', count: '2 teme' },
-  { id: 'knjizevnost',icon: '&#128218;', name: 'Knji\u017Eevnost', num: 'Runda 3', count: '3 teme' },
+  { id: 'knjizevnost',icon: '&#128218;', name: 'Knji\u017Eevnost', num: 'Runda 3', count: '4 teme' },
   { id: 'svastara1',  icon: '&#127914;', name: 'Sva\u0161tara I', num: 'Runda 4', count: 'Uskoro' },
   { id: 'sport',      icon: '&#127942;', name: 'Sport',        num: 'Runda 5', count: '11 tema' },
   { id: 'istorija',   icon: '&#9876;',   name: 'Istorija',     num: 'Runda 6', count: '3 teme' },
@@ -1106,6 +1120,7 @@ var TOPICS = [
   { title: 'Nobelovci', desc: 'Dobitnici Nobelove nagrade za knji\u017Eevnost — od 1980. do 2024.', round: 'Knji\u017Eevnost', roundIcon: '&#128218;', roundId: 'knjizevnost', icon: '&#127885;', gradient: 'linear-gradient(135deg, #1a1000, #2e1e00)', url: 'knjizevnost/nobelovci/index.html', available: true },
   { title: 'Stilske figure', desc: 'Tropi, figure misli i dikcije \u2014 metafora, ironija, hiperbola, anafora i jo\u0161', round: 'Knji\u017Eevnost', roundIcon: '&#128218;', roundId: 'knjizevnost', icon: '&#9998;', gradient: 'linear-gradient(135deg, #0e1a0e, #1a2e1a)', url: 'knjizevnost/stilskeFigure/index.html', available: true },
   { title: 'Glasovne promene', desc: 'Palatalizacija, jotovanje, jednačenje \u2014 fonolo\u0161ke alternacije u srpskom jeziku', round: 'Knji\u017Eevnost', roundIcon: '&#128218;', roundId: 'knjizevnost', icon: '&#128442;', gradient: 'linear-gradient(135deg, #0e0e1a, #1a1a2e)', url: 'knjizevnost/glasovnePromene/index.html', available: true },
+  { title: 'NIN nagrada', desc: 'Dobitnici nagrade za najbolji roman \u2014 od 1954. do danas', round: 'Knji\u017Eevnost', roundIcon: '&#128218;', roundId: 'knjizevnost', icon: '&#128240;', gradient: 'linear-gradient(135deg, #1a0a0e, #2e1020)', url: 'knjizevnost/nin/index.html', available: true },
   { title: 'Nemnji\u0107i', desc: 'Porodi\u010Dno stablo srpske vladarske dinastije od 1166. do 1371.', round: 'Istorija', roundIcon: '&#9876;', roundId: 'istorija', icon: '&#9812;', gradient: 'linear-gradient(135deg, #1a0800, #2e1400)', url: 'istorija/nemanjici/nemanjici.html', available: true },
   { title: 'Filmski direktori', desc: 'Najve\u0107i reditelji svetske kinematografije', round: 'Film', roundIcon: '&#127916;', roundId: 'film', icon: '&#127909;', gradient: 'linear-gradient(135deg, #1a1a0a, #2e2e1b)', url: null, available: false },
   { title: 'Filmski citati', desc: 'Prepoznaj film po \u010Duvenom citatu', round: 'Film', roundIcon: '&#127916;', roundId: 'film', icon: '&#127902;', gradient: 'linear-gradient(135deg, #0a1a1a, #1b2e2e)', url: null, available: false },
