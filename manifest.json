@@ -1,0 +1,22 @@
+{
+  "name": "Pub Quiz",
+  "short_name": "Pub Quiz",
+  "description": "Osam rundi znanja iz filma, geografije, književnosti, istorije i više",
+  "start_url": "/pubKviz/",
+  "scope": "/pubKviz/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1a0f05",
+  "theme_color": "#c9a227",
+  "lang": "sr",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "games"],
+  "screenshots": []
+}

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Nobelovci &ndash; Knji\u017eevnost</title>
+<style>
+  :root {
+    --bg: #1a0f05;
+    --surface: #241508;
+    --surface2: #2e1a08;
+    --gold: #c9a227;
+    --gold2: #e8c84a;
+    --text: #f0e6d0;
+    --text2: #b89a70;
+    --border: #4a3010;
+    --hover: #3a2010;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: Georgia, 'Times New Roman', serif;
+    min-height: 100vh;
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--gold);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-back {
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .header-back:hover { background: var(--hover); }
+  .header-title {
+    flex: 1;
+    text-align: center;
+  }
+  .header-title h1 {
+    font-size: 24px;
+    color: var(--gold2);
+    letter-spacing: 2px;
+  }
+  .header-title p {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+  .nobel-icon { font-size: 28px; }
+
+  .controls {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    color: var(--text);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    outline: none;
+  }
+  .search-box:focus { border-color: var(--gold); }
+  .search-box::placeholder { color: var(--text2); }
+
+  .filter-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .filter-label {
+    color: var(--text2);
+    font-size: 12px;
+    align-self: center;
+    margin-right: 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .filter-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text2);
+    padding: 6px 12px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+
+  .main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+
+  .results-count {
+    color: var(--text2);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead tr {
+    background: var(--surface);
+    border-bottom: 2px solid var(--gold);
+  }
+  th {
+    padding: 12px 14px;
+    text-align: left;
+    color: var(--gold);
+    font-weight: normal;
+    letter-spacing: 1px;
+    font-size: 12px;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+  }
+  th:hover { color: var(--gold2); }
+  th.nosort { cursor: default; }
+  th.nosort:hover { color: var(--gold); }
+  th .sort-arrow { margin-left: 4px; opacity: 0.5; }
+  th.sorted .sort-arrow { opacity: 1; }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:hover { background: var(--hover); }
+  td { padding: 11px 14px; vertical-align: top; }
+  td.year { color: var(--gold2); font-size: 15px; font-weight: bold; white-space: nowrap; }
+  td.winner { color: var(--text); }
+  td.country { color: var(--text2); font-size: 13px; }
+  td.lang { color: var(--text2); font-size: 13px; font-style: italic; }
+  td.delo { color: var(--text); font-style: italic; font-size: 13px; }
+  td.notes { color: var(--text2); font-size: 12px; max-width: 220px; }
+  .medal { color: var(--gold); margin-right: 5px; }
+  .winner-cell { display: flex; align-items: center; gap: 10px; }
+  .author-photo {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    background: var(--surface2);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .author-photo.loaded { opacity: 1; }
+  .photo-placeholder {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 2px dashed var(--border);
+    background: var(--surface2);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--border);
+    font-size: 20px;
+  }
+
+  .no-results {
+    text-align: center;
+    color: var(--text2);
+    padding: 60px 20px;
+    font-size: 16px;
+  }
+
+  .region-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+    font-style: normal;
+    opacity: 0.8;
+  }
+  .r-eu { background: #2a3060; color: #9ab; }
+  .r-am { background: #304020; color: #9b8; }
+  .r-as { background: #503020; color: #cb9; }
+  .r-af { background: #402030; color: #b99; }
+
+  @media (max-width: 700px) {
+    .controls { padding: 10px 14px; }
+    .main { padding: 14px; }
+    th, td { padding: 8px 10px; }
+    .header-title h1 { font-size: 18px; }
+    td.notes { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#128218; NOBELOVCI</h1>
+    <p>Nobel nagrada za knji&#382;evnost &mdash; 1980&ndash;2024</p>
+  </div>
+  <span class="nobel-icon">&#127941;</span>
+</header>
+
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretra&#382;i ime, zemlja, jezik, delo...">
+  <div class="filter-group">
+    <span class="filter-label">Decenija:</span>
+    <button class="filter-btn active" data-decade="all">Sve</button>
+    <button class="filter-btn" data-decade="1980">1980-e</button>
+    <button class="filter-btn" data-decade="1990">1990-e</button>
+    <button class="filter-btn" data-decade="2000">2000-e</button>
+    <button class="filter-btn" data-decade="2010">2010-e</button>
+    <button class="filter-btn" data-decade="2020">2020-e</button>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Region:</span>
+    <button class="filter-btn active" data-region="all">Sve</button>
+    <button class="filter-btn" data-region="EU">Evropa</button>
+    <button class="filter-btn" data-region="AM">Amerike</button>
+    <button class="filter-btn" data-region="AS">Azija</button>
+    <button class="filter-btn" data-region="AF">Afrika</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="results-count" id="resultsCount"></div>
+  <div id="tableContainer"></div>
+</div>
+
+<script>
+var DATA = [
+  {year:1980, winner:"Czes\u0142aw Mi\u0142osz", wiki:"Czes\u0142aw_Mi\u0142osz", country:"Poljska / SAD", region:"EU", lang:"Poljski", delo:"Zarobljeni um", notes:"Pesnik i esejista, emigrant, antitotalitarizam"},
+  {year:1981, winner:"Elias Canetti", wiki:"Elias_Canetti", country:"Bugarska / UK", region:"EU", lang:"Nema\u010dki", delo:"Masa i mo\u0107", notes:"Ro\u0111en u Bugarskoj, pisao na nema\u010dkom"},
+  {year:1982, winner:"Gabriel Garc\u00eda M\u00e1rquez", wiki:"Gabriel_Garc%C3%ADa_M%C3%A1rquez", country:"Kolumbija", region:"AM", lang:"\u0160panski", delo:"Sto godina samo\u0107e", notes:"Magijski realizam, latinoamerika"},
+  {year:1983, winner:"William Golding", wiki:"William_Golding", country:"UK", region:"EU", lang:"Engleski", delo:"Gospodar muva", notes:""},
+  {year:1984, winner:"Jaroslav Seifert", wiki:"Jaroslav_Seifert", country:"\u010cehoslova\u010dka", region:"EU", lang:"\u010ce\u0161ki", delo:"Kruna od soneta", notes:"Pesnik, \u010ce\u0161ki narodni pesnik"},
+  {year:1985, winner:"Claude Simon", wiki:"Claude_Simon", country:"Francuska", region:"EU", lang:"Francuski", delo:"Putevi Flandrije", notes:"Novi roman (nouveau roman)"},
+  {year:1986, winner:"Wole Soyinka", wiki:"Wole_Soyinka", country:"Nigerija", region:"AF", lang:"Engleski", delo:"Smrt i kraljevski jaha\u010d", notes:"Prvi Afrikanac dobitnik Nobela za knji\u017eevnost"},
+  {year:1987, winner:"Joseph Brodsky", wiki:"Joseph_Brodsky", country:"SSSR / SAD", region:"EU", lang:"Ruski / Engleski", delo:"Manje od jednog", notes:"Izgnanak iz SSSR-a, pisao i na engleskom"},
+  {year:1988, winner:"Naguib Mahfouz", wiki:"Naguib_Mahfouz", country:"Egipat", region:"AF", lang:"Arapski", delo:"Trilogija o Kairu", notes:"Prvi i jedini Arapin dobitnik Nobela za knji\u017eevnost"},
+  {year:1989, winner:"Camilo Jos\u00e9 Cela", wiki:"Camilo_Jos%C3%A9_Cela", country:"\u0160panija", region:"EU", lang:"\u0160panski", delo:"Porodica Pascuala Duartea", notes:""},
+  {year:1990, winner:"Octavio Paz", wiki:"Octavio_Paz", country:"Meksiko", region:"AM", lang:"\u0160panski", delo:"Lavirint samo\u0107e", notes:"Pesnik i esejista"},
+  {year:1991, winner:"Nadine Gordimer", wiki:"Nadine_Gordimer", country:"JAR", region:"AF", lang:"Engleski", delo:"Julijev narod", notes:"Antiapartheid, JAR"},
+  {year:1992, winner:"Derek Walcott", wiki:"Derek_Walcott", country:"Sveta Lucija", region:"AM", lang:"Engleski", delo:"Omeros", notes:"Karibi, epska poezija"},
+  {year:1993, winner:"Toni Morrison", wiki:"Toni_Morrison", country:"SAD", region:"AM", lang:"Engleski", delo:"Miljeva", notes:"Prva Afroamerikanka dobitnica Nobela za knji\u017eevnost"},
+  {year:1994, winner:"Kenzabur\u014d \u014ce", wiki:"Kenzabur%C5%8D_%C5%8Ce", country:"Japan", region:"AS", lang:"Japanski", delo:"Li\u010dno iskustvo", notes:""},
+  {year:1995, winner:"Seamus Heaney", wiki:"Seamus_Heaney", country:"Irska", region:"EU", lang:"Engleski", delo:"Severni", notes:"Irski pesnik, Severna Irska"},
+  {year:1996, winner:"Wis\u0142awa Szymborska", wiki:"Wis%C5%82awa_Szymborska", country:"Poljska", region:"EU", lang:"Poljski", delo:"Zov \u017eiga", notes:"Pesnikinja, ironi\u010dna i filozofska lirika"},
+  {year:1997, winner:"Dario Fo", wiki:"Dario_Fo", country:"Italija", region:"EU", lang:"Italijanski", delo:"Slu\u010dajna smrt anarhi\u0161te", notes:"Dramati\u010dar i redatelj, komedija"},
+  {year:1998, winner:"Jos\u00e9 Saramago", wiki:"Jos%C3%A9_Saramago", country:"Portugal", region:"EU", lang:"Portugalski", delo:"Slepilo", notes:"Komunista, jedini Portugalac dobitnik"},
+  {year:1999, winner:"G\u00fcnter Grass", wiki:"G%C3%BCnter_Grass", country:"Nema\u010dka", region:"EU", lang:"Nema\u010dki", delo:"Limeni dobo\u0161", notes:"Grupa 47, kontroverzni ratni roman"},
+  {year:2000, winner:"Gao Xingjian", wiki:"Gao_Xingjian", country:"Kina / Francuska", region:"AS", lang:"Kineski", delo:"Planina du\u0161e", notes:"Emigrant iz Kine u Francusku, disident"},
+  {year:2001, winner:"V.S. Naipaul", wiki:"V._S._Naipaul", country:"Trinidad / UK", region:"AM", lang:"Engleski", delo:"Ku\u0107a za gospodina Bisvasa", notes:"Indijsko poreklo, Trinidad"},
+  {year:2002, winner:"Imre Kert\u00e9sz", wiki:"Imre_Kert%C3%A9sz", country:"Ma\u0111arska", region:"EU", lang:"Ma\u0111arski", delo:"Bezsudbinskost", notes:"Pre\u017eiveo Au\u0161vic, holokaustna tema"},
+  {year:2003, winner:"J.M. Coetzee", wiki:"J._M._Coetzee", country:"JAR / Australija", region:"AF", lang:"Engleski", delo:"Sramota", notes:"Dvaput dobitnik Booker nagrade"},
+  {year:2004, winner:"Elfriede Jelinek", wiki:"Elfriede_Jelinek", country:"Austrija", region:"EU", lang:"Nema\u010dki", delo:"Pijanistkinja", notes:"Feministkinja, drama i proza"},
+  {year:2005, winner:"Harold Pinter", wiki:"Harold_Pinter", country:"UK", region:"EU", lang:"Engleski", delo:"Povratak", notes:"Dramati\u010dar, apsurd, \u201epinterovska ti\u0161ina\u201c"},
+  {year:2006, winner:"Orhan Pamuk", wiki:"Orhan_Pamuk", country:"Turska", region:"AS", lang:"Turski", delo:"Sneg", notes:"Jedini turski dobitnik, optu\u017een za \u201euvredu turskog identiteta\u201c"},
+  {year:2007, winner:"Doris Lessing", wiki:"Doris_Lessing", country:"Zimbabwe / UK", region:"AF", lang:"Engleski", delo:"Zlatna bele\u017enica", notes:"Najstarija dobitnica (88 god.), feminizam i kolonijalizam"},
+  {year:2008, winner:"J.M.G. Le Cl\u00e9zio", wiki:"J._M._G._Le_Cl%C3%A9zio", country:"Francuska / Mauricijus", region:"EU", lang:"Francuski", delo:"Pustinju", notes:"Putopisac i romansijer"},
+  {year:2009, winner:"Herta M\u00fcller", wiki:"Herta_M%C3%BCller", country:"Rumunija / Nema\u010dka", region:"EU", lang:"Nema\u010dki", delo:"Ljulja\u0161ka daha", notes:"Ro\u0111ena u Rumuniji, pi\u0161e na nema\u010dkom"},
+  {year:2010, winner:"Mario Vargas Llosa", wiki:"Mario_Vargas_Llosa", country:"Peru", region:"AM", lang:"\u0160panski", delo:"Razgovor u Katedrali", notes:"Peru, politi\u010dki roman"},
+  {year:2011, winner:"Tomas Transtr\u00f6mer", wiki:"Tomas_Transtr%C3%B6mer", country:"\u0160vedska", region:"EU", lang:"\u0160vedski", delo:"Balti", notes:"Pesnik, preveden na 60 jezika"},
+  {year:2012, winner:"Mo Yan", wiki:"Mo_Yan", country:"Kina", region:"AS", lang:"Kineski", delo:"Crveni sorgum", notes:"Magijski realizam u kineskom kontekstu"},
+  {year:2013, winner:"Alice Munro", wiki:"Alice_Munro", country:"Kanada", region:"AM", lang:"Engleski", delo:"\u017divoti devojaka i \u017eena", notes:"Majstor kratke pri\u010de, Kanada"},
+  {year:2014, winner:"Patrick Modiano", wiki:"Patrick_Modiano", country:"Francuska", region:"EU", lang:"Francuski", delo:"Trg zvezda", notes:"Tema okupirane Francuske i identiteta"},
+  {year:2015, winner:"Svetlana Aleksijevi\u010d", wiki:"Svetlana_Alexievich", country:"Belorusija", region:"EU", lang:"Ruski", delo:"\u010cernobilska molitva", notes:"Dokumentarna proza, \u017eenska perspektiva rata"},
+  {year:2016, winner:"Bob Dylan", wiki:"Bob_Dylan", country:"SAD", region:"AM", lang:"Engleski", delo:"Blowin\u2019 in the Wind", notes:"Jedini muzi\u010dar dobitnik, stihovi kao knji\u017eevnost"},
+  {year:2017, winner:"Kazuo Ishiguro", wiki:"Kazuo_Ishiguro", country:"Japan / UK", region:"AS", lang:"Engleski", delo:"Ostaci dana", notes:"Japanskog porekla, pi\u0161e na engleskom"},
+  {year:2018, winner:"Olga Tokarczuk", wiki:"Olga_Tokarczuk", country:"Poljska", region:"EU", lang:"Poljski", delo:"Letovi", notes:"Dodeljena 2019. zbog skandala u \u0160vedskoj akademiji"},
+  {year:2019, winner:"Peter Handke", wiki:"Peter_Handke", country:"Austrija", region:"EU", lang:"Nema\u010dki", delo:"Publika vre\u0111a", notes:"Kontroverzna nagrada zbog stavova o jugoslovenskim ratovima"},
+  {year:2020, winner:"Louise Gl\u00fcck", wiki:"Louise_Gl%C3%BCck", country:"SAD", region:"AM", lang:"Engleski", delo:"Divlja iris", notes:"Pesnikinja, ameri\u010dki pesni\u010dki kanon"},
+  {year:2021, winner:"Abdulrazak Gurnah", wiki:"Abdulrazak_Gurnah", country:"Tanzanija / UK", region:"AF", lang:"Engleski", delo:"Raj", notes:"Tanzanijskog porekla, tema postkolonijalizma"},
+  {year:2022, winner:"Annie Ernaux", wiki:"Annie_Ernaux", country:"Francuska", region:"EU", lang:"Francuski", delo:"Mesta", notes:"Autobiografska proza, \u017eenska perspektiva"},
+  {year:2023, winner:"Jon Fosse", wiki:"Jon_Fosse", country:"Norve\u0161ka", region:"EU", lang:"Norve\u0161ki", delo:"Septologija", notes:"Dramati\u010dar i romansijer, minimalizam"},
+  {year:2024, winner:"Han Kang", wiki:"Han_Kang_(author)", country:"Ju\u017ena Koreja", region:"AS", lang:"Korejski", delo:"Vegetarijanka", notes:"Prva Korejanka i prvi korejski dobitnik"}
+];
+
+var state = { decade: "all", region: "all", search: "", sortCol: 0, sortDir: -1 };
+
+function getRows() {
+  var rows = DATA.slice();
+  if (state.decade !== "all") {
+    var d = parseInt(state.decade);
+    rows = rows.filter(function(r) { return r.year >= d && r.year < d + 10; });
+  }
+  if (state.region !== "all") {
+    rows = rows.filter(function(r) { return r.region === state.region; });
+  }
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    rows = rows.filter(function(r) {
+      return String(r.year).includes(q) ||
+        r.winner.toLowerCase().includes(q) ||
+        r.country.toLowerCase().includes(q) ||
+        r.lang.toLowerCase().includes(q) ||
+        r.delo.toLowerCase().includes(q) ||
+        r.notes.toLowerCase().includes(q);
+    });
+  }
+  rows.sort(function(a, b) {
+    var av, bv;
+    if (state.sortCol === 0) { av = a.year; bv = b.year; }
+    else { av = a.winner.toLowerCase(); bv = b.winner.toLowerCase(); }
+    if (av < bv) return state.sortDir;
+    if (av > bv) return -state.sortDir;
+    return 0;
+  });
+  return rows;
+}
+
+var REGION_CLASS = { EU: "r-eu", AM: "r-am", AS: "r-as", AF: "r-af" };
+var REGION_LABEL = { EU: "Evropa", AM: "Amerike", AS: "Azija", AF: "Afrika" };
+
+function renderTable() {
+  var rows = getRows();
+  if (rows.length === 0) {
+    document.getElementById("resultsCount").textContent = "Nema rezultata.";
+    document.getElementById("tableContainer").innerHTML = "<div class=\"no-results\">\u2606 Nema dobitnika za zadati filter.</div>";
+    return;
+  }
+  document.getElementById("resultsCount").textContent = rows.length + " dobitnika";
+
+  var sortArrow0 = (state.sortCol === 0) ? (state.sortDir === -1 ? " \u25BC" : " \u25B2") : " \u25BD";
+  var sortArrow1 = (state.sortCol === 1) ? (state.sortDir === -1 ? " \u25BC" : " \u25B2") : " \u25BD";
+  var sorted0 = state.sortCol === 0 ? " sorted" : "";
+  var sorted1 = state.sortCol === 1 ? " sorted" : "";
+
+  var html = "<table><thead><tr>";
+  html += "<th class=\"" + sorted0 + "\" data-col=\"0\">Godina<span class=\"sort-arrow\">" + sortArrow0 + "</span></th>";
+  html += "<th class=\"" + sorted1 + "\" data-col=\"1\">Dobitnik<span class=\"sort-arrow\">" + sortArrow1 + "</span></th>";
+  html += "<th class=\"nosort\">Zemlja</th>";
+  html += "<th class=\"nosort\">Jezik</th>";
+  html += "<th class=\"nosort\">Najpoznatije delo</th>";
+  html += "<th class=\"nosort\">Napomena</th>";
+  html += "</tr></thead><tbody>";
+
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var rc = REGION_CLASS[r.region] || "";
+    var rl = REGION_LABEL[r.region] || "";
+    html += "<tr>";
+    html += "<td class=\"year\">" + r.year + "</td>";
+    html += "<td class=\"winner\"><div class=\"winner-cell\"><img class=\"author-photo\" data-wiki=\"" + r.wiki + "\" alt=\"" + r.winner + "\"><div><span class=\"medal\">\u2606</span>" + r.winner + "<span class=\"region-tag " + rc + "\">" + rl + "</span></div></div></td>";
+    html += "<td class=\"country\">" + r.country + "</td>";
+    html += "<td class=\"lang\">" + r.lang + "</td>";
+    html += "<td class=\"delo\">" + r.delo + "</td>";
+    html += "<td class=\"notes\">" + r.notes + "</td>";
+    html += "</tr>";
+  }
+  html += "</tbody></table>";
+  document.getElementById("tableContainer").innerHTML = html;
+  loadPhotos();
+
+  var ths = document.querySelectorAll("thead th[data-col]");
+  for (var ti = 0; ti < ths.length; ti++) {
+    ths[ti].addEventListener("click", function() {
+      var col = parseInt(this.getAttribute("data-col"));
+      if (state.sortCol === col) { state.sortDir *= -1; }
+      else { state.sortCol = col; state.sortDir = -1; }
+      renderTable();
+    });
+  }
+}
+
+function loadPhotos() {
+  var imgs = document.querySelectorAll('img.author-photo');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      var img = entry.target;
+      if (img.getAttribute('data-loaded')) return;
+      img.setAttribute('data-loaded', '1');
+      observer.unobserve(img);
+      var wiki = img.getAttribute('data-wiki');
+      fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + wiki)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.thumbnail && data.thumbnail.source) {
+            img.src = data.thumbnail.source;
+            img.onload = function() { img.classList.add('loaded'); };
+          }
+        })
+        .catch(function() {});
+    });
+  }, { rootMargin: '150px' });
+  for (var i = 0; i < imgs.length; i++) observer.observe(imgs[i]);
+}
+
+document.getElementById("searchBox").addEventListener("input", function() {
+  state.search = this.value.trim();
+  renderTable();
+});
+
+var decBtns = document.querySelectorAll("[data-decade]");
+for (var i = 0; i < decBtns.length; i++) {
+  decBtns[i].addEventListener("click", function() {
+    state.decade = this.getAttribute("data-decade");
+    var all = document.querySelectorAll("[data-decade]");
+    for (var j = 0; j < all.length; j++) all[j].classList.remove("active");
+    this.classList.add("active");
+    renderTable();
+  });
+}
+
+var regBtns = document.querySelectorAll("[data-region]");
+for (var i = 0; i < regBtns.length; i++) {
+  regBtns[i].addEventListener("click", function() {
+    state.region = this.getAttribute("data-region");
+    var all = document.querySelectorAll("[data-region]");
+    for (var j = 0; j < all.length; j++) all[j].classList.remove("active");
+    this.classList.add("active");
+    renderTable();
+  });
+}
+
+renderTable();
+</script>
+</body>
+</html>

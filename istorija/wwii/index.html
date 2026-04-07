@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>II Svetski rat — Pub Quiz</title>
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #100a04;
+  --surface: #1c1008;
+  --surface2: #261508;
+  --surface3: #301a0a;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #7a6015;
+  --text: #f0e6d0;
+  --muted: #9a8060;
+  --border: #3a2a12;
+  --border2: #4a3518;
+  --c-vojna: #8b2020;
+  --c-vojna-b: #c04040;
+  --c-politicki: #1e4a7a;
+  --c-politicki-b: #4a88c0;
+  --c-prekretnica: #7a5c10;
+  --c-prekretnica-b: #c9a227;
+  --c-holokaust: #3a1a3a;
+  --c-holokaust-b: #8a5a8a;
+  --c-pacifik: #145a40;
+  --c-pacifik-b: #3a9a70;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(139,32,32,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(92,61,30,0.2) 0%, transparent 60%);
+}
+
+/* HEADER */
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back {
+  color: var(--gold-dim);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.header-back:hover { color: var(--gold); border-color: var(--gold-dim); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 20px; color: var(--gold2); font-weight: normal; letter-spacing: 3px; }
+.header-title p { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 2px; }
+.header-spacer { width: 80px; }
+
+/* FILTERS */
+.filters-wrap {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border2);
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.filter-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.filter-label {
+  font-size: 10px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  align-self: center;
+  min-width: fit-content;
+  margin-right: 4px;
+}
+.fbtn {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 5px 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.fbtn:hover { border-color: var(--gold-dim); color: var(--gold); }
+.fbtn.active { color: var(--gold2); border-color: var(--gold); background: var(--surface3); }
+.fbtn.f-vojna.active { border-color: var(--c-vojna-b); color: #f09090; background: #1f0808; }
+.fbtn.f-politicki.active { border-color: var(--c-politicki-b); color: #90b8e0; background: #080c18; }
+.fbtn.f-prekretnica.active { border-color: var(--c-prekretnica-b); color: var(--gold2); background: #1a1200; }
+.fbtn.f-holokaust.active { border-color: var(--c-holokaust-b); color: #c090c0; background: #100810; }
+.fbtn.f-pacifik.active { border-color: var(--c-pacifik-b); color: #80d0a8; background: #041410; }
+
+/* STATS BAR */
+.stats-bar {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 14px 20px 0;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.stats-count {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+.stats-count span { color: var(--gold); }
+
+/* MAIN */
+.main-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+/* YEAR GROUP */
+.year-group { margin-bottom: 8px; }
+.year-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  margin-top: 8px;
+}
+.year-badge {
+  background: var(--surface2);
+  border: 1px solid var(--gold-dim);
+  border-radius: 6px;
+  padding: 6px 18px;
+  font-size: 20px;
+  color: var(--gold2);
+  letter-spacing: 3px;
+  font-weight: normal;
+  white-space: nowrap;
+}
+.year-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold-dim), transparent);
+}
+
+/* TIMELINE */
+.timeline {
+  position: relative;
+  padding-left: 28px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--border2), var(--border2));
+}
+
+/* EVENT */
+.event {
+  position: relative;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.event::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 18px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--border2);
+  background: var(--bg);
+  transition: all 0.2s;
+  z-index: 1;
+}
+.event.cat-vojna::before       { border-color: var(--c-vojna-b); }
+.event.cat-politicki::before   { border-color: var(--c-politicki-b); }
+.event.cat-prekretnica::before { border-color: var(--c-prekretnica-b); background: var(--c-prekretnica-b); }
+.event.cat-holokaust::before   { border-color: var(--c-holokaust-b); }
+.event.cat-pacifik::before     { border-color: var(--c-pacifik-b); }
+.event.open::before { transform: scale(1.4); }
+
+.event-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--border2);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.event.cat-vojna .event-card       { border-left-color: var(--c-vojna-b); }
+.event.cat-politicki .event-card   { border-left-color: var(--c-politicki-b); }
+.event.cat-prekretnica .event-card { border-left-color: var(--c-prekretnica-b); }
+.event.cat-holokaust .event-card   { border-left-color: var(--c-holokaust-b); }
+.event.cat-pacifik .event-card     { border-left-color: var(--c-pacifik-b); }
+
+.event:hover .event-card,
+.event.open .event-card {
+  border-color: var(--border2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+.event-head {
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.event-date {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  min-width: 80px;
+  padding-top: 2px;
+  letter-spacing: 0.5px;
+}
+.event-main { flex: 1; }
+.event-title {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+.event.cat-prekretnica .event-title { color: var(--gold2); }
+
+.event-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.cat-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+  border: 1px solid;
+}
+.cat-badge.vojna       { background: #1f0808; color: #f09090; border-color: var(--c-vojna-b); }
+.cat-badge.politicki   { background: #080c18; color: #90b8e0; border-color: var(--c-politicki-b); }
+.cat-badge.prekretnica { background: #1a1200; color: var(--gold2); border-color: var(--c-prekretnica-b); }
+.cat-badge.holokaust   { background: #100810; color: #c090c0; border-color: var(--c-holokaust-b); }
+.cat-badge.pacifik     { background: #041410; color: #80d0a8; border-color: var(--c-pacifik-b); }
+
+.event-arrow {
+  color: var(--muted);
+  font-size: 13px;
+  padding-top: 2px;
+  transition: transform 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.event.open .event-arrow { transform: rotate(90deg); color: var(--gold); }
+
+/* EXPANDED */
+.event-body {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+  margin-top: 0;
+}
+.event.open .event-body { display: block; }
+.event-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.event-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+.event-meta-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+.event-meta-label {
+  font-size: 10px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.event-meta-val {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+}
+.event-significance {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(201,162,39,0.06);
+  border: 1px solid rgba(201,162,39,0.15);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--gold-dim);
+  font-style: italic;
+  line-height: 1.5;
+}
+.event-significance::before { content: '★  '; color: var(--gold); }
+
+/* EMPTY */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 14px;
+}
+.no-results span { display: block; font-size: 32px; margin-bottom: 12px; }
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 24px;
+  border-top: 1px solid var(--border2);
+  font-size: 12px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .header-title h1 { font-size: 15px; letter-spacing: 1px; }
+  .header-spacer { width: 50px; }
+  .event-head { gap: 8px; }
+  .event-date { min-width: 64px; font-size: 10px; }
+  .event-title { font-size: 14px; }
+  .event-meta-grid { grid-template-columns: 1fr; }
+  .year-badge { font-size: 16px; padding: 5px 12px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../index.html" class="header-back">&#8592; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#9876; II SVETSKI RAT</h1>
+    <p>1939 &#8212; 1945</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="filters-wrap">
+  <div class="filter-row">
+    <span class="filter-label">GODINA:</span>
+    <button class="fbtn active" data-year="sve" onclick="setFilter('year','sve',this)">Sve</button>
+    <button class="fbtn" data-year="1939" onclick="setFilter('year','1939',this)">1939</button>
+    <button class="fbtn" data-year="1940" onclick="setFilter('year','1940',this)">1940</button>
+    <button class="fbtn" data-year="1941" onclick="setFilter('year','1941',this)">1941</button>
+    <button class="fbtn" data-year="1942" onclick="setFilter('year','1942',this)">1942</button>
+    <button class="fbtn" data-year="1943" onclick="setFilter('year','1943',this)">1943</button>
+    <button class="fbtn" data-year="1944" onclick="setFilter('year','1944',this)">1944</button>
+    <button class="fbtn" data-year="1945" onclick="setFilter('year','1945',this)">1945</button>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">VRSTA:</span>
+    <button class="fbtn active" data-cat="sve" onclick="setFilter('cat','sve',this)">Sve</button>
+    <button class="fbtn f-vojna" data-cat="vojna" onclick="setFilter('cat','vojna',this)">&#9876; Vojna operacija</button>
+    <button class="fbtn f-politicki" data-cat="politicki" onclick="setFilter('cat','politicki',this)">&#9670; Politi&#269;ki</button>
+    <button class="fbtn f-prekretnica" data-cat="prekretnica" onclick="setFilter('cat','prekretnica',this)">&#9733; Prekretnica</button>
+    <button class="fbtn f-holokaust" data-cat="holokaust" onclick="setFilter('cat','holokaust',this)">&#9632; Holokaust</button>
+    <button class="fbtn f-pacifik" data-cat="pacifik" onclick="setFilter('cat','pacifik',this)">&#9654; Pacifik</button>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-count">Prikazano: <span id="countShown">0</span> od <span id="countTotal">0</span> doga&#273;aja</div>
+</div>
+
+<div class="main-wrap" id="mainWrap"></div>
+
+<footer>&#9830; II Svetski rat &#9830; 1939&#8211;1945 &#9830;</footer>
+
+<script>
+var EVENTS = [
+  // ── 1939 ──────────────────────────────────────────
+  {
+    year: 1939, date: '1. septembar',
+    title: 'Nema\u010dka napada Poljsku', cat: 'vojna',
+    desc: 'U zoru 1. septembra 1939. nema\u010dke trupe uz podr\u0161ku Luftvafe pre\u0161le su granicu Poljske. Napad je izvr\u0161en bez objave rata. Primenjena je nova taktika munjevitog rata (\u201eBlitzkrieg\u201c) koja je spojila tenkove, pe\u0161adiju i vazduhoplovstvo u brze probojne operacije.',
+    place: 'Poljska',
+    figures: 'Adolf Hitler, general Fedor fon Bok, general Gerd fon Rundstedt',
+    result: 'Po\u010detak II svetskog rata; Varšava pala 27. septembra',
+    significance: 'Zvani\u010dni po\u010detak II svetskog rata u Evropi. Blickrig strategija pokazala svoju razornu efikasnost.'
+  },
+  {
+    year: 1939, date: '3. septembar',
+    title: 'Britanija i Francuska objavljuju rat', cat: 'politicki',
+    desc: 'Nakon nema\u010dkog odbijanja da povla\u010di trupe iz Poljske, Velika Britanija i Francuska objavile su rat Nema\u010dkoj. Rat je za\u010duo ve\u0107inu Evropljana koji su se nadali da \u0107e do\u0107i do diplomatskog re\u0161enja.',
+    place: 'London, Pariz',
+    figures: 'Neville Chamberlen, Edouard Daladier',
+    result: 'Rat postaje svetski sukob',
+    significance: 'Sukob koji je po\u010deo kao regionalni pretvara se u evropski, a potom i svetski rat.'
+  },
+  {
+    year: 1939, date: '17. septembar',
+    title: 'SSSR napada Poljsku sa istoka', cat: 'vojna',
+    desc: 'Na osnovu tajnog protokola pakta Molotov-Ribentrop, Crvena armija u\u0161la je u isto\u010dnu Poljsku. Ova akcija bila je koordinisana sa nema\u010dkim napadom sa zapada, \u010dime je Poljska su\u0161tinski opkoljena sa dve strane.',
+    place: 'Isto\u010dna Poljska',
+    figures: 'Josif Staljin, general Mihail Kovalev',
+    result: 'Podela Poljske izme\u0111u Nema\u010dke i SSSR-a',
+    significance: 'Pakt Molotov-Ribentrop otkrio je svoju pravu prirodu — tajnu podelu isto\u010dne Evrope.'
+  },
+  {
+    year: 1939, date: '30. novembar',
+    title: 'SSSR napada Finsku \u2014 Zimski rat', cat: 'vojna',
+    desc: 'Staljin je tra\u017eio od Finske ustupanje dela teritorija u zamenu za kompenzaciju drugde. Nakon odbijanja, Crvena armija napala je Finsku. Finci su, uprkos enormnoj nadmo\u0107i protivnika, 3,5 meseca herojski odoljevali.',
+    place: 'Finska',
+    figures: 'Josif Staljin, maršal Karl Gustav Maneraheim',
+    result: 'Moskovskim mirom (mart 1940) Finska ustupila deo Karelije',
+    significance: 'Lo\u0161i rezultati Crvene armije ubedili su Hitlera da \u0107e SSSR lako biti pobe\u0111en — gre\u0161ka koja \u0107e ga ko\u0161tati rata.'
+  },
+  // ── 1940 ──────────────────────────────────────────
+  {
+    year: 1940, date: '9. april',
+    title: 'Nema\u010dka zauzima Dansku i Norvešku', cat: 'vojna',
+    desc: 'Danska je kapitulirala za samo \u010detiri sata. Norveška je pru\u017eila otpor, ali uz britansku pomo\u0107 nije mogla zaustaviti nema\u010dko napredovanje. Kampanja je pokazala nema\u010dku mo\u0107 amfibijske operacije.',
+    place: 'Danska, Norve\u0161ka',
+    figures: 'General Nikolaus fon Falkenhorst, norveški kralj Hakon VII',
+    result: 'Danska odmah kapitulirala; Norveška do juna 1940.',
+    significance: 'Nema\u010dka je osigurala pristup Severnom moru i skandinavskim sirovinama, pre svega \u017eeleznoj rudi.'
+  },
+  {
+    year: 1940, date: '10. maj',
+    title: 'Blickrig na zapadu \u2014 pad Francuske', cat: 'prekretnica',
+    desc: 'Nema\u010dka vojska pro\u0161la je kroz Ardene — \u0161umovitu oblast koju Francuzi nisu \u010dvrsto branili. Za samo 6 nedelja porazila je francusku i britansku vojsku. Pariz je pao 14. juna 1940. bez borbe.',
+    place: 'Francuska, Belgija, Holandija',
+    figures: 'General Erih fon Manštajn, general Hajnc Guderian, general Maksim Vegand',
+    result: 'Primirje sa Francuskom 22. juna 1940.',
+    significance: 'Najbrži poraz velike sile u modernoj istoriji. Nema\u010dka dominira zapadnom Evropom.'
+  },
+  {
+    year: 1940, date: '26. maj \u2013 4. jun',
+    title: 'Evakuacija kod Dinkera', cat: 'prekretnica',
+    desc: 'Oko 338.000 britanskih i savezni\u010dkih vojnika okru\u017eeno je kod francuske luke Dinker. U jednoj od najve\u0107ih evakuacija u istoriji, civili su sa\u010duvalim brodicama uz ratnu mornaricu prevezli vojnike u Britaniju. Churchill je to opisao kao \u201echudo izbavljenja\u201c.',
+    place: 'Dinker (Dunkirk), Francuska',
+    figures: 'Admirala Bertram Remzi, Vinston \u010c\u00e9r\u010dil',
+    result: '338.226 vojnika evakuisano',
+    significance: 'Britanija sa\u010duvala vojsku. Da je uni\u0161tena, verovatno bi tra\u017eila mir sa Hitlerom.'
+  },
+  {
+    year: 1940, date: 'jul \u2013 oktobar',
+    title: 'Bitka za Britaniju', cat: 'prekretnica',
+    desc: 'Hitler je planirao invaziju na Britaniju (Operacija Morski lav), ali je prvo trebalo uni\u0161titi britansko vazduhoplovstvo RAF. Tokom 4 meseca, Luftvaffe i RAF vodili su najve\u0107e vazdušne bitke u istoriji. RAF je odbranio britansko nebo.',
+    place: 'Britanska ostrva',
+    figures: 'Air Chief Marshal Hugh Daunding, Vilhelm Bauer, Vinston \u010c\u00e9r\u010dil',
+    result: 'Hitler odustao od invazije na Britaniju',
+    significance: 'Prva nema\u010dka strategijska pora\u017enost. Churchill: \u201eNikada u istoriji sukoba toliko mnogo nije dugovalo toliko malobrojnima.\u201c'
+  },
+  {
+    year: 1940, date: '22. jun',
+    title: 'Francuska potpisuje primirje', cat: 'politicki',
+    desc: 'Primirje je potpisano u šumici Kompjenjskog šumarije — simboli\u010dni isto mesti gde je Nema\u010dka kapitulirala 1918. Hitler je li\u010dno dolazio na ceremoniju. Severnom Francuskom vladala je Nema\u010dka, a ju\u017edom marionetski re\u017eim u Višiju.',
+    place: 'Šuma Kompjenj, Francuska',
+    figures: 'Adolf Hitler, general Vilhelm Kajtel, general \u010carl Huntzinger',
+    result: 'Podela Francuske na okupiranu zonu i Vishi re\u017eim',
+    significance: 'Hitler se osveti za poni\u017eenje Nema\u010dke iz 1918. Generalni de Gol iz Londona poziva na nastavak otpora.'
+  },
+  // ── 1941 ──────────────────────────────────────────
+  {
+    year: 1941, date: '6. april',
+    title: 'Nema\u010dka napada Jugoslaviju i Gr\u010dku', cat: 'vojna',
+    desc: 'Nakon što je Jugoslavija odbila da prihvati Trojni pakt, Nema\u010dka je uputila ultimatum, a potom napala. Srbija je bila bombardovana bez objave rata 6. aprila na Uskrs. Kraljevina Jugoslavija kapitulirala je 17. aprila 1941.',
+    place: 'Balkansko poluostrvo',
+    figures: 'General Vilhelm Lis, general Maksimilijan fon Vajks',
+    result: 'Pad Jugoslavije za 11 dana; Gr\u010dka do maja 1941.',
+    significance: 'Po\u010detak \u010detvorogodišnje okupacije Srbije i rata/revolucije na prostoru Jugoslavije.'
+  },
+  {
+    year: 1941, date: '22. jun',
+    title: 'Operacija Barbarosa — napad na SSSR', cat: 'prekretnica',
+    desc: 'Nema\u010dka, Italija, Rumunija, Ma\u0111arska i Finska napale su SSSR du\u017e 2.900 km fronta. Bila je to najve\u0107a kopnena vojna operacija u istoriji \u010dove\u010danstva — 4 miliona vojnika. Staljin je u po\u010detku bio u šoku od napada.',
+    place: 'Isto\u010dna Evropa, zapadu SSSR-a',
+    figures: 'Adolf Hitler, Josif Staljin, general Georgij \u017dukov, general Fjodor fon Bok',
+    result: 'Nema\u010dka do decembra stigla do Moskve, ali nije je zauzela',
+    significance: 'Otvaranje Isto\u010dnog fronta \u2014 najkrvavijeg ratišta u istoriji. Ovde je odlu\u010dena sudbina II svetskog rata.'
+  },
+  {
+    year: 1941, date: '7. decembar',
+    title: 'Japanski napad na Perl Harbor', cat: 'prekretnica',
+    desc: 'Japanska mornarica bez prethodne objave rata iznenada napala je ameri\u010dku bazu Perl Harbor na Havajima. Poginulo je 2.403 Ameri\u010dkana, uni\u0161teno ili ošte\u0107eno 19 brodova i 188 aviona. Japan je istovremeno napao Filipine, Malaju i Hongkong.',
+    place: 'Perl Harbor, Havaji, SAD',
+    figures: 'Admiral Isuroku Yamamoto, admiral Huang \u010cuniti Nagumo',
+    result: 'Uni\u0161tena je ameri\u010dka Pacifi\u010dka flota (brodovi); nosači aviona bili su na moru',
+    significance: 'SAD ulaze u rat. Roosevelt: \u201eDan koji \u0107e \u017eiveti u sramoti.\u201c Rat postaje globalni sukob.'
+  },
+  {
+    year: 1941, date: '8. decembar',
+    title: 'SAD ulaze u II svetski rat', cat: 'politicki',
+    desc: 'Dan nakon napada na Perl Harbor, Kongres SAD jednoglasno je objavio rat Japanu. Tri dana kasnije, Nema\u010dka i Italija objavile su rat SAD-u. Ameri\u010dka industrija i vojska po\u010dele su da se mobilizuju u ogromnim razmerima.',
+    place: 'Va\u0161ington D.C.',
+    figures: 'Predsednik Frenklin D. Ruzvelt, Kongres SAD',
+    result: 'SAD zvani\u010dno u ratu sa Japanom, Nema\u010dkom i Italijom',
+    significance: 'Ameri\u010dki ulazak u rat presudio je kona\u010dnoj pobedi Saveznika. SAD su imale najve\u0107u industrijsku mo\u0107 na svetu.'
+  },
+  // ── 1942 ──────────────────────────────────────────
+  {
+    year: 1942, date: '20. januar',
+    title: 'Vanzeejska konferencija', cat: 'holokaust',
+    desc: 'Na tajnoj konferenciji u predgra\u0111u Berlina, visokoranguireni nacisti\u010dki zvani\u010dnici dogovorili su tzv. \u201eKona\u010dno re\u0161enje jevrejskog pitanja\u201c \u2014 sistemski industrijalizovano uni\u0161tavanje evropskih Jevreja. Konferencija je trajala svega 90 minuta.',
+    place: 'Vanzee, Berlin, Nema\u010dka',
+    figures: 'Rajnhard Hajdrih, Adolf Ajhman, visokoranguireni SS oficiri',
+    result: 'Organizovano planirano uništavanje 11 miliona Jevreja',
+    significance: 'Po\u010detak sistemati\u010dnog Holokausta. Do kraja rata ubijeno je oko 6 miliona Jevreja i milioni Srba, Roma, Poljaka i dr.'
+  },
+  {
+    year: 1942, date: '4\u20137. jun',
+    title: 'Bitka kod Midveja', cat: 'prekretnica',
+    desc: 'Ameri\u010dka mornari\u010dka vazdušna snaga presrela je japansku flotu koja je napadala ostrvo Midvej. Ameri\u010dki torpedni i bombarderski avioni potopili su 4 japanska nosa\u010da aviona — osnovu japanske pacifi\u010dke mo\u0107i.',
+    place: 'Pacifik, ostrvo Midvej',
+    figures: 'Admiral \u010dester Nimitz, admiral Isoroku Yamamoto',
+    result: 'Uništena japanska nosačka mo\u0107; Japan na defanzivi',
+    significance: 'Prekretnica u Pacifi\u010dkom ratu. Japan nije mogao da nadoknadi izgubljene nosa\u010de aviona i iskusne pilote.'
+  },
+  {
+    year: 1942, date: 'oktobar \u2013 novembar',
+    title: 'Bitka kod El Alamejna', cat: 'prekretnica',
+    desc: 'General Bernard Montgomeri sa britans kom 8. armijom porazio je Romelove afri\u010dke snage u Egiptu. Bila su to dva sraza — prvi se završio nerešeno (jul), a drugi kona\u010dnom britanskom pobedom (oktobar\u2013novembar).',
+    place: 'El Alamejn, Egipat',
+    figures: 'General Bernard Montgomeri, general Ervin Romel (\u201ePustinjska lisica\u201c)',
+    result: 'Romel povla\u010di ostatke vojske prema Libiji i Tunisu',
+    significance: 'Churchill: \u201ePre El Alamejna nismo nikad pobedili. Posle El Alamejna nismo nikad izgubili.\u201c'
+  },
+  {
+    year: 1942, date: '23. avgust',
+    title: 'Bitka za Staljingrad \u2014 po\u010detak', cat: 'prekretnica',
+    desc: 'Nema\u010dka 6. armija generala Paulusa napala je Staljingrad na Volgi. Grad je bio strategi\u010dki i simboli\u010dki klju\u010dan — nosio je Staljinovo ime. Po\u010dela je jedna od najkrvavijih gradskih bitki u istoriji, borba ulica za ulicu, ku\u0107a za ku\u0107u.',
+    place: 'Staljingrad (danas Volgograd), SSSR',
+    figures: 'General Fridrih Paulus, general Vasilij \u010dujkov',
+    result: 'Opsada trajala do februara 1943.',
+    significance: 'Najkrvavija bitka rata — oko 2 miliona mrtvih. Ovde je slomljena snaga Vermahta.'
+  },
+  // ── 1943 ──────────────────────────────────────────
+  {
+    year: 1943, date: '2. februar',
+    title: 'Nema\u010dka predaja kod Staljingrada', cat: 'prekretnica',
+    desc: 'General Fridrih Paulus sa ostatkom 6. armije (91.000 vojnika) predao se Crvenoj armiji. Hitler je odbio planove za proboj. Bio je to prvi veliki poraz Nema\u010dke na Isto\u010dnom frontu i po\u010detak nema\u010dkog povla\u010denja.',
+    place: 'Staljingrad, SSSR',
+    figures: 'Feldmaršal Fridrih Paulus, general Georgij \u017dukov, general Aleksandar Vasilevski',
+    result: '91.000 nema\u010dkih vojnika zarobljeno; ve\u0107ina nikad nije vratila se u Nema\u010dku',
+    significance: 'Psihološki preokret rata. Za Nema\u010dku — po\u010detak kraja. Za SSSR — dokaz da Vermahtu mo\u017ee biti naneta katastrofalna pora\u017e.'
+  },
+  {
+    year: 1943, date: 'jul',
+    title: 'Bitka kod Kurska — najve\u0107a tenkovska bitka', cat: 'vojna',
+    desc: 'Nema\u010dka je pokrenula operaciju Citadela da bi eliminisala istureni fronton kod Kurska. SSSR je unapred znao za plan (zahvaljuju\u0107i obaave\u0161tajcima) i postavila je duboku odbranu. U bitki je u\u010destvovalo 6.000 tenkova.',
+    place: 'Kursk, SSSR',
+    figures: 'Generala Erich fon Manštajn, general Konstantin Rokosovski',
+    result: 'Nema\u010dka ofanziva zaustavljena; Crvena armija preuzela inicijativu',
+    significance: 'Poslednja nema\u010dka strategijska ofanziva na Isto\u010dnom frontu. Od tada SSSR napada, Nema\u010dka se brani.'
+  },
+  {
+    year: 1943, date: '10. jul',
+    title: 'Saveznici se iskrcavaju na Siciliji', cat: 'vojna',
+    desc: 'Operacija Haskij bila je najve\u0107a amfibijska operacija u istoriji do tada — 160.000 vojnika iskrcalo se na Siciliji. Ostrvo je zauzeto za 38 dana. Mussolini je svrgnutan 10 dana nakon iskrcavanja.',
+    place: 'Sicilija, Italija',
+    figures: 'General Dvajt Ajzenhauer, general Bernard Montgomeri, general Džordž Paton',
+    result: 'Sicilija zauzeta; Musolini svrgnut',
+    significance: 'Saveznički povratak u Evropu. Mussolinijev pad pokazao da Osa nije neranjiva.'
+  },
+  {
+    year: 1943, date: '8. septembar',
+    title: 'Italija kapitulira', cat: 'politicki',
+    desc: 'Tajni pregovori Badoljevog re\u017eima sa Saveznicima doveli su do kapitulacije Italije. Nema\u010dka je brzo reagovala i zauzela severnu i srednju Italiju. Italija je pro\u0161la iz ratnog saveznika Nema\u010dke u kobeliperenata Saveznika.',
+    place: 'Italija',
+    figures: 'Maršal Pietro Badoljo, General \u010dartls Kasting, nema\u010dki general Albret Keseling',
+    result: 'Italija kapitulirala; Nema\u010dka zauzela severni i centralni deo',
+    significance: 'Raspad Sila Osovine. Borbe u Italiji nastavile se do maja 1945.'
+  },
+  {
+    year: 1943, date: '28. novembar',
+    title: 'Teheranska konferencija \u2014 \u201eVelika trojka\u201c', cat: 'politicki',
+    desc: 'Prvi susret trojice velikih savezni\u010dkih lidera — Ruzvelta, \u010c\u00e9r\u010dila i Staljina. Dogovoreno je otvaranje Drugog fronta u Normandiji (prole\u0107e 1944) i budu\u0107a podela uticajnih sfera u postratnom svetu.',
+    place: 'Teheran, Iran',
+    figures: 'Frenklin D. Ruzvelt, Vinston \u010c\u00e9r\u010dil, Josif Staljin',
+    result: 'Planiran Dan D za 1944.; naznake podele postratnog sveta',
+    significance: 'Staljin dobio garanciju za otvaranje Zapadnog fronta. Ovde je po\u010deo dizajn postratnog svetskog poretka.'
+  },
+  // ── 1944 ──────────────────────────────────────────
+  {
+    year: 1944, date: '6. jun',
+    title: 'Dan D — iskrcavanje u Normandiji', cat: 'prekretnica',
+    desc: 'Operacija Overlord bila je najve\u0107a amfibijska invazija u istoriji — 156.000 vojnika iskrcalo se na pet normandijskih pla\u017ea. Prethodila je najve\u0107a vazdušna i morska bombarderska kampanja. Nema\u010dka odbrana bila je žilava, ali saveznici su se probili.',
+    place: 'Normandija, Francuska',
+    figures: 'General Dvajt Ajzenhauer, feldmaršal Ervin Romel, general Omar Bredli, general Bernard Montgomeri',
+    result: 'Saveznici stvorili trupci na Normandiji; po\u010detak oslobo\u0111enja Francuske',
+    significance: 'Otvaranje Zapadnog fronta. Nema\u010dka sada vodi borbe na tri fronta: Isto\u010dnom, Zapadnom i u Italiji.'
+  },
+  {
+    year: 1944, date: '20. jul',
+    title: 'Atentat na Hitlera \u2014 Operacija Valkira', cat: 'politicki',
+    desc: 'Grupa visokih nema\u010dkih oficira pod vo\u0111stvom grofa fon Štaufenberga postavila je bombu u Hitlerovom shtabu Vulja. Hitler je pre\u017eiveo jer je bomba bila ispod masivnog stola koji je apsorbovao deo eksplozije. Urota je brzo srušena.',
+    place: 'Hitlerov stab "Vulja" (Wolfsschanze), Isto\u010dna Prusija',
+    figures: 'Grof Klaus fon Štaufenberg, feldmaršal Ervin Romel (implicirani), general Fridrih Olbriht',
+    result: 'Hitler pre\u017eiveo; 4.980 urotnika pogubljeno, me\u0111u njima fon Štaufenberg',
+    significance: 'Dokaz da me\u0111u nema\u010dkim generalima postoji unutrašnja opozicija Hitlerovom re\u017eimu.'
+  },
+  {
+    year: 1944, date: '25. avgust',
+    title: 'Oslobo\u0111enje Pariza', cat: 'vojna',
+    desc: 'Nema\u010dki komandant Pariza general fon Holtits odbio je Hitlerov nare\u0111enje da sravni grad. Slobodne fran\u010duske snage generala de Gola, uz podr\u0161ku ameri\u010dkih jedinica, ušle su u Pariz. Milioni Parižana slavili su na ulicama.',
+    place: 'Pariz, Francuska',
+    figures: 'General \u0160arl de Gol, general Filip Lekler, general Deitri\u0161 fon Holtic',
+    result: 'Pariz slobodan; Francuska vlada se vra\u0107a u prestonicu',
+    significance: 'Simbol oslobo\u0111enja Evrope i poraz nacisti\u010dke kontrole nad Zapadnom Evropom.'
+  },
+  {
+    year: 1944, date: 'decembar',
+    title: 'Bitka za Ardene \u2014 poslednja nema\u010dka ofanziva', cat: 'vojna',
+    desc: 'Hitler je pokrenuo poslednju veliku ofanzivu na Zapadnom frontu kroz šumovite Ardene u Belgiji. Nema\u010dke snage su napravile duboki proboj, ali saveznici su se oporavili. Bitka je bila jedna od najkrvavijih za ameri\u010dke snage.',
+    place: 'Ardeni, Belgija',
+    figures: 'Feldmaršal Gerd fon Rundstedt, general Omar Bredli, general Entoni Mejkols',
+    result: 'Nema\u010dka ofanziva zaustavljena; ogromni gubici',
+    significance: 'Poslednji nema\u010dki udarac na Zapadu. Nakon toga Saveznici krenuli prema Berlinu.'
+  },
+  // ── 1945 ──────────────────────────────────────────
+  {
+    year: 1945, date: '27. januar',
+    title: 'Oslobo\u0111enje Aušvica', cat: 'holokaust',
+    desc: 'Vojnici Crvene armije ušli su u logoraški kompleks Aušvic-Birkenau u Poljskoj. Našli su oko 7.000 pre\u017eivelih, ve\u0107inu u agoniji. Pronašli su hiljade kilograma kose, milion pari obu\u0107e i stotine hiljada odevnih predmeta — dokazi neviđenih zlo\u010dina.',
+    place: 'Aušvic-Birkenau, Poljska',
+    figures: 'Vojnici 60. armije Crvene armije, Rudolf H\u00f6s (komandant logora)',
+    result: 'Svet suo\u010den sa razmeram Holokausta',
+    significance: 'Simbol holokausta — u Aušvicu je ubijeno oko 1,1 milion ljudi, od toga 900.000 Jevreja. 27. januar je Me\u0111unarodni dan se\u0107anja na \u017drtve holokausta.'
+  },
+  {
+    year: 1945, date: '4\u201311. februar',
+    title: 'Jaltska konferencija', cat: 'politicki',
+    desc: 'Poslednji sastanak \u201eVelike trojke\u201c na Krimu. Dogovorena je podela Nema\u010dke na okupacione zone, pravo SSSR-a na sfere uticaja u Isto\u010dnoj Evropi, i osnivanje Ujedinjenih nacija. Postavljeni temelji Hladnog rata.',
+    place: 'Jalta, Krim, SSSR',
+    figures: 'Frenklin D. Ruzvelt, Vinston \u010c\u00e9r\u010dil, Josif Staljin',
+    result: 'Sporazum o postratnom ure\u0111enju sveta; podela Nema\u010dke na zone',
+    significance: 'Konferencija koja je odredila sudbinu Evrope na narednih 45 godina — podela na Istok i Zapad.'
+  },
+  {
+    year: 1945, date: '30. april',
+    title: 'Hitlerova smrt', cat: 'politicki',
+    desc: 'Dok su sovjetski vojnici bili na svega 500 metara od njegovog bunkera ispod Kancelara u Berlinu, Adolf Hitler se ubio zajedno sa Evom Braun — brakom sklopljenim dan ranije. Telo je spaljeno u skladu sa Hitlerovim nare\u0111enjem.',
+    place: 'F\u00fchrerbunker, Berlin, Nema\u010dka',
+    figures: 'Adolf Hitler, Eva Braun',
+    result: 'Grosadmiral Karl D\u00f6nic imenovan za naslednika; predaja uskoro usledila',
+    significance: 'Kraj nacisti\u010dkog re\u017eima. Nema\u010dke trupe nastavile su kratko da se bore, ali je kraj bio neizbežan.'
+  },
+  {
+    year: 1945, date: '8. maj',
+    title: 'Dan pobede u Evropi \u2014 V-E Dan', cat: 'prekretnica',
+    desc: 'Nema\u010dka je potpisala bezuslovnu kapitulaciju. Ratifikacija potpisana u Reims-u (7. maja) i u Berlinu (8. maja). Milioni Evropljana slavili su na ulicama. Rat u Evropi je završen, ali na Pacifiku se nastavljao.',
+    place: 'Reims, Francuska; Berlin, Nema\u010dka',
+    figures: 'Feldmaršal Vilhelm Kajtel, General Dvajt Ajzenhauer, Maršal Georgij \u017dukov',
+    result: 'Bezuslovna nema\u010dka kapitulacija',
+    significance: 'Kraj šest godina rata u Evropi. Po\u010dinje era suđenja za ratne zlo\u010dine i rekonstrukcije Evrope.'
+  },
+  {
+    year: 1945, date: '6. avgust',
+    title: 'Atomska bomba na Hirošimu', cat: 'prekretnica',
+    desc: 'Ameri\u010dki bombarder B-29 \u201eEnola Gej\u201c bacio je prvu atomsku bombu ikad upotrebljenu u ratu na japanski grad Hirošimu. Oko 80.000 ljudi poginulo je trenutno, a isti toliko od posledica zra\u010denja u narednim mesecima.',
+    place: 'Hirošima, Japan',
+    figures: 'Predsednik Hari Truman, pukovnik Pol Tib\u00e9ts (pilot \u201eEnola Geja\u201c)',
+    result: 'Grad sravnjen; Japan nije odmah kapitulirao',
+    significance: 'Po\u010detak nuklearnog doba. Jedna bomba uni\u0161tila čitav grad — oru\u017eje koje je zauvek promenilo ratovanje i politiku.'
+  },
+  {
+    year: 1945, date: '9. avgust',
+    title: 'Atomska bomba na Nagasaki', cat: 'vojna',
+    desc: 'Tri dana nakon Hirošime, druga atomska bomba ba\u010dena je na luku Nagasaki. Oko 40.000 ljudi poginulo je trenutno. Istog dana SSSR je objavio rat Japanu i napao Mandžuriju, čime je Japan ostao bez saveznika.',
+    place: 'Nagasaki, Japan',
+    figures: 'Predsednik Hari Truman, major \u010carls Svini (pilot)',
+    result: 'Japanski car Hirohito naredio kapitulaciju',
+    significance: 'Druga i poslednja upotreba nuklearnog oru\u017eja u istoriji. Debate o nu\u017enosti i etici traju do danas.'
+  },
+  {
+    year: 1945, date: '2. septembar',
+    title: 'Japan kapitulira \u2014 Kraj II svetskog rata', cat: 'prekretnica',
+    desc: 'Na palubi ameri\u010dkog bojnog broda USS Missouri u Tokijskom zalivu, Japan je potpisao bezuslovnu kapitulaciju. Generala Daglas Makarturu predsedavao je ceremonijom. Time je zvani\u010dno završen II svetski rat.',
+    place: 'USS Missouri, Tokijski zaliv, Japan',
+    figures: 'General Daglas Makarturu, ministar spoljnih poslova Mamoru Šigemicu, car Hirohito',
+    result: 'Bezuslovna japanska kapitulacija',
+    significance: 'Kraj najrazornijeg sukoba u istoriji \u010dove\u010danstva \u2014 56\u201385 miliona mrtvih, me\u0111u njima 6 miliona Jevreja u Holokaustu.'
+  }
+];
+
+// ── STATE & FILTERS ───────────────────────────────────
+var filterYear = 'sve';
+var filterCat  = 'sve';
+
+function setFilter(type, val, el) {
+  if (type === 'year') {
+    filterYear = val;
+    document.querySelectorAll('[data-year]').forEach(function(b) { b.classList.remove('active'); });
+  } else {
+    filterCat = val;
+    document.querySelectorAll('[data-cat]').forEach(function(b) { b.classList.remove('active'); });
+  }
+  el.classList.add('active');
+  render();
+}
+
+function render() {
+  var filtered = EVENTS.filter(function(e) {
+    var okYear = filterYear === 'sve' || String(e.year) === filterYear;
+    var okCat  = filterCat  === 'sve' || e.cat === filterCat;
+    return okYear && okCat;
+  });
+
+  document.getElementById('countShown').textContent = filtered.length;
+  document.getElementById('countTotal').textContent = EVENTS.length;
+
+  var wrap = document.getElementById('mainWrap');
+
+  if (!filtered.length) {
+    wrap.innerHTML = '<div class="no-results"><span>&#128269;</span>Nema doga\u0111aja za izabrane filtere.</div>';
+    return;
+  }
+
+  // Group by year
+  var byYear = {};
+  filtered.forEach(function(e) {
+    if (!byYear[e.year]) byYear[e.year] = [];
+    byYear[e.year].push(e);
+  });
+
+  var years = Object.keys(byYear).map(Number).sort(function(a,b){return a-b;});
+
+  var html = '';
+  years.forEach(function(yr) {
+    html += '<div class="year-group">';
+    html += '<div class="year-header"><div class="year-badge">' + yr + '</div><div class="year-line"></div></div>';
+    html += '<div class="timeline">';
+    byYear[yr].forEach(function(e, idx) {
+      var uid = 'ev-' + e.year + '-' + idx;
+      html += buildEvent(e, uid);
+    });
+    html += '</div></div>';
+  });
+
+  wrap.innerHTML = html;
+}
+
+function buildEvent(e, uid) {
+  var catLabels = {
+    vojna: 'Vojna operacija',
+    politicki: 'Politi\u010dki',
+    prekretnica: 'Prekretnica',
+    holokaust: 'Holokaust',
+    pacifik: 'Pacifik'
+  };
+  return '<div class="event cat-' + e.cat + '" id="' + uid + '" onclick="toggleEvent(\'' + uid + '\')">' +
+    '<div class="event-card">' +
+      '<div class="event-head">' +
+        '<div class="event-date">' + e.date + '</div>' +
+        '<div class="event-main">' +
+          '<div class="event-title">' + e.title + '</div>' +
+          '<div class="event-badges"><span class="cat-badge ' + e.cat + '">' + (catLabels[e.cat]||e.cat) + '</span></div>' +
+        '</div>' +
+        '<div class="event-arrow">&#9658;</div>' +
+      '</div>' +
+      '<div class="event-body">' +
+        '<div class="event-desc">' + e.desc + '</div>' +
+        '<div class="event-meta-grid">' +
+          (e.place   ? '<div class="event-meta-item"><div class="event-meta-label">Lokacija</div><div class="event-meta-val">' + e.place   + '</div></div>' : '') +
+          (e.figures ? '<div class="event-meta-item"><div class="event-meta-label">Klju\u010dne li\u010dnosti</div><div class="event-meta-val">' + e.figures + '</div></div>' : '') +
+          (e.result  ? '<div class="event-meta-item"><div class="event-meta-label">Ishod</div><div class="event-meta-val">' + e.result  + '</div></div>' : '') +
+        '</div>' +
+        (e.significance ? '<div class="event-significance">' + e.significance + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function toggleEvent(uid) {
+  var el = document.getElementById(uid);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.event.open').forEach(function(e) { e.classList.remove('open'); });
+  // Open clicked if it was closed
+  if (!isOpen) el.classList.add('open');
+}
+
+// Init
+render();
+</script>
+</body>
+</html>

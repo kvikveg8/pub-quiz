@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jugoslavija 1941–1945 — Pub Quiz</title>
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d0a08;
+  --surface: #181008;
+  --surface2: #221408;
+  --surface3: #2c1a0c;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #7a6015;
+  --text: #f0e6d0;
+  --muted: #9a8060;
+  --border: #3a2a12;
+  --border2: #4a3518;
+  --c-napad: #7a1a1a;
+  --c-napad-b: #b04040;
+  --c-zlocin: #2a2020;
+  --c-zlocin-b: #806060;
+  --c-otpor: #1a4020;
+  --c-otpor-b: #40904a;
+  --c-politicki: #1a2e5a;
+  --c-politicki-b: #4a70b0;
+  --c-oslobodenje: #5a4a10;
+  --c-oslobodenje-b: #c9a227;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 15% 0%, rgba(122,26,26,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 100%, rgba(64,144,74,0.06) 0%, transparent 55%);
+}
+
+/* HEADER */
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back {
+  color: var(--gold-dim);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.header-back:hover { color: var(--gold); border-color: var(--gold-dim); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 20px; color: var(--gold2); font-weight: normal; letter-spacing: 3px; }
+.header-title p { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 3px; }
+.header-spacer { width: 80px; }
+
+/* FILTERS */
+.filters-wrap {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border2);
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.filter-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.filter-label {
+  font-size: 10px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  align-self: center;
+  min-width: fit-content;
+  margin-right: 4px;
+}
+.fbtn {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 5px 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.fbtn:hover { border-color: var(--gold-dim); color: var(--gold); }
+.fbtn.active                   { color: var(--gold2); border-color: var(--gold); background: var(--surface3); }
+.fbtn.f-napad.active           { border-color: var(--c-napad-b); color: #f09090; background: #1a0808; }
+.fbtn.f-zlocin.active          { border-color: var(--c-zlocin-b); color: #c0a0a0; background: #100808; }
+.fbtn.f-otpor.active           { border-color: var(--c-otpor-b); color: #90d090; background: #080f08; }
+.fbtn.f-politicki.active       { border-color: var(--c-politicki-b); color: #90b8e0; background: #08080f; }
+.fbtn.f-oslobodenje.active     { border-color: var(--c-oslobodenje-b); color: var(--gold2); background: #141000; }
+
+/* STATS */
+.stats-bar {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 14px 20px 0;
+}
+.stats-count { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.stats-count span { color: var(--gold); }
+
+/* MAIN */
+.main-wrap { max-width: 900px; margin: 0 auto; padding: 24px 20px 60px; }
+
+/* YEAR GROUP */
+.year-group { margin-bottom: 8px; }
+.year-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  margin-top: 8px;
+}
+.year-badge {
+  background: var(--surface2);
+  border: 1px solid var(--gold-dim);
+  border-radius: 6px;
+  padding: 6px 18px;
+  font-size: 20px;
+  color: var(--gold2);
+  letter-spacing: 3px;
+  font-weight: normal;
+  white-space: nowrap;
+}
+.year-line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold-dim), transparent); }
+
+/* TIMELINE */
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border2);
+}
+
+/* EVENT */
+.event { position: relative; margin-bottom: 12px; cursor: pointer; }
+.event::before {
+  content: '';
+  position: absolute;
+  left: -24px; top: 18px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--border2);
+  background: var(--bg);
+  transition: all 0.2s;
+  z-index: 1;
+}
+.event.cat-napad::before       { border-color: var(--c-napad-b); }
+.event.cat-zlocin::before      { border-color: var(--c-zlocin-b); background: #1a0808; }
+.event.cat-otpor::before       { border-color: var(--c-otpor-b); }
+.event.cat-politicki::before   { border-color: var(--c-politicki-b); }
+.event.cat-oslobodenje::before { border-color: var(--c-oslobodenje-b); background: var(--c-oslobodenje-b); }
+.event.open::before { transform: scale(1.4); }
+
+.event-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--border2);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.event.cat-napad .event-card       { border-left-color: var(--c-napad-b); }
+.event.cat-zlocin .event-card      { border-left-color: var(--c-zlocin-b); }
+.event.cat-otpor .event-card       { border-left-color: var(--c-otpor-b); }
+.event.cat-politicki .event-card   { border-left-color: var(--c-politicki-b); }
+.event.cat-oslobodenje .event-card { border-left-color: var(--c-oslobodenje-b); }
+.event:hover .event-card,
+.event.open .event-card { box-shadow: 0 4px 16px rgba(0,0,0,0.6); }
+
+.event-head { padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px; }
+.event-date { font-size: 11px; color: var(--muted); white-space: nowrap; min-width: 80px; padding-top: 2px; letter-spacing: 0.5px; }
+.event-main { flex: 1; }
+.event-title { font-size: 15px; color: var(--text); line-height: 1.35; margin-bottom: 5px; }
+.event.cat-oslobodenje .event-title { color: var(--gold2); }
+.event-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.cat-badge {
+  font-size: 10px; padding: 2px 8px;
+  border-radius: 4px; letter-spacing: 1px; border: 1px solid;
+}
+.cat-badge.napad       { background: #1a0808; color: #f09090; border-color: var(--c-napad-b); }
+.cat-badge.zlocin      { background: #100808; color: #c0a0a0; border-color: var(--c-zlocin-b); }
+.cat-badge.otpor       { background: #080f08; color: #90d090; border-color: var(--c-otpor-b); }
+.cat-badge.politicki   { background: #08080f; color: #90b8e0; border-color: var(--c-politicki-b); }
+.cat-badge.oslobodenje { background: #141000; color: var(--gold2); border-color: var(--c-oslobodenje-b); }
+
+.event-arrow { color: var(--muted); font-size: 13px; padding-top: 2px; transition: transform 0.2s, color 0.2s; flex-shrink: 0; }
+.event.open .event-arrow { transform: rotate(90deg); color: var(--gold); }
+
+.event-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.event.open .event-body { display: block; }
+.event-desc { font-size: 13px; color: var(--muted); line-height: 1.65; margin-top: 12px; margin-bottom: 12px; }
+.event-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.event-meta-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+.event-meta-label { font-size: 10px; color: var(--gold-dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.event-meta-val { font-size: 12px; color: var(--text); line-height: 1.5; }
+.event-significance {
+  margin-top: 10px; padding: 10px 14px;
+  background: rgba(201,162,39,0.05); border: 1px solid rgba(201,162,39,0.12);
+  border-radius: 6px; font-size: 12px; color: var(--gold-dim); font-style: italic; line-height: 1.5;
+}
+.event-significance::before { content: '\2605\00A0\00A0'; color: var(--gold); }
+
+/* EMPTY */
+.no-results { text-align: center; padding: 60px 20px; color: var(--muted); font-style: italic; font-size: 14px; }
+.no-results span { display: block; font-size: 32px; margin-bottom: 12px; }
+
+footer { text-align: center; padding: 24px; border-top: 1px solid var(--border2); font-size: 12px; color: var(--gold-dim); letter-spacing: 2px; }
+
+@media (max-width: 600px) {
+  .header-title h1 { font-size: 14px; letter-spacing: 1px; }
+  .header-spacer { width: 50px; }
+  .event-date { min-width: 60px; font-size: 10px; }
+  .event-title { font-size: 14px; }
+  .event-meta-grid { grid-template-columns: 1fr; }
+  .year-badge { font-size: 16px; padding: 5px 12px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../index.html" class="header-back">&#8592; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#9876; JUGOSLAVIJA 1941&#8211;1945</h1>
+    <p>Otpor &#9830; Oslobo&#273;enje &#9830; Revolucija</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="filters-wrap">
+  <div class="filter-row">
+    <span class="filter-label">GODINA:</span>
+    <button class="fbtn active" data-year="sve" onclick="setFilter('year','sve',this)">Sve</button>
+    <button class="fbtn" data-year="1941" onclick="setFilter('year','1941',this)">1941</button>
+    <button class="fbtn" data-year="1942" onclick="setFilter('year','1942',this)">1942</button>
+    <button class="fbtn" data-year="1943" onclick="setFilter('year','1943',this)">1943</button>
+    <button class="fbtn" data-year="1944" onclick="setFilter('year','1944',this)">1944</button>
+    <button class="fbtn" data-year="1945" onclick="setFilter('year','1945',this)">1945</button>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">VRSTA:</span>
+    <button class="fbtn active" data-cat="sve" onclick="setFilter('cat','sve',this)">Sve</button>
+    <button class="fbtn f-napad" data-cat="napad" onclick="setFilter('cat','napad',this)">&#9876; Napad i okupacija</button>
+    <button class="fbtn f-zlocin" data-cat="zlocin" onclick="setFilter('cat','zlocin',this)">&#9632; Zlo&#269;ini i teror</button>
+    <button class="fbtn f-otpor" data-cat="otpor" onclick="setFilter('cat','otpor',this)">&#9733; Otpor i ustanak</button>
+    <button class="fbtn f-politicki" data-cat="politicki" onclick="setFilter('cat','politicki',this)">&#9670; Politi&#269;ki</button>
+    <button class="fbtn f-oslobodenje" data-cat="oslobodenje" onclick="setFilter('cat','oslobodenje',this)">&#9658; Oslobo&#273;enje</button>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-count">Prikazano: <span id="countShown">0</span> od <span id="countTotal">0</span> doga&#273;aja</div>
+</div>
+
+<div class="main-wrap" id="mainWrap"></div>
+
+<footer>&#9830; Jugoslavija u II svetskom ratu &#9830; 1941&#8211;1945 &#9830;</footer>
+
+<script>
+var EVENTS = [
+  // ── 1941 ──────────────────────────────────────────
+  {
+    year: 1941, date: '6. april',
+    title: 'Operacija 25 \u2014 Bombardovanje Beograda i napad na Jugoslaviju', cat: 'napad',
+    desc: 'U zoru 6. aprila, na Uskrs, nema\u010dko vazduhoplovstvo je bez objave rata bombardovalo Beograd u operaciji \u201eStrafgericht\u201c (\u201eKazna\u201c). Istovremeno su nema\u010dke, italijanske, ma\u0111arske i bugarske trupe napale Jugoslaviju sa svih strana du\u017e 3.000 km granice.',
+    place: 'Beograd i cela Jugoslavija',
+    figures: 'Adolf Hitler, general Vilhelm Lis, general Maksimilijan fon Vajks',
+    result: 'Beograd te\u0161ko o\u0161te\u0107en; procenjuje se 2.000\u201317.000 civilnih \u017ertava',
+    significance: 'Jedan od prvih primera masovnog bombardovanja civilnih ciljeva u Evropi. Hitler je posebno nare\u0111enje potpisao tek tri dana ranije.'
+  },
+  {
+    year: 1941, date: '10. april',
+    title: 'Proglašena Nezavisna Dr\u017Eava Hrvatska (NDH)', cat: 'napad',
+    desc: 'Dok su nema\u010dki tenkovi ulazili u Zagreb, Slavko Kvaternik je u ime usta\u0161kog pokreta proglasio Nezavisnu Dr\u017Eavu Hrvatsku. Ante Paveli\u0107 vratio se iz emigracije u Italiji i preuzeo vlast kao Poglavnik. NDH je obuhvatala Hrvatsku, BiH i deo Srbije.',
+    place: 'Zagreb',
+    figures: 'Ante Paveli\u0107 (Poglavnik), Slavko Kvaternik',
+    result: 'Formiran fa\u0161isti\u010dki marionetski re\u017eim; odmah doneti rasni zakoni',
+    significance: 'NDH je od prvog dana imala genocidni program: tre\u0107inu Srba ubiti, tre\u0107inu proterati, tre\u0107inu pokrstiti. Usta\u0161e nisu \u010dekale nema\u010dke naredbe.'
+  },
+  {
+    year: 1941, date: '17. april',
+    title: 'Kapitulacija Kraljevine Jugoslavije', cat: 'napad',
+    desc: 'Posle samo 11 dana borbi, vojska Kraljevine Jugoslavije potpisala je bezuslovnu kapitulaciju. Zemlja je napadnuta sa svih strana bez koordinisane odbrane. Kralj Petar II i vlada pobe\u017Eali su u inostranstvo \u2014 prvo u Gr\u010dku, potom u London.',
+    place: 'Beograd',
+    figures: 'General Radivoje Jankovi\u0107, kralj Petar II Kara\u0111or\u0111evi\u0107',
+    result: 'Kraljevina Jugoslavija prestala da postoji; po\u010dinje vi\u0161egodišnja okupacija',
+    significance: 'Brza kapitulacija \u0161okirala je svet. Ipak, otpor koji je sledio bio je jedan od najdugovekijih i naju\u010dinkovitijih u Evropi.'
+  },
+  {
+    year: 1941, date: 'April\u2013maj',
+    title: 'Podela Jugoslavije i usta\u0161ki pokolji Srba', cat: 'zlocin',
+    desc: 'Teritorija Jugoslavije podeljena je izme\u0111u sila Osovine. Odmah po uspostavljanju NDH, usta\u0161e su po\u010dele masovna ubijanja srpskog stanovni\u0161tva u Slavoniji i Lici. Prva masovna ubojstva izvr\u0161ena su u Gudovcu, Glini i Jadovnom \u2014 no\u017Eevima i \u010dekima, bacanjem u jame.',
+    place: 'NDH (Hrvatska, Bosna)',
+    figures: 'Ante Paveli\u0107, Andrija Artukovi\u0107 (ministar unutrašnjih poslova), Mile Budak',
+    result: 'Po\u010detak sistematskog genocida nad Srbima, Jevrejima i Romima',
+    significance: 'Usta\u0161ki zlo\u010dini bili su toliko brutalni da su \u010dak i nema\u010dki oficiri slali zgro\u017Eene izve\u0161taje Berlinu. UN su ih kvalifikovale kao genocid.'
+  },
+  {
+    year: 1941, date: 'Maj',
+    title: 'Mihailovi\u0107 osniva \u010cetni\u010dki pokret na Ravnoj Gori', cat: 'otpor',
+    desc: 'Pukovnik Dragoljub (Dra\u017Ea) Mihailovi\u0107 sa grupom oficira Kraljevske vojske odbio je kapitulaciju i povukao se na Ravnu Goru u Srbiji. Organizovao je Jugoslovensku vojsku u Otad\u017Ebini \u2014 \u010detni\u010dki pokret. Vlada u emigraciji u Londonu proglasila ga je za zvani\u010dnog komandanta otpora.',
+    place: 'Ravna Gora, Srbija',
+    figures: 'Dragoljub (Dra\u017Ea) Mihailovi\u0107',
+    result: 'Osnivanje prvog organizovanog otpora u Srbiji',
+    significance: 'Mihailovi\u0107 je verovao da aktivna borba donosi previše civilnih \u017ertava. Ta strategija \u010dekanja ko\u0161tala ga je britanske podr\u0161ke koja je prenesena Titu 1943.'
+  },
+  {
+    year: 1941, date: '4. jul',
+    title: 'KPJ progla\u0161ava po\u010detak narodnooslobodila\u010dkog ustanka', cat: 'otpor',
+    desc: 'Na sednici Politbiroa KPJ u Beogradu, Josip Broz Tito zvani\u010dno je proglasio po\u010detak ooru\u017Eanog ustanka. Komunisti\u010dka partija Jugoslavije, \u0161irokom mre\u017Eom ilegalnih \u0107elija, bila je jedina organizacija sposobna da odmah po\u010dne akcije. Datum 4. jul postaje Dan borca.',
+    place: 'Beograd',
+    figures: 'Josip Broz Tito, Aleksandar Rankovi\u0107, Milovan \u0110ilas, Edvard Kardelj',
+    result: 'Po\u010detne partizanske akcije u Srbiji, Crnoj Gori i Bosni',
+    significance: 'Za razliku od \u010detnika koji su \u010dekali povoljan trenutak, partizani su odmah stupili u akciju, preuzev\u0161i politi\u010dku inicijativu otpora.'
+  },
+  {
+    year: 1941, date: '7. jul',
+    title: 'Ustanak u Srbiji \u2014 Bela Crkva kod Krupnja', cat: 'otpor',
+    desc: 'Partizanski odred napao je \u017Eandarmerijsku stanicu u selu Bela Crkva kod Krupnja u zapadnoj Srbiji. Ovaj datum slavi se kao Dan ustanka u Srbiji. Za nekoliko nedelja ustanak se pro\u0161irio po \u0160umadiji i zapadnoj Srbiji; do septembra oslobo\u0111ena je velika slobodna teritorija.',
+    place: 'Bela Crkva kod Krupnja, Srbija',
+    figures: '\u017dikica Jovanovi\u0107 Španac (pao u borbi)',
+    result: 'Po\u010detak ooru\u017Eanog ustanka u Srbiji',
+    significance: 'Srbija je bila me\u0111u prvima u Evropi koja je digla masovni ooru\u017Eani ustanak. 13. jula ustanak je po\u010deo i u Crnoj Gori.'
+  },
+  {
+    year: 1941, date: 'Avgust',
+    title: 'Osnivanje logora Jasenovac', cat: 'zlocin',
+    desc: 'NDH je osnovala sistem logora na reci Savi \u2014 Jasenovac. Logor je bio jedinstven: njime su upravljali Hrvati, a ne Nemci. Ubijani su Srbi, Jevreji, Romi i antifa\u0161isti. Koristili su se specijalni no\u017Eevi (srbosjek), \u010dekici, kamenolomi. Deca su odvajana od roditelja.',
+    place: 'Jasenovac, NDH (danas Hrvatska)',
+    figures: 'Vjekoslav \u201eMaks\u201c Luburi\u0107 (komandant), Dinko Šaki\u0107',
+    result: 'Procenjuje se 77.000\u2013100.000 ubijenih (neke procene idu do 700.000)',
+    significance: 'Jedini logor u Evropi kojim nisu upravljali Nemci. Simbol usta\u0161kog genocida. Simon Vizental nazvao ga je \u201eFabrika smrti\u201c.'
+  },
+  {
+    year: 1941, date: 'Avgust',
+    title: 'General Nedi\u0107 osniva kolaboracionisti\u010dku vladu Srbije', cat: 'politicki',
+    desc: 'General Milan Nedi\u0107 prihvatio je mandat za formiranje \u201eVlade nacionalnog spasa\u201c u Srbiji pod nema\u010dkom vojnom upravom. Nedi\u0107 je smatrao da \u0107e smanjenjem otpora za\u0161tititi srpski narod od odmazdi. Njegova vlada sara\u0111ivala je pri hap\u0161enju Jevreja i borbi protiv partizana.',
+    place: 'Beograd',
+    figures: 'General Milan Nedi\u0107, nema\u010dki general Harald Turner',
+    result: 'Nema\u010dkim okupatorima olak\u0161ana kontrola Srbije',
+    significance: 'Kontroverzna figura \u2014 jedni ga smatraju \u017ertveljem koji je Srbima smanjio stradanje, drugi kolaboracionistom koji je pomagao Holokaust u Srbiji.'
+  },
+  {
+    year: 1941, date: 'Septembar\u2013oktobar',
+    title: 'U\u017ei\u010dka republika \u2014 prva slobodna teritorija', cat: 'otpor',
+    desc: 'Partizani su oslobodili veliku teritoriju u zapadnoj Srbiji sa centrom u U\u017Eicu. Na ovoj prvoj slobodnoj teritoriji radila je fabrika oru\u017Eja, \u0161tamparija, bolnica. Tito i Mihailovi\u0107 su se ovde susreli dva puta poku\u0161avaju\u0107i da uspostave koordinaciju \u2014 bezuspešno.',
+    place: 'Zapadna Srbija (U\u017Eice i okolina)',
+    figures: 'Josip Broz Tito, Dragoljub Mihailovi\u0107',
+    result: 'Slobodna teritorija ~10.000 km\u00b2 trajala oko 2 meseca',
+    significance: 'Dokaz da organizovani otpor mo\u017Ee osloboditi zna\u010dajnu teritoriju. Fabrika oru\u017Eja u U\u017Eicu bila je simboli\u010dno srce otpora.'
+  },
+  {
+    year: 1941, date: '21. oktobar',
+    title: 'Masakr u Kragujevcu', cat: 'zlocin',
+    desc: 'Kao odmazda za partizanske napade u kojima su poginula nema\u010dka vojnici, nemci su pohapsili skoro sve mu\u0161karce u Kragujevcu. Streljano je 2.778 civila, me\u0111u njima u\u010denici ni\u017Eih razreda I. gimnazije i profesori koji su odbili da napuste \u0111ake. Za svakog ubijenog nema\u010dkog vojnika \u2014 100 civila.',
+    place: 'Kragujevac, Srbija',
+    figures: 'Nema\u010dki general Franz B\u00f6hme (nare\u0111enje odmazde)',
+    result: '2.778 nevinih civila streljano u jednom danu',
+    significance: 'Jedan od najve\u0107ih nema\u010dkih zlo\u010dina u Srbiji. Desanka Maksimovi\u0107 posvetila im je pesmu \u201eKrvava bajka\u201c. Istog dana streljano je i oko 1.700 civila u Kraljevu.'
+  },
+  {
+    year: 1941, date: 'Novembar',
+    title: 'Razlaz Tita i Mihailovi\u0107a', cat: 'politicki',
+    desc: 'Nakon dva zajedni\u010dka sastanka (Struganik i Braji\u0107i), Tito i Mihailovi\u0107 nisu mogli da se dogovore. Mihailovi\u0107 nije hteo aktivnu borbu jer su odmazde isuviše skupo kostale narod; Tito je insistirao na ofanzivnoj strategiji. Do\u0161lo je do ooru\u017Eanog sukoba i partizani i \u010detnici su postali neprijatelji.',
+    place: 'Zapadna Srbija',
+    figures: 'Josip Broz Tito, Dragoljub Mihailovi\u0107',
+    result: 'Gra\u0111anski rat unutar rata \u2014 partizani i \u010detnici se bore jedni protiv drugih',
+    significance: 'Podela jugoslovenskog otpora imala je te\u0161ke posledice za sve: vi\u0161e civilnih \u017ertava, slabiji otpor okupatoru, i krvavi obra\u010dun na kraju rata.'
+  },
+  {
+    year: 1941, date: 'Novembar\u2013decembar',
+    title: 'Prva neprijateljevska ofanziva \u2014 pad U\u017ei\u010dke republike', cat: 'napad',
+    desc: 'Nemci su pokrenuli prvu veliku ofanzivu uz u\u010de\u0161\u0107e \u010detni\u010dkih odreda koji su sara\u0111ivali. Partizani su potisnuti, U\u017Ei\u010dka republika pala. Tito se sa jezgrom partizanskog pokreta povukao u Bosnu \u2014 u Focu. Mihailovi\u0107 je kratko uhap\u0161en od Nemaca, pa pu\u0161ten.',
+    place: 'Zapadna Srbija',
+    figures: 'General Franz B\u00f6hme, Josip Broz Tito',
+    result: 'Partizani proterani iz Srbije; centar otpora preme\u0161ten u Bosnu',
+    significance: 'Partizani gube Srbiju ali pre\u017Eivljavaju kao organizovana snaga. Ovo je definisalo ostatak rata \u2014 Srbija ostaje pod jakom nema\u010dko-Nedi\u0107evom kontrolom.'
+  },
+
+  // ── 1942 ──────────────────────────────────────────
+  {
+    year: 1942, date: 'Januar\u2013april',
+    title: 'Fo\u010danski period \u2014 Tito reorganizuje partizanski pokret', cat: 'otpor',
+    desc: 'U slobodnoj teritoriji oko Fo\u010de u Bosni, Tito je reorganizovao partizanski pokret koji je na\u010dinjen da li\u010di na regularnu vojsku. Formirane su prve proletarijatske brigade \u2014 disciplinovane, mobilne jedinice. Po\u010dinje \u201eFo\u010danski propisi\u201c \u2014 pravni okvir partizanskog pokreta.',
+    place: 'Fo\u010da, Bosna i Hercegovina',
+    figures: 'Josip Broz Tito, Ko\u010da Popovi\u0107 (komandant 1. Proleterske brigade)',
+    result: 'Reorganizovana partizanska vojska; stvorene disciplinovane jedinice',
+    significance: 'Preobrazba partizana od gerilaca do vojne organizacije koja \u0107e mo\u0107i da se bori protiv regularnih nema\u010dkih jedinica.'
+  },
+  {
+    year: 1942, date: 'Leto',
+    title: 'Bitka na Kozari \u2014 nema\u010dka ofanziva i deportacije', cat: 'zlocin',
+    desc: 'Nema\u010dke i usta\u0161ke snage opkolile su partizane i oko 100.000 civila na planini Kozari u Bosanskoj Krajini. Partizani su se probili, ali civili nisu. Oko 36.000 civila deportovano je u logore (Jasenovac i dr.); hiljade dece odvojeno od roditelja i raseljeno po celoj Evropi.',
+    place: 'Kozara, Bosna',
+    figures: 'General Friedrich Stahl (komandant ofanzive)',
+    result: 'Partizani probijeni; masovne deportacije i ubijanja civila',
+    significance: 'Kozara je postala simbol i\u017Ertve bosanskog naroda. Spomen-park na Kozari podi\u017Ezan je kao jedno od najve\u0107ih anti-fa\u0161isti\u010dkih spomen-mesta u SFRJ.'
+  },
+  {
+    year: 1942, date: '26. novembar',
+    title: 'Prvo zasedanje AVNOJ-a u Biha\u0107u', cat: 'politicki',
+    desc: 'U oslobo\u0111enom Biha\u0107u odr\u017Eano je prvo zasedanje Antifa\u0161isti\u010dkog ve\u0107a narodnog oslobo\u0111enja Jugoslavije (AVNOJ). AVNOJ je trebalo da bude politi\u010dko telo NOP-a i alternativna vlast nova Jugoslavija \u2014 federalna i egalitarna umesto monarhisti\u010dke.',
+    place: 'Biha\u0107, Bosna',
+    figures: 'Josip Broz Tito, Ivan Ribar (predsednik AVNOJ-a)',
+    result: 'Postavljen politi\u010dki okvir nove, federalne Jugoslavije',
+    significance: 'Temelji Titove Jugoslavije postavljeni u ratu. AVNOJ je nadrastao vojni pokret i postao politi\u010dka alternativa vladi u emigraciji.'
+  },
+
+  // ── 1943 ──────────────────────────────────────────
+  {
+    year: 1943, date: 'Januar\u2013mart',
+    title: 'Bitka na Neretvi \u2014 \u010cetvrt ofanziva', cat: 'otpor',
+    desc: 'Nemci, Italijani i \u010detnici pokrenuli su ogromnu ofanzivu (Operacija Vais / Slu\u010daj Belo) da uni\u0161te partizane. Tito je sa 20.000 boraca i 4.000 ranjenika bio opkoljen izme\u0111u nema\u010dkih snaga i reke Neretve. Partizani su pora\u017Eili \u010detnike, sru\u0161ili i obnovili most i pre\u0161li reku.',
+    place: 'Hercegovina (reka Neretva)',
+    figures: 'Josip Broz Tito, Ko\u010da Popovi\u0107, nema\u010dki general Lothar Rendulic',
+    result: 'Partizani se probili; \u010detnici doživeli poraz od kojeg se nisu oporavili',
+    significance: 'Epska bitka koja je postala deo jugosloven skog nacionalnog mita. Film \u201eBitka na Neretvi\u201c (1969) nominovan za Oskara. Tito je odbacio pri\u010du o \u010detnicima kao antifa\u0161isti\u010dkim borcima.'
+  },
+  {
+    year: 1943, date: 'Maj\u2013jun',
+    title: 'Bitka na Sutjesci \u2014 Peta ofanziva', cat: 'otpor',
+    desc: 'Odmah posle Neretve, Nemci su opkolili partizane u kanjonu Sutjeske u najtežoj situaciji u ratu (Operacija Švarc / Slu\u010daj Crno). Tito je li\u010dno ranjen. Od 18.000 partizana, oko 7.000 poginulo. Ali proboj je izvr\u0161en i jezgro NOV-a pre\u017Eivelo.',
+    place: 'Sutjeska, Bosna (danas Nacionalni park Sutjeska)',
+    figures: 'Josip Broz Tito (ranjen), Milovan \u0110ilas, general Ernst von Leyser',
+    result: 'Partizani probili obruč; ogromni gubici \u2014 oko 7.000 poginulih',
+    significance: '\u201eSutjeska\u201c \u2014 simbol pre\u017Eivljavanja bez nade. Tito je ovde definitvno preuzeo moralni autoritet jugoslovenskog otpora. Britanija je po\u010dela da ša lje misijesavezne oficire Titu.'
+  },
+  {
+    year: 1943, date: 'Septembar',
+    title: 'Britanci napu\u0161taju Mihailovi\u0107a i pre\u0161laze na podr\u0161ku Titu', cat: 'politicki',
+    desc: 'Britanske obavje\u0161tajne misije (me\u0111u njima Fizroj Maklejn) potvrdile su Londonu da \u010detnici ne vode efektivan otpor, a da su u nekim slu\u010dajevima sara\u0111ivali sa Nemcima i Italijanima. Britanci su okrenuli svu podr\u0161ku \u2014 oru\u017Eje, novac, misije \u2014 Titovim partizanima.',
+    place: 'London / Jugosla vija',
+    figures: 'Vinston \u010c\u00e9r\u010dil, Fizroj Maklejn (britanska misija kod Tita), Dragoljub Mihailovi\u0107',
+    result: 'Mihailovi\u0107 politi\u010dki izolovan; Tito dobija me\u0111unarodni legitimitet',
+    significance: 'Presudan politi\u010dki zaokret rata. Bez britanske podr\u0161ke, Mihailovi\u0107 i Kraljevska vlada u emigraciji izgubili su partiju.'
+  },
+  {
+    year: 1943, date: '29. novembar',
+    title: 'Drugo zasedanje AVNOJ-a \u2014 Tito postaje Maršal', cat: 'politicki',
+    desc: 'U Jajcu je AVNOJ proglasio sebe za vrhovni zakonodavni i izvr\u0161ni organ Jugoslavije i zabranio povratak Kralja Petra dok narod ne odlu\u010di. Tito je proglašen Maršalom Jugoslavije. Formiran je Nacionalni komitet oslobo\u0111enja \u2014 de facto vlada.',
+    place: 'Jajce, Bosna',
+    figures: 'Josip Broz Tito, Edvard Kardelj, Moša Pijade',
+    result: 'AVNOJ postaje zvani\u010dna vlada; monarhija u emigraciji izgubila legitimitet',
+    significance: 'Ovde je odlu\u010deno da posleratna Jugoslavija ne\u0107e biti monarhija nego federalna republika. Datum 29. novembar 1943. postao je Dan Republike u SFRJ.'
+  },
+
+  // ── 1944 ──────────────────────────────────────────
+  {
+    year: 1944, date: '25. maj',
+    title: 'Desant na Drvar \u2014 nema\u010dki poku\u0161aj hvatanja Tita', cat: 'napad',
+    desc: 'Nemci su sproveli Operaciju Ritersprung (Skok viteza) \u2014 vazdušni desant na Drvar gde je bio Titov štab. SS padobranci sleteli su tačno ispred pe\u0107ine u kojoj je Tito boravio. Tito je pobegao spu\u0161taju\u0107i se konopcem niz stenu, u posednjem trenutku. Savezni\u010dkim avionom prevezen na Vis.',
+    place: 'Drvar, Bosna',
+    figures: 'Josip Broz Tito, SS-Hauptsturmf\u00fchrer Kurt Rybka (nemački komandant)',
+    result: 'Tito evakuisan na ostrvo Vis; operacija propala',
+    significance: 'Najdramati\u010dnija nema\u010dka operacija na Balkanu. Da su ga zarobili, rat u Jugoslaviji mogao je oti\u0107i posve druga\u010dijim putem.'
+  },
+  {
+    year: 1944, date: 'Septembar',
+    title: 'Crvena armija ulazi u Srbiju', cat: 'oslobodenje',
+    desc: 'Soviet koji je zapo\u010deo veliku ofanzivu na Balkanu prešao je rumunsko-jugoslovensku granicu i u\u0161ao u isto\u010dnu Srbiju. Tito je sklopio dogovor sa Staljinom da \u0107e Crvena armija pomo\u0107i u oslobo\u0111enju Srbije, pa se povu\u010di. Zajedni\u010dka operacija oslobo\u0111enja Beograda je zapo\u010detala.',
+    place: 'Isto\u010dna Srbija',
+    figures: 'Josip Broz Tito, maršal Fjodor Tolbuhin (1. bugarski front), general Peko Dap\u010devi\u0107',
+    result: 'Put prema Beogradu otvoren',
+    significance: 'Jedina balkanska zemlja gde je Crvena armija u\u0161la na osnovu eksplicitnog dogovora, a ne jednostrane odluke. Tito je na taj na\u010din sa\u010duvao jugosloven sku samostalnost.'
+  },
+  {
+    year: 1944, date: '20. oktobar',
+    title: 'Oslobo\u0111enje Beograda', cat: 'oslobodenje',
+    desc: 'Zajedni\u010dka operacija NOV Jugoslavije i Crvene armije oslobodila je Beograd. Uliczne borbe trajale su 6 dana. Nema\u010dki garnizon branio se do poslednjeg. Tito je ve\u010de 20. oktobra u\u0161ao u oslobo\u0111eni Beograd. Datum je decenijama slavljan kao Dan oslobo\u0111enja Beograda.',
+    place: 'Beograd',
+    figures: 'Josip Broz Tito, general Peko Dap\u010devi\u0107, maršal Fjodor Tolbuhin',
+    result: 'Beograd oslobo\u0111en; Nemci se povla\u010de prema severu',
+    significance: 'Politi\u010dki i simboli\u010dki prvu dan nove Jugoslavije. Tito je u\u0161ao kao pobednik u prestoni cu koju nije dr\u017Eao u rukama od 1941.'
+  },
+
+  // ── 1945 ──────────────────────────────────────────
+  {
+    year: 1945, date: 'Mart\u2013april',
+    title: 'Proboj Sremskog fronta', cat: 'oslobodenje',
+    desc: 'Jugoslovenska armija probila je Sremski front \u2014 dobro utvr\u0111enu nema\u010dku liniju odbrane Šid\u2013Vinkovci koja je bila najduži kopneni front u istoriji jugoslovenskog rata. Nema\u010dki SS i regularne jedinice branile su se sa ekstremons tvenim \u017Eilav o\u0161\u0107u. Proboj je otvorio put prema Vojvodini, Slavoniji i Zagrebu.',
+    place: 'Srem (Vojvodina/Hrvatska)',
+    figures: 'General Ko\u010da Popovi\u0107, general Pe\u010do Vojvodi\u0107',
+    result: 'Nema\u010dka odbrana slomljena; put prema severu otvoren',
+    significance: 'Najkrvavija faza zavr\u0161nih borbi za Jugoslaviju. Hiljade jugoslov enskih vojnika poginulo na dobro utvr\u0111enom Sremskom frontu.'
+  },
+  {
+    year: 1945, date: '9.\u20115. maj',
+    title: 'Oslobo\u0111enje cele Jugoslavije', cat: 'oslobodenje',
+    desc: 'Sarajevo oslobo\u0111eno 6. aprila, Zagreb 8. maja, Ljubljana i Slovenija 9. maja. Do 15. maja cela Jugoslavija bila je oslobo\u0111ena. Neke nema\u010dke i kolaboracionisti\u010dke (usta\u0161ke, \u010detni\u010dke) jedinice poku\u0161ale su da se predaju Britancima kod Blajburga u Austriji. Ve\u0107ina je vra\u0107ena partizanima.',
+    place: 'Cela Jugoslavija (Zagreb, Ljubljana, Blajburg)',
+    figures: 'Josip Broz Tito, general Peko Dap\u010devi\u0107',
+    result: 'Puna teritorijalna kontrola NOVJ; Jugoslavija oslobo\u0111ena',
+    significance: 'Jedina balkanska zemlja koja se oslobodila uglavnom sopstvenim snagama. To je dalo Titu ogromni legitimitet i nezavisnost od Moskve.'
+  },
+  {
+    year: 1945, date: '29. novembar',
+    title: 'Proglašenje FNRJ \u2014 nova Jugoslavija', cat: 'politicki',
+    desc: 'Ustavotvorna skupština proglasila je Federativnu Narodnu Republiku Jugoslaviju. Monarhija je ukinuta; Petar II Kara\u0111or\u0111evi\u0107 ostao je u emigraciji. Tito je imenovan za premijera. Jugos lavija je postala federacija \u0161est republika: Slovenija, Hrvatska, Bosna i Hercegovina, Srbija, Crna Gora i Makedonija.',
+    place: 'Beograd',
+    figures: 'Josip Broz Tito, Ivan Ribar, Edvard Kardelj',
+    result: 'Kraljevina Srbija/Jugoslavija zamenjeno komunisti\u010dkom federalnom republikom',
+    significance: 'Kraj jedne epohe i po\u010detak nove. Titova Jugoslavija trajala je do 1991. Srbija, dotad dominantna sila, postala je samo jedna od \u0161est republika.'
+  }
+];
+
+// ── FILTERI ───────────────────────────────────────────
+var filterYear = 'sve';
+var filterCat  = 'sve';
+
+function setFilter(type, val, el) {
+  if (type === 'year') {
+    filterYear = val;
+    document.querySelectorAll('[data-year]').forEach(function(b) { b.classList.remove('active'); });
+  } else {
+    filterCat = val;
+    document.querySelectorAll('[data-cat]').forEach(function(b) { b.classList.remove('active'); });
+  }
+  el.classList.add('active');
+  render();
+}
+
+function render() {
+  var filtered = EVENTS.filter(function(e) {
+    var okYear = filterYear === 'sve' || String(e.year) === filterYear;
+    var okCat  = filterCat  === 'sve' || e.cat === filterCat;
+    return okYear && okCat;
+  });
+
+  document.getElementById('countShown').textContent = filtered.length;
+  document.getElementById('countTotal').textContent = EVENTS.length;
+
+  var wrap = document.getElementById('mainWrap');
+  if (!filtered.length) {
+    wrap.innerHTML = '<div class="no-results"><span>&#128269;</span>Nema doga\u0111aja za izabrane filtere.</div>';
+    return;
+  }
+
+  var byYear = {};
+  filtered.forEach(function(e) {
+    if (!byYear[e.year]) byYear[e.year] = [];
+    byYear[e.year].push(e);
+  });
+
+  var years = Object.keys(byYear).map(Number).sort(function(a,b){return a-b;});
+  var html = '';
+  years.forEach(function(yr) {
+    html += '<div class="year-group"><div class="year-header"><div class="year-badge">' + yr + '</div><div class="year-line"></div></div><div class="timeline">';
+    byYear[yr].forEach(function(e, i) {
+      html += buildEvent(e, 'ev-' + yr + '-' + i);
+    });
+    html += '</div></div>';
+  });
+  wrap.innerHTML = html;
+}
+
+var CAT_LABELS = {
+  napad: 'Napad i okupacija',
+  zlocin: 'Zlo\u010dini i teror',
+  otpor: 'Otpor i ustanak',
+  politicki: 'Politi\u010dki',
+  oslobodenje: 'Oslobo\u0111enje'
+};
+
+function buildEvent(e, uid) {
+  return '<div class="event cat-' + e.cat + '" id="' + uid + '" onclick="toggle(\'' + uid + '\')">' +
+    '<div class="event-card">' +
+      '<div class="event-head">' +
+        '<div class="event-date">' + e.date + '</div>' +
+        '<div class="event-main">' +
+          '<div class="event-title">' + e.title + '</div>' +
+          '<div class="event-badges"><span class="cat-badge ' + e.cat + '">' + (CAT_LABELS[e.cat]||e.cat) + '</span></div>' +
+        '</div>' +
+        '<div class="event-arrow">&#9658;</div>' +
+      '</div>' +
+      '<div class="event-body">' +
+        '<div class="event-desc">' + e.desc + '</div>' +
+        '<div class="event-meta-grid">' +
+          (e.place   ? '<div class="event-meta-item"><div class="event-meta-label">Lokacija</div><div class="event-meta-val">' + e.place + '</div></div>' : '') +
+          (e.figures ? '<div class="event-meta-item"><div class="event-meta-label">Klju\u010dne li\u010dnosti</div><div class="event-meta-val">' + e.figures + '</div></div>' : '') +
+          (e.result  ? '<div class="event-meta-item"><div class="event-meta-label">Ishod</div><div class="event-meta-val">' + e.result + '</div></div>' : '') +
+        '</div>' +
+        (e.significance ? '<div class="event-significance">' + e.significance + '</div>' : '') +
+      '</div>' +
+    '</div></div>';
+}
+
+function toggle(uid) {
+  var el = document.getElementById(uid);
+  if (!el) return;
+  var wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.event.open').forEach(function(e) { e.classList.remove('open'); });
+  if (!wasOpen) el.classList.add('open');
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pub Quiz</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #1a0f05;
+  --surface: #241508;
+  --surface2: #2e1c0a;
+  --surface3: #3a2410;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #7a6015;
+  --text: #f5e8d0;
+  --muted: #9a8060;
+  --border: #3a2a12;
+  --border2: #4a3518;
+  --wood: #5c3d1e;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(201,162,39,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(92,30,10,0.35) 0%, transparent 60%);
+}
+
+/* ── HEADER ─────────────────────────────────────────── */
+.header {
+  text-align: center;
+  padding: 48px 20px 36px;
+  position: relative;
+  border-bottom: 2px solid var(--border2);
+  background: linear-gradient(180deg, #0c0503 0%, transparent 100%);
+}
+.header-deco {
+  font-size: 36px;
+  margin-bottom: 12px;
+  filter: sepia(1) saturate(2);
+}
+.header h1 {
+  font-size: clamp(36px, 7vw, 72px);
+  color: var(--gold2);
+  font-weight: normal;
+  letter-spacing: 6px;
+  text-shadow: 0 0 60px rgba(201,162,39,0.4), 2px 2px 0 rgba(0,0,0,0.8);
+  text-transform: uppercase;
+}
+.header-sub {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--gold-dim);
+  letter-spacing: 3px;
+  font-style: italic;
+}
+.header-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+  color: var(--gold-dim);
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+.header-ornament::before,
+.header-ornament::after {
+  content: '';
+  flex: 1;
+  max-width: 120px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim));
+}
+.header-ornament::after {
+  background: linear-gradient(270deg, transparent, var(--gold-dim));
+}
+
+/* ── ROUND TABS ──────────────────────────────────────── */
+.rounds-nav {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 2px solid var(--border2);
+  background: var(--surface);
+}
+.rounds-nav::-webkit-scrollbar { display: none; }
+.rounds-nav-inner {
+  display: flex;
+  gap: 2px;
+  padding: 0 20px;
+  flex: 1;
+  justify-content: center;
+  min-width: max-content;
+}
+.round-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 14px 18px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 1px;
+  min-width: fit-content;
+  user-select: none;
+}
+.round-tab:hover { color: var(--gold); background: var(--surface2); }
+.round-tab.active { color: var(--gold2); border-bottom-color: var(--gold); }
+.round-tab .tab-icon { font-size: 20px; }
+.round-tab .tab-num {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+}
+
+/* ── MAIN ────────────────────────────────────────────── */
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+/* ── ROUND PANEL ─────────────────────────────────────── */
+.round-panel { display: none; }
+.round-panel.active { display: block; }
+
+.round-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border2);
+}
+.round-icon-big { font-size: 48px; }
+.round-header h2 {
+  font-size: 28px;
+  color: var(--gold2);
+  font-weight: normal;
+  letter-spacing: 2px;
+}
+.round-header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.round-badge {
+  margin-left: auto;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--gold-dim);
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* ── TOPIC CARDS ─────────────────────────────────────── */
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.topic-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: block;
+  position: relative;
+}
+.topic-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--gold-dim);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,162,39,0.1);
+}
+.topic-card-top {
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  position: relative;
+  overflow: hidden;
+}
+.topic-card-top::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, var(--surface) 100%);
+}
+.topic-card-body { padding: 14px 16px 16px; }
+.topic-card-body h3 {
+  font-size: 16px;
+  color: var(--gold2);
+  font-weight: normal;
+  letter-spacing: 1px;
+}
+.topic-card-body p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+.topic-card-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--gold-dim);
+}
+.topic-card-footer .arrow { font-size: 14px; }
+.topic-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  font-size: 10px;
+  color: var(--gold-dim);
+  padding: 2px 6px;
+  z-index: 1;
+  letter-spacing: 1px;
+}
+.topic-badge.new {
+  background: rgba(201,162,39,0.15);
+  border-color: var(--gold-dim);
+  color: var(--gold);
+}
+.topic-badge.soon {
+  background: rgba(0,0,0,0.4);
+  color: var(--muted);
+}
+.topic-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.topic-card.disabled:hover { transform: none; }
+
+/* ── COMING SOON ─────────────────────────────────────── */
+.coming-soon {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 32px;
+  border: 1px dashed var(--border2);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* ── HOME PANEL ──────────────────────────────────────── */
+.home-panel { display: none; }
+.home-panel.active { display: block; }
+
+.welcome-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 32px 36px;
+  margin-bottom: 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.welcome-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c9a227' fill-opacity='0.03'%3E%3Cpath d='M40 0L43 27H70L48 43L56 70L40 54L24 70L32 43L10 27H37Z'/%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.welcome-box h2 {
+  font-size: 22px;
+  color: var(--gold2);
+  font-weight: normal;
+  margin-bottom: 10px;
+}
+.welcome-box p { color: var(--muted); font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto; }
+
+.all-rounds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.round-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.round-card:hover {
+  border-color: var(--gold-dim);
+  background: var(--surface2);
+  transform: translateY(-2px);
+}
+.round-card .rc-icon { font-size: 36px; margin-bottom: 10px; }
+.round-card .rc-name { font-size: 14px; color: var(--gold2); letter-spacing: 1px; }
+.round-card .rc-num { font-size: 10px; color: var(--gold-dim); margin-bottom: 6px; letter-spacing: 2px; text-transform: uppercase; }
+.round-card .rc-count { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+/* ── SEARCH ──────────────────────────────────────────── */
+.search-wrap {
+  margin-bottom: 28px;
+  position: relative;
+}
+.search-input {
+  width: 100%;
+  padding: 14px 48px 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input:focus {
+  border-color: var(--gold-dim);
+  box-shadow: 0 0 0 2px rgba(201,162,39,0.1);
+}
+.search-input::placeholder { color: var(--muted); }
+.search-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 17px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.search-clear {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--muted);
+  cursor: pointer;
+  display: none;
+  background: none;
+  border: none;
+  line-height: 1;
+  padding: 2px 4px;
+}
+.search-clear:hover { color: var(--gold); }
+.search-results { display: none; margin-bottom: 8px; }
+.search-results.active { display: block; }
+.search-results-header {
+  font-size: 11px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.search-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+.search-result-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: block;
+  position: relative;
+}
+.search-result-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--gold-dim);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,162,39,0.1);
+}
+.search-result-card.disabled { opacity: 0.45; cursor: default; pointer-events: none; }
+.src-top {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  position: relative;
+  overflow: hidden;
+}
+.src-top::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, var(--surface) 100%);
+}
+.src-body { padding: 10px 14px 12px; }
+.src-body h3 { font-size: 15px; color: var(--gold2); font-weight: normal; letter-spacing: 1px; }
+.src-body p { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+.src-footer {
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--gold-dim);
+}
+.src-round-tag {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+.search-none {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 14px;
+  border: 1px dashed var(--border2);
+  border-radius: 10px;
+}
+.search-none span { display: block; font-size: 28px; margin-bottom: 10px; filter: grayscale(1); }
+
+@media (max-width: 600px) {
+  .search-input { font-size: 14px; padding: 12px 44px 12px 14px; }
+  .search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+}
+@media (max-width: 380px) {
+  .search-results-grid { grid-template-columns: 1fr; }
+}
+
+/* ── WOOD DIVIDER ────────────────────────────────────── */
+.wood-divider {
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--wood), var(--gold-dim), var(--wood), transparent);
+  margin: 32px 0;
+  opacity: 0.5;
+}
+
+/* ── FOOTER ──────────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 24px;
+  border-top: 1px solid var(--border2);
+  font-size: 12px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  background: var(--surface);
+}
+
+/* ── SCROLLBAR ───────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 768px) {
+  .all-rounds-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .topics-grid { grid-template-columns: repeat(2, 1fr); }
+  .content { padding: 24px 14px 48px; }
+}
+
+@media (max-width: 600px) {
+  /* Header */
+  .header { padding: 28px 14px 22px; }
+  .header-deco { font-size: 26px; margin-bottom: 8px; }
+  .header h1 { letter-spacing: 2px; }
+  .header-sub { font-size: 11px; letter-spacing: 1px; }
+  .header-ornament { font-size: 11px; gap: 10px; }
+
+  /* Nav */
+  .rounds-nav-inner { padding: 0 6px; gap: 0; }
+  .round-tab { padding: 10px 9px; font-size: 10px; }
+  .round-tab .tab-icon { font-size: 17px; }
+  .round-tab .tab-num { font-size: 7px; letter-spacing: 1px; }
+
+  /* Content */
+  .content { padding: 16px 12px 40px; }
+
+  /* Welcome box */
+  .welcome-box { padding: 20px 14px; margin-bottom: 20px; }
+  .welcome-box h2 { font-size: 17px; }
+  .welcome-box p { font-size: 12px; }
+
+  /* Round cards on home */
+  .all-rounds-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .round-card { padding: 14px 8px; }
+  .round-card .rc-icon { font-size: 26px; margin-bottom: 6px; }
+  .round-card .rc-name { font-size: 12px; }
+  .round-card .rc-count { font-size: 10px; }
+
+  /* Round header in panel */
+  .round-header { gap: 10px; margin-bottom: 20px; padding-bottom: 14px; flex-wrap: wrap; }
+  .round-icon-big { font-size: 34px; }
+  .round-header h2 { font-size: 20px; }
+  .round-header p { font-size: 12px; }
+  .round-badge { font-size: 10px; padding: 3px 8px; }
+
+  /* Topic cards */
+  .topics-grid { grid-template-columns: 1fr; gap: 12px; }
+  .topic-card-top { height: 72px; font-size: 38px; }
+}
+
+@media (max-width: 380px) {
+  .round-tab { padding: 8px 7px; font-size: 9px; }
+  .round-tab .tab-icon { font-size: 15px; }
+  .round-tab .tab-num { display: none; }
+  .all-rounds-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-deco">&#127867;</div>
+  <h1>Pub Quiz</h1>
+  <div class="header-sub">Dobro do&#353;li u najve&#263;e znalce u gradu</div>
+  <div class="header-ornament">&#10022; osam rundi znanja &#10022;</div>
+</div>
+
+<nav class="rounds-nav" id="roundsNav">
+<div class="rounds-nav-inner">
+  <div class="round-tab active" data-panel="home" onclick="switchPanel('home', this)">
+    <span class="tab-icon">&#127968;</span>
+    <span>Po&#269;etna</span>
+  </div>
+  <div class="round-tab" data-panel="film" onclick="switchPanel('film', this)">
+    <span class="tab-num">Runda 1</span>
+    <span class="tab-icon">&#127916;</span>
+    <span>Film</span>
+  </div>
+  <div class="round-tab" data-panel="geografija" onclick="switchPanel('geografija', this)">
+    <span class="tab-num">Runda 2</span>
+    <span class="tab-icon">&#127758;</span>
+    <span>Geografija</span>
+  </div>
+  <div class="round-tab" data-panel="knjizevnost" onclick="switchPanel('knjizevnost', this)">
+    <span class="tab-num">Runda 3</span>
+    <span class="tab-icon">&#128218;</span>
+    <span>Knji&#382;evnost</span>
+  </div>
+  <div class="round-tab" data-panel="svastara1" onclick="switchPanel('svastara1', this)">
+    <span class="tab-num">Runda 4</span>
+    <span class="tab-icon">&#127914;</span>
+    <span>Sva&#353;tara I</span>
+  </div>
+  <div class="round-tab" data-panel="sport" onclick="switchPanel('sport', this)">
+    <span class="tab-num">Runda 5</span>
+    <span class="tab-icon">&#127942;</span>
+    <span>Sport</span>
+  </div>
+  <div class="round-tab" data-panel="istorija" onclick="switchPanel('istorija', this)">
+    <span class="tab-num">Runda 6</span>
+    <span class="tab-icon">&#9876;</span>
+    <span>Istorija</span>
+  </div>
+  <div class="round-tab" data-panel="muzika" onclick="switchPanel('muzika', this)">
+    <span class="tab-num">Runda 7</span>
+    <span class="tab-icon">&#127932;</span>
+    <span>Muzika</span>
+  </div>
+  <div class="round-tab" data-panel="svastara2" onclick="switchPanel('svastara2', this)">
+    <span class="tab-num">Runda 8</span>
+    <span class="tab-icon">&#9889;</span>
+    <span>Sva&#353;tara II</span>
+  </div>
+</div>
+</nav>
+
+<div class="content">
+
+  <!-- HOME -->
+  <div class="home-panel active" id="panel-home">
+    <div class="welcome-box">
+      <h2>&#127867; Dobro do&#353;li u Pub Quiz!</h2>
+      <p>Osam rundi znanja iz filma, geografije, knji&#382;evnosti, sporta, istorije, muzike i svega ostalog. Izaberite rundu i po&#269;nite istra&#382;ivati.</p>
+      <a href="kviz/index.html" style="display:inline-block;margin-top:18px;padding:11px 28px;background:var(--gold);color:var(--bg);text-decoration:none;border-radius:8px;font-size:14px;letter-spacing:2px;text-transform:uppercase;font-weight:bold;transition:background 0.2s;" onmouseover="this.style.background='var(--gold2)'" onmouseout="this.style.background='var(--gold)'">&#127381; Kviz Mod</a>
+    </div>
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput" type="text" placeholder="&#128269; Pretra&#382;i teme — Oskarovci, Zastave, Nobelovci...">
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">&#215;</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+    <div class="all-rounds-grid" id="homeGrid"></div>
+  </div>
+
+  <!-- RUNDA 1: FILM -->
+  <div class="round-panel" id="panel-film">
+    <div class="round-header">
+      <span class="round-icon-big">&#127916;</span>
+      <div>
+        <h2>Film</h2>
+        <p>Sve o sedmoj umetnosti — od Holivuda do svetske kinematografije</p>
+      </div>
+      <span class="round-badge">Runda 1</span>
+    </div>
+    <div class="topics-grid">
+      <a href="film/oskarovci/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #1a0a2e, #2d1b4e);">
+          &#127942;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Oskarovci</h3>
+          <p>Dobitnici nagrade Oscar za najboljii film kroz decenije — od po&#269;etaka do danas</p>
+        </div>
+        <div class="topic-card-footer">
+          <span>Istra&#382;i listu</span>
+          <span class="arrow">&#8594;</span>
+        </div>
+      </a>
+      <div class="topic-card disabled">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #1a1a0a, #2e2e1b);">
+          &#127909;
+          <span class="topic-badge soon">Uskoro</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Filmski direktori</h3>
+          <p>Najve&#263;i reditelji svetske kinematografije</p>
+        </div>
+        <div class="topic-card-footer"><span>Dolazi uskoro</span></div>
+      </div>
+      <div class="topic-card disabled">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #0a1a1a, #1b2e2e);">
+          &#127894;
+          <span class="topic-badge soon">Uskoro</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Filmski citati</h3>
+          <p>Prepoznaj film po &#269;uvenom citatu</p>
+        </div>
+        <div class="topic-card-footer"><span>Dolazi uskoro</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RUNDA 2: GEOGRAFIJA -->
+  <div class="round-panel" id="panel-geografija">
+    <div class="round-header">
+      <span class="round-icon-big">&#127758;</span>
+      <div>
+        <h2>Geografija</h2>
+        <p>Svet koji nas okru&#382;uje — drave, prestolnice, kontinenti</p>
+      </div>
+      <span class="round-badge">Runda 2</span>
+    </div>
+    <div class="topics-grid">
+      <a href="geografija/zastave/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #071a1a, #0d3333);">
+          &#127760;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Zastave</h3>
+          <p>Zastave svih dr&#382;ava sveta razvrstane po kontinentima — hover za detalje</p>
+        </div>
+        <div class="topic-card-footer">
+          <span>Istra&#382;i zastave</span>
+          <span class="arrow">&#8594;</span>
+        </div>
+      </a>
+      <a href="geografija/suncevSistem/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #020818, #051530);">
+          &#9728;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Sun&#269;ev Sistem</h3>
+          <p>Planete, sateliti i klju&#269;ni podaci o na&#353;em sun&#269;evom sistemu</p>
+        </div>
+        <div class="topic-card-footer">
+          <span>Istra&#382;i planete</span>
+          <span class="arrow">&#8594;</span>
+        </div>
+      </a>
+      <div class="topic-card disabled">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #1a0a0a, #2e1b1b);">
+          &#9968;
+          <span class="topic-badge soon">Uskoro</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Planine i reke</h3>
+          <p>Najve&#263;i prirodni oblici na planeti</p>
+        </div>
+        <div class="topic-card-footer"><span>Dolazi uskoro</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RUNDA 3: KNJIŽEVNOST -->
+  <div class="round-panel" id="panel-knjizevnost">
+    <div class="round-header">
+      <span class="round-icon-big">&#128218;</span>
+      <div>
+        <h2>Knji&#382;evnost</h2>
+        <p>Re&#269;i koje su promenile svet — pisci, dela, nagrade</p>
+      </div>
+      <span class="round-badge">Runda 3</span>
+    </div>
+    <div class="topics-grid">
+      <a href="knjizevnost/nobelovci/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #1a1000, #2e1e00);">
+          &#127885;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Nobelovci</h3>
+          <p>Dobitnici Nobelove nagrade za knji&#382;evnost — od Selia do danas</p>
+        </div>
+        <div class="topic-card-footer">
+          <span>Istra&#382;i listu</span>
+          <span class="arrow">&#8594;</span>
+        </div>
+      </a>
+      <a href="knjizevnost/stilskeFigure/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #0e1a0e, #1a2e1a);">
+          &#9998;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Stilske figure</h3>
+          <p>Tropi, figure misli i dikcije &mdash; metafora, ironija, anafora i jo&#353;</p>
+        </div>
+        <div class="topic-card-footer">
+          <span>Istra&#382;i figure</span>
+          <span class="arrow">&#8594;</span>
+        </div>
+      </a>
+      <a href="knjizevnost/glasovnePromene/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #0e0e1a, #1a1a2e);">
+          &#128442;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Glasovne promene</h3>
+          <p>Palatalizacija, jotovanje, jednačenje &mdash; fonolo&#353;ke alternacije u srpskom</p>
+        </div>
+        <div class="topic-card-footer">
+          <span>Istra&#382;i promene</span>
+          <span class="arrow">&#8594;</span>
+        </div>
+      </a>
+      <div class="topic-card disabled">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #0a0a1a, #1b1b2e);">
+          &#128196;
+          <span class="topic-badge soon">Uskoro</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Srpski pisci</h3>
+          <p>Najve&#263;a imena srpske knji&#382;evnosti</p>
+        </div>
+        <div class="topic-card-footer"><span>Dolazi uskoro</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RUNDA 4: SVASTARA I -->
+  <div class="round-panel" id="panel-svastara1">
+    <div class="round-header">
+      <span class="round-icon-big">&#127914;</span>
+      <div>
+        <h2>Sva&#353;tara I</h2>
+        <p>Pitanja iz svih oblasti — od nauke do pop kulture</p>
+      </div>
+      <span class="round-badge">Runda 4</span>
+    </div>
+    <div class="topics-grid">
+      <div class="coming-soon">
+        &#8987; Teme za ovu rundu su u pripremi...
+      </div>
+    </div>
+  </div>
+
+  <!-- RUNDA 5: SPORT -->
+  <div class="round-panel" id="panel-sport">
+    <div class="round-header">
+      <span class="round-icon-big">&#127942;</span>
+      <div>
+        <h2>Sport</h2>
+        <p>Svetski rekorderi, &#353;ampioni i nezaboravni momenti</p>
+      </div>
+      <span class="round-badge">Runda 5</span>
+    </div>
+    <div class="topics-grid">
+      <div class="coming-soon">
+        &#8987; Teme za ovu rundu su u pripremi...
+      </div>
+    </div>
+  </div>
+
+  <!-- RUNDA 6: ISTORIJA -->
+  <div class="round-panel" id="panel-istorija">
+    <div class="round-header">
+      <span class="round-icon-big">&#9876;</span>
+      <div>
+        <h2>Istorija</h2>
+        <p>Pro&#353;lost koja je oblikovala dana&#353;njicu</p>
+      </div>
+      <span class="round-badge">Runda 6</span>
+    </div>
+    <div class="topics-grid">
+      <a href="istorija/nemanjici/nemanjici.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #1a0800, #2e1400);">
+          &#9812;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Nemnji&#263;i</h3>
+          <p>Porodično stablo srpske vladarske dinastije od 1166. do 1371. — vladari, zadužbine, dostignuća</p>
+        </div>
+        <div class="topic-card-footer">
+          <span>Otvori stablo</span>
+          <span class="arrow">&#8594;</span>
+        </div>
+      </a>
+      <a href="istorija/jugoslavija/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #080e08, #0f1e10);">
+          &#9733;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Jugoslavija 1941&#8211;1945</h3>
+          <p>Otpor, oslobo&#273;enje i revolucija — od ustanka do FNRJ</p>
+        </div>
+        <div class="topic-card-footer">
+          <span>Otvori tajmlajn</span>
+          <span class="arrow">&#8594;</span>
+        </div>
+      </a>
+      <a href="istorija/wwii/index.html" class="topic-card">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #0e0808, #1e1008);">
+          &#9876;
+          <span class="topic-badge new">Novo</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>II Svetski rat</h3>
+          <p>Interaktivni tajmlajn klju&#269;nih doga&#273;aja od 1939. do 1945. — bitke, prekretnice, politi&#269;ki obrti</p>
+        </div>
+        <div class="topic-card-footer">
+          <span>Otvori tajmlajn</span>
+          <span class="arrow">&#8594;</span>
+        </div>
+      </a>
+      <div class="topic-card disabled">
+        <div class="topic-card-top" style="background: linear-gradient(135deg, #12100a, #22201a);">
+          &#127981;
+          <span class="topic-badge soon">Uskoro</span>
+        </div>
+        <div class="topic-card-body">
+          <h3>Stari vek</h3>
+          <p>Gr&#269;ka, Rim, Egipat — civilizacije koje su postavile temelje</p>
+        </div>
+        <div class="topic-card-footer"><span>Dolazi uskoro</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RUNDA 7: MUZIKA -->
+  <div class="round-panel" id="panel-muzika">
+    <div class="round-header">
+      <span class="round-icon-big">&#127932;</span>
+      <div>
+        <h2>Muzika</h2>
+        <p>Od klasike do roka — istorija zvuka</p>
+      </div>
+      <span class="round-badge">Runda 7</span>
+    </div>
+    <div class="topics-grid">
+      <div class="coming-soon">
+        &#8987; Teme za ovu rundu su u pripremi...
+      </div>
+    </div>
+  </div>
+
+  <!-- RUNDA 8: SVASTARA II -->
+  <div class="round-panel" id="panel-svastara2">
+    <div class="round-header">
+      <span class="round-icon-big">&#9889;</span>
+      <div>
+        <h2>Sva&#353;tara II</h2>
+        <p>Zavr&#353;na runda — te&#382;a pitanja za prave znalce</p>
+      </div>
+      <span class="round-badge">Runda 8</span>
+    </div>
+    <div class="topics-grid">
+      <div class="coming-soon">
+        &#8987; Teme za ovu rundu su u pripremi...
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<footer>&#9830; Pub Quiz &#9830; Znanje je mo&#263; &#9830;</footer>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+
+var rounds = [
+  { id: 'film',       icon: '&#127916;', name: 'Film',         num: 'Runda 1', count: '1 tema' },
+  { id: 'geografija', icon: '&#127758;', name: 'Geografija',   num: 'Runda 2', count: '2 teme' },
+  { id: 'knjizevnost',icon: '&#128218;', name: 'Knji\u017Eevnost', num: 'Runda 3', count: '3 teme' },
+  { id: 'svastara1',  icon: '&#127914;', name: 'Sva\u0161tara I', num: 'Runda 4', count: 'Uskoro' },
+  { id: 'sport',      icon: '&#127942;', name: 'Sport',        num: 'Runda 5', count: 'Uskoro' },
+  { id: 'istorija',   icon: '&#9876;',   name: 'Istorija',     num: 'Runda 6', count: '3 teme' },
+  { id: 'muzika',     icon: '&#127932;', name: 'Muzika',       num: 'Runda 7', count: 'Uskoro' },
+  { id: 'svastara2',  icon: '&#9889;',   name: 'Sva\u0161tara II', num: 'Runda 8', count: 'Uskoro' }
+];
+
+var grid = document.getElementById('homeGrid');
+rounds.forEach(function(r) {
+  var card = document.createElement('div');
+  card.className = 'round-card';
+  card.innerHTML =
+    '<div class="rc-icon">' + r.icon + '</div>' +
+    '<div class="rc-num">' + r.num + '</div>' +
+    '<div class="rc-name">' + r.name + '</div>' +
+    '<div class="rc-count">' + r.count + '</div>';
+  card.onclick = function() {
+    var tab = document.querySelector('[data-panel="' + r.id + '"]');
+    if (tab) tab.click();
+  };
+  grid.appendChild(card);
+});
+
+var TOPICS = [
+  { title: 'Oskarovci', desc: 'Dobitnici nagrade Oscar za najbolji film — od 1980. do danas', round: 'Film', roundIcon: '&#127916;', roundId: 'film', icon: '&#127942;', gradient: 'linear-gradient(135deg, #1a0a2e, #2d1b4e)', url: 'film/oskarovci/index.html', available: true },
+  { title: 'Zastave', desc: 'Zastave svih dr\u017Eava sveta razvrstane po kontinentima', round: 'Geografija', roundIcon: '&#127758;', roundId: 'geografija', icon: '&#127760;', gradient: 'linear-gradient(135deg, #071a1a, #0d3333)', url: 'geografija/zastave/index.html', available: true },
+  { title: 'Sun\u010Dev Sistem', desc: 'Planete, sateliti i klju\u010Dni podaci o na\u0161em sun\u010Devom sistemu', round: 'Geografija', roundIcon: '&#127758;', roundId: 'geografija', icon: '&#9728;', gradient: 'linear-gradient(135deg, #020818, #051530)', url: 'geografija/suncevSistem/index.html', available: true },
+  { title: 'Nobelovci', desc: 'Dobitnici Nobelove nagrade za knji\u017Eevnost — od 1980. do 2024.', round: 'Knji\u017Eevnost', roundIcon: '&#128218;', roundId: 'knjizevnost', icon: '&#127885;', gradient: 'linear-gradient(135deg, #1a1000, #2e1e00)', url: 'knjizevnost/nobelovci/index.html', available: true },
+  { title: 'Stilske figure', desc: 'Tropi, figure misli i dikcije \u2014 metafora, ironija, hiperbola, anafora i jo\u0161', round: 'Knji\u017Eevnost', roundIcon: '&#128218;', roundId: 'knjizevnost', icon: '&#9998;', gradient: 'linear-gradient(135deg, #0e1a0e, #1a2e1a)', url: 'knjizevnost/stilskeFigure/index.html', available: true },
+  { title: 'Glasovne promene', desc: 'Palatalizacija, jotovanje, jednačenje \u2014 fonolo\u0161ke alternacije u srpskom jeziku', round: 'Knji\u017Eevnost', roundIcon: '&#128218;', roundId: 'knjizevnost', icon: '&#128442;', gradient: 'linear-gradient(135deg, #0e0e1a, #1a1a2e)', url: 'knjizevnost/glasovnePromene/index.html', available: true },
+  { title: 'Nemnji\u0107i', desc: 'Porodi\u010Dno stablo srpske vladarske dinastije od 1166. do 1371.', round: 'Istorija', roundIcon: '&#9876;', roundId: 'istorija', icon: '&#9812;', gradient: 'linear-gradient(135deg, #1a0800, #2e1400)', url: 'istorija/nemanjici/nemanjici.html', available: true },
+  { title: 'Filmski direktori', desc: 'Najve\u0107i reditelji svetske kinematografije', round: 'Film', roundIcon: '&#127916;', roundId: 'film', icon: '&#127909;', gradient: 'linear-gradient(135deg, #1a1a0a, #2e2e1b)', url: null, available: false },
+  { title: 'Filmski citati', desc: 'Prepoznaj film po \u010Duvenom citatu', round: 'Film', roundIcon: '&#127916;', roundId: 'film', icon: '&#127902;', gradient: 'linear-gradient(135deg, #0a1a1a, #1b2e2e)', url: null, available: false },
+  { title: 'Planine i reke', desc: 'Najve\u0107i prirodni oblici reljefa na planeti Zemlji', round: 'Geografija', roundIcon: '&#127758;', roundId: 'geografija', icon: '&#9968;', gradient: 'linear-gradient(135deg, #1a0a0a, #2e1b1b)', url: null, available: false },
+  { title: 'Srpski pisci', desc: 'Najve\u0107a imena srpske knji\u017Eevnosti kroz vekove', round: 'Knji\u017Eevnost', roundIcon: '&#128218;', roundId: 'knjizevnost', icon: '&#128196;', gradient: 'linear-gradient(135deg, #0a0a1a, #1b1b2e)', url: null, available: false },
+  { title: 'II Svetski rat', desc: 'Interaktivni tajmlajn klju\u010Dnih doga\u0111aja od 1939. do 1945.', round: 'Istorija', roundIcon: '&#9876;', roundId: 'istorija', icon: '&#9876;', gradient: 'linear-gradient(135deg, #0e0808, #1e1008)', url: 'istorija/wwii/index.html', available: true },
+  { title: 'Stari vek', desc: 'Gr\u010Dka, Rim, Egipat — civilizacije koje su postavile temelje', round: 'Istorija', roundIcon: '&#9876;', roundId: 'istorija', icon: '&#127981;', gradient: 'linear-gradient(135deg, #12100a, #22201a)', url: null, available: false }
+];
+
+var searchInput = document.getElementById('searchInput');
+var searchClear = document.getElementById('searchClear');
+var searchResults = document.getElementById('searchResults');
+var homeGrid = document.getElementById('homeGrid');
+
+searchInput.addEventListener('input', function() {
+  var q = this.value.trim().toLowerCase();
+  searchClear.style.display = q ? 'block' : 'none';
+  if (!q) {
+    searchResults.classList.remove('active');
+    searchResults.innerHTML = '';
+    homeGrid.style.display = '';
+    return;
+  }
+  homeGrid.style.display = 'none';
+  searchResults.classList.add('active');
+
+  var matches = TOPICS.filter(function(t) {
+    return (
+      t.title.toLowerCase().indexOf(q) >= 0 ||
+      t.desc.toLowerCase().indexOf(q) >= 0 ||
+      t.round.toLowerCase().indexOf(q) >= 0
+    );
+  });
+
+  if (!matches.length) {
+    searchResults.innerHTML = '<div class="search-none"><span>&#128269;</span>Nema rezultata za &ldquo;' + escHtml(searchInput.value.trim()) + '&rdquo;</div>';
+    return;
+  }
+
+  var html = '<div class="search-results-header">&#9830; ' + matches.length + ' ' + (matches.length === 1 ? 'rezultat' : matches.length < 5 ? 'rezultata' : 'rezultata') + '</div>';
+  html += '<div class="search-results-grid">';
+  matches.forEach(function(t) {
+    var tag = t.available
+      ? '<span class="arrow">&#8594;</span>'
+      : '<span style="color:var(--muted);font-style:italic">Uskoro</span>';
+    var card = t.available
+      ? '<a href="' + t.url + '" class="search-result-card">'
+      : '<div class="search-result-card disabled">';
+    var close = t.available ? '</a>' : '</div>';
+    html += card +
+      '<div class="src-top" style="background:' + t.gradient + '">' + t.icon + '</div>' +
+      '<div class="src-body"><h3>' + t.title + '</h3><p>' + t.desc + '</p></div>' +
+      '<div class="src-footer"><span class="src-round-tag">' + t.roundIcon + ' ' + t.round + '</span>' + tag + '</div>' +
+      close;
+  });
+  html += '</div>';
+  searchResults.innerHTML = html;
+});
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function clearSearch() {
+  searchInput.value = '';
+  searchClear.style.display = 'none';
+  searchResults.classList.remove('active');
+  searchResults.innerHTML = '';
+  homeGrid.style.display = '';
+  searchInput.focus();
+}
+
+function switchPanel(id, tab) {
+  document.querySelectorAll('.round-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.round-panel, .home-panel').forEach(function(p) { p.classList.remove('active'); });
+  tab.classList.add('active');
+  var panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kviz — Pub Quiz</title>
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #1a0f05;
+  --surface: #241508;
+  --surface2: #2e1c0a;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #7a6015;
+  --text: #f0e6d0;
+  --muted: #9a8060;
+  --border: #3a2a12;
+  --border2: #4a3518;
+  --correct: #1a3d28;
+  --correct-b: #3a9d5f;
+  --wrong: #3d1a1a;
+  --wrong-b: #9d3a3a;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(201,162,39,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(92,61,30,0.3) 0%, transparent 60%);
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 2px solid var(--border2);
+  background: var(--surface);
+  gap: 16px;
+}
+.header-back {
+  color: var(--gold-dim);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.header-back:hover { color: var(--gold); border-color: var(--gold-dim); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 22px; color: var(--gold2); font-weight: normal; letter-spacing: 4px; }
+.header-spacer { width: 88px; }
+
+/* SCREENS */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── HOME SCREEN ─────────────────────────────────────── */
+.home-wrap { max-width: 680px; margin: 0 auto; padding: 40px 20px 60px; }
+
+.home-intro { text-align: center; margin-bottom: 36px; }
+.home-intro .big-icon { font-size: 52px; margin-bottom: 12px; }
+.home-intro h2 { font-size: 24px; color: var(--gold2); font-weight: normal; letter-spacing: 2px; margin-bottom: 8px; }
+.home-intro p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 32px;
+}
+.cat-card {
+  background: var(--surface);
+  border: 2px solid var(--border2);
+  border-radius: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cat-card:hover { border-color: var(--gold-dim); background: var(--surface2); transform: translateY(-2px); }
+.cat-card.selected { border-color: var(--gold); background: var(--surface2); }
+.cat-card .cat-icon { font-size: 36px; margin-bottom: 10px; }
+.cat-card .cat-name { font-size: 14px; color: var(--gold2); letter-spacing: 1px; }
+.cat-card .cat-count { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+.section-label {
+  text-align: center;
+  font-size: 11px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.num-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 32px; }
+.num-btn {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 10px 28px;
+  color: var(--muted);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.num-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+.num-btn.selected { border-color: var(--gold); color: var(--gold2); background: var(--surface2); }
+
+.start-btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: var(--gold);
+  color: var(--bg);
+  font-size: 16px;
+  font-family: inherit;
+  letter-spacing: 3px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.start-btn:hover:not(:disabled) { background: var(--gold2); transform: translateY(-1px); }
+.start-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ── QUIZ SCREEN ─────────────────────────────────────── */
+.quiz-wrap { max-width: 680px; margin: 0 auto; padding: 28px 20px 60px; }
+
+.quiz-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+.quiz-score-label { color: var(--gold); font-size: 13px; }
+
+.progress-bar-wrap {
+  height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: width 0.35s ease;
+}
+
+.timer-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.timer-num {
+  font-size: 13px;
+  color: var(--gold-dim);
+  min-width: 24px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.timer-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--border2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.timer-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: background 0.4s;
+}
+
+.question-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 24px 26px 22px;
+  margin-bottom: 18px;
+}
+.question-cat {
+  font-size: 10px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.question-text {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.question-text em { color: var(--gold); font-style: normal; }
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.opt-btn {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 14px 14px;
+  text-align: left;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.45;
+}
+.opt-btn:hover:not(:disabled) { border-color: var(--gold-dim); background: var(--surface2); }
+.opt-letter {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--gold-dim);
+  flex-shrink: 0;
+  font-weight: bold;
+  transition: background 0.15s;
+}
+.opt-btn.correct { background: var(--correct); border-color: var(--correct-b); color: #8dffc2; }
+.opt-btn.correct .opt-letter { background: var(--correct-b); color: #0a1f14; }
+.opt-btn.wrong { background: var(--wrong); border-color: var(--wrong-b); color: #ffaaaa; }
+.opt-btn.wrong .opt-letter { background: var(--wrong-b); color: #fff; }
+.opt-btn:disabled { cursor: default; }
+
+/* Feedback flash */
+.quiz-feedback {
+  text-align: center;
+  height: 28px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.quiz-feedback.show { opacity: 1; }
+
+/* ── RESULT SCREEN ───────────────────────────────────── */
+.result-wrap { max-width: 680px; margin: 0 auto; padding: 40px 20px 60px; }
+
+.result-score-box {
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 36px 24px 28px;
+  margin-bottom: 20px;
+}
+.result-big-icon { font-size: 56px; margin-bottom: 12px; }
+.result-label { font-size: 11px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+.result-score { font-size: 56px; color: var(--gold2); font-weight: normal; line-height: 1; margin-bottom: 4px; }
+.result-total { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.result-pct {
+  display: inline-block;
+  font-size: 18px;
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+  border-radius: 20px;
+  padding: 5px 22px;
+  margin-bottom: 10px;
+}
+.result-rating { font-size: 14px; color: var(--muted); font-style: italic; }
+
+.result-correct-count {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border2);
+}
+.rcc-item { text-align: center; }
+.rcc-num { font-size: 26px; color: var(--gold2); }
+.rcc-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+.result-actions { display: flex; gap: 12px; margin-bottom: 28px; }
+.btn-secondary {
+  flex: 1;
+  padding: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--gold-dim);
+  font-size: 13px;
+  font-family: inherit;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+}
+.btn-secondary:hover { border-color: var(--gold-dim); color: var(--gold); }
+.btn-primary {
+  flex: 1;
+  padding: 13px;
+  background: var(--gold);
+  border: none;
+  border-radius: 8px;
+  color: var(--bg);
+  font-size: 13px;
+  font-family: inherit;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--gold2); }
+
+.result-breakdown {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.breakdown-header {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border2);
+  font-size: 11px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.breakdown-item {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.breakdown-item:last-child { border-bottom: none; }
+.bd-icon { font-size: 15px; flex-shrink: 0; padding-top: 1px; }
+.bd-content { flex: 1; min-width: 0; }
+.bd-q { font-size: 12px; color: var(--muted); margin-bottom: 4px; line-height: 1.4; }
+.bd-answer { font-size: 13px; line-height: 1.4; }
+.bd-correct-ans { color: #8dffc2; }
+.bd-wrong-ans { color: #ffaaaa; text-decoration: line-through; opacity: 0.7; }
+.bd-hint { font-size: 11px; color: #8dffc2; margin-top: 2px; opacity: 0.8; }
+.bd-points { font-size: 10px; color: var(--gold-dim); letter-spacing: 1px; float: right; margin-top: 2px; }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .header-title h1 { font-size: 17px; letter-spacing: 2px; }
+  .header-spacer { width: 60px; }
+  .cat-card { padding: 18px 10px; }
+  .cat-card .cat-icon { font-size: 28px; margin-bottom: 6px; }
+  .cat-card .cat-name { font-size: 12px; }
+  .options-grid { grid-template-columns: 1fr; }
+  .question-text { font-size: 15px; }
+  .result-actions { flex-direction: column; }
+  .quiz-wrap, .home-wrap, .result-wrap { padding: 18px 12px 48px; }
+  .result-score { font-size: 44px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="../index.html" class="header-back">&#8592; Pub Quiz</a>
+  <div class="header-title"><h1>&#127381; KVIZ MOD</h1></div>
+  <div class="header-spacer"></div>
+</div>
+
+<!-- ── HOME ───────────────────────────────────────────── -->
+<div class="screen active" id="screen-home">
+  <div class="home-wrap">
+    <div class="home-intro">
+      <div class="big-icon">&#9830;</div>
+      <h2>Izaberi kategoriju</h2>
+      <p>Odaberi oblast znanja, broj pitanja i kreni u kviz!<br>Ima&#353; 20 sekundi po pitanju — br&#382;i odgovor donosi vi&#353;e bodova.</p>
+    </div>
+
+    <div class="cat-grid">
+      <div class="cat-card" onclick="selectCat('film', this)">
+        <div class="cat-icon">&#127916;</div>
+        <div class="cat-name">Film</div>
+        <div class="cat-count">Oskari &amp; reditelji</div>
+      </div>
+      <div class="cat-card" onclick="selectCat('knjizevnost', this)">
+        <div class="cat-icon">&#128218;</div>
+        <div class="cat-name">Knji&#382;evnost</div>
+        <div class="cat-count">Nobelova nagrada</div>
+      </div>
+      <div class="cat-card" onclick="selectCat('geografija', this)">
+        <div class="cat-icon">&#9728;</div>
+        <div class="cat-name">Geografija</div>
+        <div class="cat-count">Sun&#269;ev sistem</div>
+      </div>
+      <div class="cat-card" onclick="selectCat('mix', this)">
+        <div class="cat-icon">&#9889;</div>
+        <div class="cat-name">Mix</div>
+        <div class="cat-count">Sve kategorije</div>
+      </div>
+    </div>
+
+    <div class="section-label">Broj pitanja</div>
+    <div class="num-row">
+      <button class="num-btn" onclick="selectNum(5, this)">5</button>
+      <button class="num-btn selected" onclick="selectNum(10, this)">10</button>
+      <button class="num-btn" onclick="selectNum(15, this)">15</button>
+    </div>
+
+    <button class="start-btn" id="startBtn" onclick="startQuiz()" disabled>Izaberi kategoriju</button>
+  </div>
+</div>
+
+<!-- ── KVIZ ───────────────────────────────────────────── -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-wrap">
+    <div class="quiz-meta">
+      <span id="qProgress">Pitanje 1 / 10</span>
+      <span class="quiz-score-label" id="qScore">0 bodova</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="timer-row">
+      <span class="timer-num" id="timerNum">20</span>
+      <div class="timer-bar-wrap">
+        <div class="timer-bar-fill" id="timerBar" style="width:100%;background:var(--gold)"></div>
+      </div>
+    </div>
+    <div class="question-box">
+      <div class="question-cat" id="qCat"></div>
+      <div class="question-text" id="qText"></div>
+    </div>
+    <div class="options-grid" id="optionsGrid"></div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+  </div>
+</div>
+
+<!-- ── REZULTATI ──────────────────────────────────────── -->
+<div class="screen" id="screen-result">
+  <div class="result-wrap">
+    <div class="result-score-box">
+      <div class="result-big-icon" id="resultIcon">&#127881;</div>
+      <div class="result-label">Tvoj rezultat</div>
+      <div class="result-score" id="resultScore">0</div>
+      <div class="result-total" id="resultTotal">od 0 bodova</div>
+      <div class="result-pct" id="resultPct">0%</div>
+      <div class="result-rating" id="resultRating"></div>
+      <div class="result-correct-count">
+        <div class="rcc-item">
+          <div class="rcc-num" id="rccCorrect">0</div>
+          <div class="rcc-label">Ta&#269;no</div>
+        </div>
+        <div class="rcc-item">
+          <div class="rcc-num" id="rccWrong">0</div>
+          <div class="rcc-label">Neta&#269;no</div>
+        </div>
+        <div class="rcc-item">
+          <div class="rcc-num" id="rccMax">0</div>
+          <div class="rcc-label">Max bodova</div>
+        </div>
+      </div>
+    </div>
+    <div class="result-actions">
+      <a href="../index.html" class="btn-secondary">&#8592; Pub Quiz</a>
+      <button class="btn-primary" onclick="restartSame()">Igraj ponovo</button>
+    </div>
+    <div class="result-breakdown">
+      <div class="breakdown-header">&#9830; Pregled pitanja</div>
+      <div id="breakdown"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── BAZA PITANJA ──────────────────────────────────────
+var QB = {
+  film: [
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 1994. godine?', a:'Schindler\'s List', w:['The Piano','The Fugitive','Philadelphia']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 1995. godine?', a:'Forrest Gump', w:['Pulp Fiction','The Shawshank Redemption','Four Weddings and a Funeral']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 1996. godine?', a:'Braveheart', w:['Apollo 13','Sense and Sensibility','The Usual Suspects']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 1998. godine?', a:'Titanic', w:['L.A. Confidential','Good Will Hunting','As Good as It Gets']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2001. godine?', a:'Gladiator', w:['Traffic','Crouching Tiger, Hidden Dragon','Chocolat']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2002. godine?', a:'A Beautiful Mind', w:['The Lord of the Rings: The Fellowship of the Ring','Gosford Park','Moulin Rouge!']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2003. godine?', a:'Chicago', w:['The Pianist','Gangs of New York','The Hours']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2004. godine?', a:'The Lord of the Rings: The Return of the King', w:['Mystic River','Master and Commander','Lost in Translation']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2007. godine?', a:'The Departed', w:['Babel','Little Miss Sunshine','The Queen']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2009. godine?', a:'Slumdog Millionaire', w:['The Curious Case of Benjamin Button','Frost/Nixon','Milk']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2010. godine?', a:'The Hurt Locker', w:['Avatar','Inglourious Basterds','Up in the Air']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2011. godine?', a:'The King\'s Speech', w:['The Social Network','Black Swan','Inception']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2014. godine?', a:'12 Years a Slave', w:['Gravity','American Hustle','The Wolf of Wall Street']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2017. godine?', a:'Moonlight', w:['La La Land','Arrival','Manchester by the Sea']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 1991. godine?', a:'Dances with Wolves', w:['Goodfellas','Ghost','The Godfather Part III']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 1992. godine?', a:'The Silence of the Lambs', w:['JFK','Thelma & Louise','Bugsy']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 1993. godine?', a:'Unforgiven', w:['The Crying Game','A Few Good Men','Scent of a Woman']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 1985. godine?', a:'Amadeus', w:['Places in the Heart','A Passage to India','The Killing Fields']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2020. godine?', a:'Parasite', w:['1917','Joker','The Irishman']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2023. godine?', a:'Everything Everywhere All at Once', w:['The Fabelmans','T\u00e1r','All Quiet on the Western Front']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2024. godine?', a:'Oppenheimer', w:['Barbie','Poor Things','The Zone of Interest']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2025. godine?', a:'Anora', w:['The Brutalist','Conclave','Emilia P\u00e9rez']},
+    {q:'Ko je re\u017Eirao film <em>Schindler\'s List</em>?', a:'Steven Spielberg', w:['Martin Scorsese','Francis Ford Coppola','Sidney Lumet']},
+    {q:'Ko je re\u017Eirao film <em>Titanic</em> (1997)?', a:'James Cameron', w:['Steven Spielberg','Ridley Scott','Peter Jackson']},
+    {q:'Ko je re\u017Eirao film <em>Parasite</em> (2019)?', a:'Bong Joon-ho', w:['Park Chan-wook','Sam Mendes','Lee Chang-dong']},
+    {q:'Ko je re\u017Eirao film <em>Oppenheimer</em> (2023)?', a:'Christopher Nolan', w:['Denis Villeneuve','Ridley Scott','Paul Thomas Anderson']},
+    {q:'Ko je re\u017Eirao film <em>The Departed</em> (2006)?', a:'Martin Scorsese', w:['Francis Ford Coppola','Clint Eastwood','Michael Mann']},
+    {q:'Ko je re\u017Eirao film <em>Gladiator</em> (2000)?', a:'Ridley Scott', w:['Mel Gibson','Oliver Stone','Wolfgang Petersen']},
+    {q:'Ko je re\u017Eirao film <em>The Lord of the Rings</em> trilogiju?', a:'Peter Jackson', w:['Ridley Scott','Steven Spielberg','James Cameron']},
+    {q:'Koji film je pobedio na Oskaru za <em>Najboji film</em> 2019. godine?', a:'Green Book', w:['Roma','A Star Is Born','Black Panther']}
+  ],
+
+  knjizevnost: [
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>1982. godine</em>?', a:'Gabriel Garc\u00EDa M\u00E1rquez', w:['Czesław Miłosz','William Golding','Elias Canetti']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>1993. godine</em>?', a:'Toni Morrison', w:['Kenzaburo Oe','Nadine Gordimer','Derek Walcott']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2006. godine</em>?', a:'Orhan Pamuk', w:['Harold Pinter','Elfriede Jelinek','J.M. Coetzee']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2016. godine</em>?', a:'Bob Dylan', w:['Svetlana Aleksijevi\u0107','Kazuo Ishiguro','Peter Handke']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2024. godine</em>?', a:'Han Kang', w:['Jon Fosse','Annie Ernaux','Olga Tokar\u010dzuk']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2015. godine</em>?', a:'Svetlana Aleksijevi\u0107', w:['Patrick Modiano','Alice Munro','Doris Lessing']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2022. godine</em>?', a:'Annie Ernaux', w:['Jon Fosse','Abdulrazak Gurnah','Han Kang']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2023. godine</em>?', a:'Jon Fosse', w:['Annie Ernaux','Han Kang','Abdulrazak Gurnah']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2019. godine</em>?', a:'Peter Handke', w:['Olga Tokar\u010dzuk','Kazuo Ishiguro','Svetlana Aleksijevi\u0107']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2018. godine</em>?', a:'Olga Tokar\u010dzuk', w:['Peter Handke','Annie Ernaux','Jon Fosse']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2017. godine</em>?', a:'Kazuo Ishiguro', w:['Svetlana Aleksijevi\u0107','Bob Dylan','Mo Yan']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2012. godine</em>?', a:'Mo Yan', w:['Alice Munro','Patrick Modiano','Tomas Transtr\u00f6mer']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2013. godine</em>?', a:'Alice Munro', w:['Mo Yan','Tomas Transtr\u00f6mer','Herta M\u00fcller']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2010. godine</em>?', a:'Mario Vargas Llosa', w:['Herta M\u00fcller','Tomas Transtr\u00f6mer','J.M.G. Le Cl\u00e9zio']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2003. godine</em>?', a:'J.M. Coetzee', w:['Elfriede Jelinek','Harold Pinter','Doris Lessing']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>1998. godine</em>?', a:'Jos\u00e9 Saramago', w:['Orhan Pamuk','Dario Fo','Seamus Heaney']},
+    {q:'Iz koje zemlje poti\u010de nobelovac <em>Gabriel Garc\u00EDa M\u00E1rquez</em>?', a:'Kolumbija', w:['Argentina','Meksiko','Peru']},
+    {q:'Iz koje zemlje poti\u010de nobelovac <em>Orhan Pamuk</em>?', a:'Turska', w:['Iran','Gr\u010dka','Egipat']},
+    {q:'Iz koje zemlje poti\u010de nobelovka <em>Han Kang</em>?', a:'Ju\u017enoj Koreji', w:['Japanu','Kini','Tajvanu']},
+    {q:'Iz koje zemlje poti\u010de nobelovac <em>Mario Vargas Llosa</em>?', a:'Peru', w:['Kolumbija','Meksiko','Argentina']},
+    {q:'Iz koje zemlje poti\u010de nobelovac <em>Kazuo Ishiguro</em>?', a:'Velika Britanija (ro\u0111en u Japanu)', w:['Japan','SAD','Australija']},
+    {q:'Koje je najpoznatije delo <em>Gabriela Garc\u00EDe M\u00E1rqueza</em>?', a:'Sto godina samo\u0107e', w:['Majstor i Margarita','Ime ru\u017ee','Igra staklenih perli']},
+    {q:'Ko je bio <em>prvi Afrikanac</em> koji je dobio Nobelovu nagradu za knji\u017Eevnost?', a:'Wole Soyinka (1986)', w:['Nadine Gordimer (1991)','J.M. Coetzee (2003)','Chinua Achebe']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>1994. godine</em>?', a:'Kenzaburo Oe', w:['Toni Morrison','Seamus Heaney','Wislawa Szymborska']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2000. godine</em>?', a:'Gao Xingjian', w:['Orhan Pamuk','V.S. Naipaul','Imre Kert\u00e9sz']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2004. godine</em>?', a:'Elfriede Jelinek', w:['Harold Pinter','Doris Lessing','Orhan Pamuk']},
+    {q:'Ko je dobio Nobelovu nagradu za knji\u017Eevnost <em>2005. godine</em>?', a:'Harold Pinter', w:['Orhan Pamuk','Elfriede Jelinek','Peter Handke']},
+    {q:'Iz koje zemlje poti\u010de nobelovka <em>Olga Tokar\u010dzuk</em>?', a:'Poljska', w:['Ma\u0111arska','\u010ce\u0161ka','Rumunija']}
+  ],
+
+  geografija: [
+    {q:'Koja je <em>najve\u0107a planeta</em> Sun\u010devog sistema?', a:'Jupiter', w:['Saturn','Neptun','Uran']},
+    {q:'Koja je <em>najmanja planeta</em> Sun\u010devog sistema?', a:'Merkur', w:['Mars','Venera','Pluton']},
+    {q:'Koja planeta je <em>najbli\u017Ea Suncu</em>?', a:'Merkur', w:['Venera','Zemlja','Mars']},
+    {q:'Koja planeta je <em>najudaljenija</em> od Sunca?', a:'Neptun', w:['Uran','Saturn','Pluton']},
+    {q:'Koliko planeta ima u <em>Sun\u010devom sistemu</em>?', a:'8', w:['9','7','10']},
+    {q:'Koja planeta ima <em>Veliku Crvenu Mrlju</em> — orkan koji traje vekovima?', a:'Jupiter', w:['Saturn','Neptun','Mars']},
+    {q:'Koja planeta ima <em>najvi\u0161e meseca</em>?', a:'Saturn (146+)', w:['Jupiter (95+)','Uran (28)','Neptun (16)']},
+    {q:'\u0160ta je Pluton od 2006. godine?', a:'Patuljasta planeta', w:['Asteroida','Komet','Mesec Neptuna']},
+    {q:'Koja je <em>najvreli\u0161a planeta</em> Sun\u010devog sistema po povr\u0161inskoj temperaturi?', a:'Venera', w:['Merkur','Jupiter','Mars']},
+    {q:'Koji je <em>najve\u0107i mesec</em> u Sun\u010devom sistemu?', a:'Ganimed (Jupiterov mesec)', w:['Titan (Saturnov mesec)','Mesec (Zemljin)','Europa (Jupiterov mesec)']},
+    {q:'Koliko meseci ima <em>Zemlja</em>?', a:'1', w:['2','0','3']},
+    {q:'Koja planeta se <em>okre\u0107e unazad</em> u odnosu na ostale?', a:'Venera', w:['Merkur','Uran','Mars']},
+    {q:'Koja planeta je poznata kao <em>Crvena planeta</em>?', a:'Mars', w:['Merkur','Jupiter','Venera']},
+    {q:'Za otprilike koliko minuta svetlost putuje od Sunca do Zemlje?', a:'~8 minuta', w:['~1 minut','~30 minuta','~2 sata']},
+    {q:'Kako se zovu <em>dva meseca Marsa</em>?', a:'Fobos i Dajmos', w:['Io i Europa','Titan i Rea','Triton i Nereida']},
+    {q:'Koliko <em>gasovitih d\u017einova</em> ima u Sun\u010devom sistemu?', a:'4 (Jupiter, Saturn, Uran, Neptun)', w:['2','3','6']},
+    {q:'Koja je <em>tre\u0107a planeta</em> od Sunca?', a:'Zemlja', w:['Venera','Mars','Jupiter']},
+    {q:'Koji je <em>najve\u0107i mesec Saturna</em>?', a:'Titan', w:['Rea','Japetus','Encelad']},
+    {q:'Izme\u0111u kojih planeta se nalazi <em>asteroidni pojas</em>?', a:'Marsa i Jupitera', w:['Jupitera i Saturna','Saturna i Urana','Urana i Neptuna']},
+    {q:'Koja planeta ima <em>dan du\u017ei od svoje godine</em>?', a:'Venera', w:['Merkur','Jupiter','Mars']},
+    {q:'Otprilike koliko Zemalja mo\u017ee da stane unutar <em>Jupitera</em>?', a:'~1.300', w:['~100','~500','~10.000']},
+    {q:'Koja planeta ima <em>nagib ose od ~98\u00b0</em> — skoro sasvim polo\u017eena na bok?', a:'Uran', w:['Saturn','Neptun','Pluton']},
+    {q:'Kako je <em>Sunce</em> klasifikovano u astronomiji?', a:'\u017duta patuljasta zvezda', w:['Crveni d\u017eiv','Bela patuljasta zvezda','Supernova']},
+    {q:'Kolika je <em>Keplerova tre\u0107a planeta</em> od Sunca — Zemlja — udaljena od Sunca?', a:'~150 miliona km (1 AU)', w:['~50 miliona km','~300 miliona km','~1 milijarda km']},
+    {q:'Koja planeta je poznata po <em>prstenovima</em> vidljivim golim okom?', a:'Saturn', w:['Jupiter','Uran','Neptun']},
+    {q:'Koja je <em>peta planeta</em> od Sunca?', a:'Jupiter', w:['Saturn','Mars','Uran']},
+    {q:'Kolika je <em>povr\u0161inska temperatura Venere</em> (approx.)?', a:'~465\u00b0C', w:['~160\u00b0C','~750\u00b0C','~250\u00b0C']},
+    {q:'Koji su <em>unutra\u0161nji planete</em> Sun\u010devog sistema?', a:'Merkur, Venera, Zemlja, Mars', w:['Merkur, Venera, Mars, Jupiter','Merkur, Zemlja, Mars, Saturn','Venera, Zemlja, Mars, Jupiter']}
+  ]
+};
+
+// ── STANJE ────────────────────────────────────────────
+var state = {
+  cat: null, numQ: 10,
+  questions: [], current: 0,
+  score: 0, answers: [],
+  timer: null, timeLeft: 20,
+  answered: false
+};
+
+// ── HOME ──────────────────────────────────────────────
+function selectCat(cat, el) {
+  document.querySelectorAll('.cat-card').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  state.cat = cat;
+  var btn = document.getElementById('startBtn');
+  btn.disabled = false;
+  btn.textContent = 'Po\u010dni kviz \u2192';
+}
+
+function selectNum(n, el) {
+  document.querySelectorAll('.num-btn').forEach(function(b) { b.classList.remove('selected'); });
+  el.classList.add('selected');
+  state.numQ = n;
+}
+
+function startQuiz() {
+  var pool = [];
+  if (state.cat === 'mix') {
+    QB.film.forEach(function(q) { pool.push(Object.assign({}, q, {_cat:'film'})); });
+    QB.knjizevnost.forEach(function(q) { pool.push(Object.assign({}, q, {_cat:'knjizevnost'})); });
+    QB.geografija.forEach(function(q) { pool.push(Object.assign({}, q, {_cat:'geografija'})); });
+  } else {
+    QB[state.cat].forEach(function(q) { pool.push(Object.assign({}, q, {_cat: state.cat})); });
+  }
+  pool = shuffle(pool);
+  state.questions = pool.slice(0, state.numQ);
+  state.current = 0;
+  state.score = 0;
+  state.answers = [];
+  showScreen('quiz');
+  renderQuestion();
+}
+
+// ── KVIZ ──────────────────────────────────────────────
+var CAT_LABELS = {
+  film: '&#127916; Film',
+  knjizevnost: '&#128218; Knji\u017Eevnost',
+  geografija: '&#9728; Geografija'
+};
+
+function renderQuestion() {
+  var q = state.questions[state.current];
+  state.answered = false;
+  state.timeLeft = 20;
+
+  document.getElementById('qProgress').textContent =
+    'Pitanje ' + (state.current + 1) + ' / ' + state.questions.length;
+  updateScoreLabel();
+  document.getElementById('progressBar').style.width =
+    (state.current / state.questions.length * 100) + '%';
+  document.getElementById('qCat').innerHTML = CAT_LABELS[q._cat] || '';
+  document.getElementById('qText').innerHTML = q.q;
+
+  var feedback = document.getElementById('quizFeedback');
+  feedback.className = 'quiz-feedback';
+  feedback.textContent = '';
+
+  // Timer bar reset (no transition for reset)
+  var bar = document.getElementById('timerBar');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  bar.style.background = 'var(--gold)';
+  bar.offsetHeight; // reflow
+  bar.style.transition = '';
+
+  document.getElementById('timerNum').textContent = '20';
+
+  // Options
+  var opts = shuffle([q.a].concat(q.w));
+  var letters = ['A','B','C','D'];
+  var grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  opts.forEach(function(opt, i) {
+    var btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = '<span class="opt-letter">' + letters[i] + '</span><span>' + esc(opt) + '</span>';
+    btn.onclick = function() { pickAnswer(opt, q.a, btn); };
+    grid.appendChild(btn);
+  });
+
+  clearInterval(state.timer);
+  state.timer = setInterval(function() {
+    state.timeLeft--;
+    document.getElementById('timerNum').textContent = state.timeLeft;
+    var pct = state.timeLeft / 20 * 100;
+    var bar = document.getElementById('timerBar');
+    bar.style.width = pct + '%';
+    bar.style.background = state.timeLeft <= 6 ? '#c0392b' : state.timeLeft <= 10 ? '#e67e22' : 'var(--gold)';
+    if (state.timeLeft <= 0) {
+      clearInterval(state.timer);
+      if (!state.answered) timeOut(q.a);
+    }
+  }, 1000);
+}
+
+function pickAnswer(chosen, correct, clickedBtn) {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timer);
+
+  var isCorrect = chosen === correct;
+  var bonus = isCorrect ? Math.round(state.timeLeft / 20 * 5) : 0;
+  var points = isCorrect ? 10 + bonus : 0;
+  state.score += points;
+
+  highlightButtons(correct, clickedBtn, isCorrect);
+
+  var feedback = document.getElementById('quizFeedback');
+  if (isCorrect) {
+    feedback.textContent = '+' + points + ' ' + (points === 1 ? 'bod' : points < 5 ? 'boda' : 'bodova') + (bonus > 0 ? ' (\u2605 brzinski bonus: +' + bonus + ')' : '');
+    feedback.style.color = '#8dffc2';
+  } else {
+    feedback.textContent = 'Neta\u010dno. Ta\u010dan odgovor je ozna\u010den.';
+    feedback.style.color = '#ffaaaa';
+  }
+  feedback.className = 'quiz-feedback show';
+
+  state.answers.push({q: q_plain(state.questions[state.current].q), correct: correct, given: chosen, isCorrect: isCorrect, points: points});
+  setTimeout(advance, 1600);
+}
+
+function timeOut(correct) {
+  state.answered = true;
+  highlightButtons(correct, null, false);
+  var feedback = document.getElementById('quizFeedback');
+  feedback.textContent = 'Vreme je isteklo! Ta\u010dan: ' + correct;
+  feedback.style.color = '#ffaaaa';
+  feedback.className = 'quiz-feedback show';
+  state.answers.push({q: q_plain(state.questions[state.current].q), correct: correct, given: null, isCorrect: false, points: 0});
+  setTimeout(advance, 1800);
+}
+
+function highlightButtons(correct, clickedBtn, isCorrect) {
+  document.querySelectorAll('.opt-btn').forEach(function(b) {
+    b.disabled = true;
+    var txt = b.querySelector('span:last-child').textContent;
+    if (txt === correct) { b.classList.add('correct'); }
+    else if (b === clickedBtn && !isCorrect) { b.classList.add('wrong'); }
+  });
+}
+
+function advance() {
+  state.current++;
+  if (state.current >= state.questions.length) showResults();
+  else renderQuestion();
+}
+
+function updateScoreLabel() {
+  var s = state.score;
+  document.getElementById('qScore').textContent =
+    s + ' ' + (s === 1 ? 'bod' : s < 5 ? 'boda' : 'bodova');
+}
+
+// ── REZULTATI ─────────────────────────────────────────
+function showResults() {
+  clearInterval(state.timer);
+  var maxScore = state.questions.length * 15;
+  var pct = maxScore > 0 ? Math.round(state.score / maxScore * 100) : 0;
+  var correct = state.answers.filter(function(a) { return a.isCorrect; }).length;
+  var wrong = state.answers.length - correct;
+
+  var icon, rating;
+  if (pct >= 90)      { icon = '&#127881;'; rating = 'Bravo! Ti si pravi znalac!'; }
+  else if (pct >= 75) { icon = '&#11088;';  rating = 'Odli\u010dno! Skoro savr\u0161eno!'; }
+  else if (pct >= 55) { icon = '&#128076;'; rating = 'Dobro! Jo\u0161 malo vr\u017ebi i bi\u0107e\u0161 ekspert.'; }
+  else if (pct >= 35) { icon = '&#128517;'; rating = 'Prolazno. Vreme je za u\u010denje!'; }
+  else                { icon = '&#128128;'; rating = 'Ups! Probaj ponovo, mo\u017ee\u0161 bolje!'; }
+
+  document.getElementById('resultIcon').innerHTML = icon;
+  document.getElementById('resultScore').textContent = state.score;
+  document.getElementById('resultTotal').textContent = 'od ' + maxScore + ' bodova';
+  document.getElementById('resultPct').textContent = pct + '%';
+  document.getElementById('resultRating').textContent = rating;
+  document.getElementById('rccCorrect').textContent = correct;
+  document.getElementById('rccWrong').textContent = wrong;
+  document.getElementById('rccMax').textContent = maxScore;
+
+  var bd = document.getElementById('breakdown');
+  bd.innerHTML = state.answers.map(function(a, i) {
+    var icon = a.isCorrect ? '&#9989;' : '&#10060;';
+    var given = a.given
+      ? '<div class="bd-answer ' + (a.isCorrect ? 'bd-correct-ans' : 'bd-wrong-ans') + '">' + esc(a.given) + '</div>'
+      : '<div class="bd-answer bd-wrong-ans">Nije odgovoreno</div>';
+    var hint = !a.isCorrect
+      ? '<div class="bd-hint">&#10003; ' + esc(a.correct) + '</div>' : '';
+    var pts = a.isCorrect
+      ? '<span class="bd-points">+' + a.points + ' bod' + (a.points === 1 ? '' : a.points < 5 ? 'a' : 'ova') + '</span>' : '';
+    return '<div class="breakdown-item">' +
+      '<div class="bd-icon">' + icon + '</div>' +
+      '<div class="bd-content">' +
+        '<div class="bd-q">' + (i+1) + '. ' + a.q + pts + '</div>' +
+        given + hint +
+      '</div></div>';
+  }).join('');
+
+  showScreen('result');
+}
+
+function restartSame() {
+  showScreen('home');
+}
+
+// ── HELPERS ───────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function q_plain(s) {
+  return s.replace(/<[^>]+>/g, '');
+}
+</script>
+</body>
+</html>

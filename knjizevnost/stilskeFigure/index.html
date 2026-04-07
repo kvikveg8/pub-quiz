@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Stilske figure &ndash; Knji&#382;evnost</title>
+<style>
+:root {
+  --bg: #1a0f05;
+  --surface: #241508;
+  --surface2: #2e1a08;
+  --surface3: #3a2410;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --text: #f0e6d0;
+  --text2: #b89a70;
+  --border: #4a3010;
+  --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--gold);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back {
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.controls {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.search-box {
+  flex: 1;
+  min-width: 200px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  outline: none;
+}
+.search-box:focus { border-color: var(--gold); }
+.search-box::placeholder { color: var(--text2); }
+
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label {
+  color: var(--text2);
+  font-size: 12px;
+  align-self: center;
+  margin-right: 2px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.filter-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text2);
+  padding: 6px 12px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+
+.main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+
+.results-count { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+
+.figures-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.figure-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.figure-card:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(201,162,39,0.15); }
+.figure-card.open { border-color: var(--gold); }
+
+.figure-head {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.figure-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.figure-info { flex: 1; }
+.figure-name {
+  font-size: 17px;
+  color: var(--gold2);
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+.figure-name-lat {
+  font-size: 11px;
+  color: var(--text2);
+  font-style: italic;
+  margin-top: 2px;
+}
+.figure-tag {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.tag-trop    { background: #1a0a2e; color: #a080e0; border: 1px solid #3a1060; }
+.tag-misao   { background: #0a1a0a; color: #70c070; border: 1px solid #1a4a1a; }
+.tag-dikcija { background: #1a1000; color: #c09040; border: 1px solid #4a3010; }
+
+.figure-expand {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.figure-card.open .figure-expand { max-height: 400px; }
+
+.figure-body {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.figure-def {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+.figure-example {
+  background: var(--bg);
+  border-left: 3px solid var(--gold);
+  padding: 10px 14px;
+  border-radius: 0 4px 4px 0;
+}
+.figure-example-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+.figure-example-text {
+  font-size: 14px;
+  color: var(--gold2);
+  font-style: italic;
+  line-height: 1.5;
+}
+.figure-example-note {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 4px;
+  font-style: normal;
+}
+
+.arrow-toggle {
+  font-size: 14px;
+  color: var(--text2);
+  transition: transform 0.3s;
+}
+.figure-card.open .arrow-toggle { transform: rotate(180deg); }
+
+.no-results {
+  text-align: center;
+  color: var(--text2);
+  padding: 60px 20px;
+  font-size: 16px;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: var(--text2);
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+
+@media (max-width: 600px) {
+  .controls { padding: 10px 14px; }
+  .main { padding: 14px; }
+  .figures-grid { grid-template-columns: 1fr; }
+  .header-title h1 { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#10022; STILSKE FIGURE</h1>
+    <p>Figura govora &mdash; jezi&#269;ki ukras i snaga izraza</p>
+  </div>
+  <span style="font-size:28px">&#9998;</span>
+</header>
+
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretra&#382;i naziv, definiciju, primer...">
+  <div class="filter-group">
+    <span class="filter-label">Vrsta:</span>
+    <button class="filter-btn active" data-cat="all">Sve</button>
+    <button class="filter-btn" data-cat="trop">Tropi</button>
+    <button class="filter-btn" data-cat="misao">Figure misli</button>
+    <button class="filter-btn" data-cat="dikcija">Figure dikcije</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="legend">
+    <span class="legend-item"><span class="figure-tag tag-trop">Trop</span> prenošenje značenja</span>
+    <span class="legend-item"><span class="figure-tag tag-misao">Misao</span> figure sadržaja</span>
+    <span class="legend-item"><span class="figure-tag tag-dikcija">Dikcija</span> zvučne figure</span>
+  </div>
+  <div class="results-count" id="resultsCount"></div>
+  <div class="figures-grid" id="figuresGrid"></div>
+</div>
+
+<script>
+var DATA = [
+  // ── TROPI ──────────────────────────────────────────────────────
+  {
+    name: "Poređenje", lat: "Comparatio / Simile", cat: "trop", icon: "⚖️",
+    def: "Izražavanje sličnosti između dve pojave uz upotrebu poređenja (kao, poput, nalik, sličan).",
+    primer: "Hrabar kao lav. / Leti poput ptice.",
+    napomena: "Za razliku od metafore, poređenje koristi eksplicitnu veznu reč."
+  },
+  {
+    name: "Metafora", lat: "Metaphora", cat: "trop", icon: "🌅",
+    def: "Prenošenje značenja na osnovu sličnosti između dve pojave — bez veznih reči poređenja.",
+    primer: "Ti si moje sunce. / Mesec je srebrni brod na nebu.",
+    napomena: "Metafora je skraćeno poređenje: 'hrabar kao lav' → 'lav'."
+  },
+  {
+    name: "Personifikacija", lat: "Personificatio / Prosopopoeia", cat: "trop", icon: "🌿",
+    def: "Pripisivanje ljudskih osobina, radnji ili osećanja neživim bićima, pojavama ili apstraktnim pojmovima.",
+    primer: "Vetar šapuće tajne. / Sunce se smeje.",
+    napomena: "Poseban slučaj metafore."
+  },
+  {
+    name: "Metonimija", lat: "Metonymia", cat: "trop", icon: "📚",
+    def: "Prenošenje naziva na osnovu susednosti ili logičke veze — autor umesto dela, sadržina umesto sadržine, deo umesto celine.",
+    primer: "Pročitao sam celog Andrića. / Popio je čašu.",
+    napomena: "Razlikuje se od metafore jer se zasniva na susednosti, ne sličnosti."
+  },
+  {
+    name: "Sinegdoha", lat: "Synecdoche", cat: "trop", icon: "🧩",
+    def: "Deo umesto celine ili celina umesto dela; rod umesto vrste ili vrsta umesto roda.",
+    primer: "Brod je imao sto jedara. (jedra = jedrilice) / Srbija je pobedila. (= reprezentacija)",
+    napomena: "Poseban slučaj metonimije."
+  },
+  {
+    name: "Hiperbola", lat: "Hyperbole", cat: "trop", icon: "📈",
+    def: "Namerno preterivanje u opisivanju radi pojačavanja izražajnosti.",
+    primer: "Čekam te sto godina. / Umiru od smeha. / Plakao je rekama suza.",
+    napomena: "Suprotna figura je litota."
+  },
+  {
+    name: "Litota", lat: "Litotes / Meiosis", cat: "trop", icon: "📉",
+    def: "Umanjivanje ili nijekanje suprotnog — izražavanje nečeg pozitivnog kroz negaciju negativnog.",
+    primer: "Nije loše. (= dobro je) / Nije bez talenta. (= talentovan je)",
+    napomena: "Suprotna figura je hiperbola."
+  },
+  {
+    name: "Ironija", lat: "Ironia", cat: "trop", icon: "😏",
+    def: "Govorenje suprotno od onoga što se misli, uz jasnu naznaku neiskrenosti.",
+    primer: "Baš si pametan! (= nisi pametan) / Lepo si se pokazao!",
+    napomena: "Sarkazam je grublja, uvredljivija vrsta ironije."
+  },
+  {
+    name: "Alegorija", lat: "Allegoria", cat: "trop", icon: "🦊",
+    def: "Produžena metafora u kojoj se apstraktne ideje prikazuju kroz konkretne slike ili priču.",
+    primer: "Orvelova Životinjska farma — životinje simbolizuju ljude i politička uredjenja.",
+    napomena: "Celokupna priča ili pesma može biti alegorija."
+  },
+  {
+    name: "Perifraza", lat: "Periphrasis / Circumlocutio", cat: "trop", icon: "🔄",
+    def: "Opisni izraz umesto kratkog i direktnog — zaobilazno imenovanje pojave.",
+    primer: "Kralj šuma (= lav) / Zemlja sunčeva (= Španija) / Onaj koji govori lažno (= lažac)",
+    napomena: ""
+  },
+  {
+    name: "Epitet", lat: "Epitheton", cat: "trop", icon: "✨",
+    def: "Pridev ili pridevska odredba koji isti&#269;e karakteristiku imenice i pojačava sliku.",
+    primer: "Bijeli grad, plavooka devojka, hladna noć bez meseca.",
+    napomena: "Stalni epitet (epitetonornans) se veže za isti pojam: 'bijeli dvori', 'siva magla'."
+  },
+  {
+    name: "Onomatopeja", lat: "Onomatopoeia", cat: "trop", icon: "🔔",
+    def: "Reč ili iskaz koji zvukom oponaša ono što opisuje.",
+    primer: "Šušur lišća. / Brum-brum motora. / Kukavica kuka.",
+    napomena: ""
+  },
+  {
+    name: "Eufemizam", lat: "Euphemismus", cat: "trop", icon: "🕊️",
+    def: "Blaži, manje neprijatan izraz koji zamenjuje direktan ili uvredljiv.",
+    primer: "Preminuo je. (= umro) / U drugom stanju je. (= trudna) / Olakšati se. (= mokrenje)",
+    napomena: "Suprotna figura: kakofemizam / disfemizam."
+  },
+  // ── FIGURE MISLI ───────────────────────────────────────────────
+  {
+    name: "Antiteza", lat: "Antithesis", cat: "misao", icon: "⚡",
+    def: "Suprotstavljanje dve suprotne pojave ili ideje radi isticanja kontrasta.",
+    primer: "Ni živ ni mrtav. / Biti ili ne biti. / Dan i noć, svetlost i tama.",
+    napomena: ""
+  },
+  {
+    name: "Oksimoron", lat: "Oxymoron", cat: "misao", icon: "🌗",
+    def: "Spajanje dve suprotne osobine ili pojma u jednu celovitu sliku.",
+    primer: "Gorka slatkoća. / Živa tišina. / Glasna tišina.",
+    napomena: "Razlikuje se od antiteze — oksimoron je kompresovan, antiteza je razvijena."
+  },
+  {
+    name: "Paradoks", lat: "Paradoxon", cat: "misao", icon: "🌀",
+    def: "Naizgled protivrečna tvrdnja koja ipak sadrži dublju istinu.",
+    primer: "Što manje znam, to više znam. / Brzi gube, spori pobeđuju.",
+    napomena: "Razlikuje se od oksimoron jer je iskaz, ne sintagma."
+  },
+  {
+    name: "Gradacija", lat: "Gradatio / Climax", cat: "misao", icon: "🪜",
+    def: "Nabrajanje pojava u uzlaznom (klimaks) ili silaznom (antiklimaks) nizu po intenzitetu.",
+    primer: "Jutro, dan, mesec, godinu čekam. / Došao je, video je, pobedio je.",
+    napomena: "Klimaks = uzlazna, antiklimaks = silazna gradacija."
+  },
+  {
+    name: "Retoričko pitanje", lat: "Interrogatio rhetorica", cat: "misao", icon: "❓",
+    def: "Pitanje koje se postavlja bez očekivanja odgovora — radi naglašavanja, isticanja, ili emocionalnog efekta.",
+    primer: "Ko to kaže da ja nju ne volim? / Kome to trebam?",
+    napomena: ""
+  },
+  {
+    name: "Apostrofa", lat: "Apostrophe", cat: "misao", icon: "📣",
+    def: "Obraćanje neprisu&#779;tnoj osobi, apstraktnoj pojavi ili neživom predmetu kao da su živi.",
+    primer: "O, slobodo, gde si? / Mila domovino, tebe volim!",
+    napomena: "Bliska personifikaciji, ali je naglasak na direktnom obraćanju."
+  },
+  {
+    name: "Inverzija", lat: "Inversio / Hyperbaton", cat: "misao", icon: "🔀",
+    def: "Promena uobičajenog reda reči u rečenici radi stilskog ili ritmičkog efekta.",
+    primer: "Bijele dvore sagradio. (umesto: Sagradio bijele dvore.) / Mrak dođe. (= dođe mrak)",
+    napomena: "Česta u poeziji radi ritma i rime."
+  },
+  {
+    name: "Enumeracija", lat: "Enumeratio", cat: "misao", icon: "📋",
+    def: "Nabrajanje više pojmova, osobina ili radnji.",
+    primer: "Imao je konje, volove, krave, ovce i svinje.",
+    napomena: "Može biti sa veznicima (polisindeton) ili bez (asindeton)."
+  },
+  // ── FIGURE DIKCIJE ─────────────────────────────────────────────
+  {
+    name: "Anafora", lat: "Anaphora", cat: "dikcija", icon: "🔁",
+    def: "Ponavljanje iste reči ili grupe reči na početku uzastopnih stihova ili rečenica.",
+    primer: "Volim te, volim te, volim te dugo. / Nema mira, nema sna, nema nade.",
+    napomena: "Suprotna figura: epifora (ponavljanje na kraju)."
+  },
+  {
+    name: "Epifora", lat: "Epiphora / Epistrophe", cat: "dikcija", icon: "🔂",
+    def: "Ponavljanje iste reči ili grupe reči na kraju uzastopnih stihova ili rečenica.",
+    primer: "Rekla je da neće, da ne može, da ne sme.",
+    napomena: "Suprotna figura: anafora."
+  },
+  {
+    name: "Aliteracija", lat: "Alliteratio", cat: "dikcija", icon: "🅰️",
+    def: "Ponavljanje istog suglasnika ili glasovne grupe na početku uzastopnih reči.",
+    primer: "Šta šušti u šumi? / Gde god grmi grome grube.",
+    napomena: ""
+  },
+  {
+    name: "Asonanca", lat: "Assonantia", cat: "dikcija", icon: "🎵",
+    def: "Ponavljanje istih samoglasnika u uzastopnim rečima radi muzikalnog efekta.",
+    primer: "Ona, ona, volim je sasvim sama.",
+    napomena: ""
+  },
+  {
+    name: "Elipsa", lat: "Ellipsis", cat: "dikcija", icon: "✂️",
+    def: "Izostavljanje jednog ili više reči koje se podrazumevaju iz konteksta.",
+    primer: "Što pre, to bolje. (= Što pre to uradiš, to je bolje.) / Dobar dan!",
+    napomena: ""
+  },
+  {
+    name: "Asindeton", lat: "Asyndeton", cat: "dikcija", icon: "💨",
+    def: "Nabrajanje bez veznika, što stvara utisak brzine i dinamičnosti.",
+    primer: "Trčao, skakao, vikao, smejao se.",
+    napomena: "Suprotna figura: polisindeton."
+  },
+  {
+    name: "Polisindeton", lat: "Polysyndeton", cat: "dikcija", icon: "🔗",
+    def: "Vi&#353;estruko ponavljanje istog veznika između nabrojanih pojmova.",
+    primer: "I plakah, i smejah se, i vikah, i ćutah.",
+    napomena: "Suprotna figura: asindeton."
+  },
+  {
+    name: "Refren", lat: "Refrain", cat: "dikcija", icon: "🎶",
+    def: "Ponavljanje istog stiha ili strofe na kraju svake strofe pesme.",
+    primer: "Kobilaš moj, kobilaš! (ponavlja se kroz pesmu)",
+    napomena: "Prisutan u lirici i muzici."
+  }
+];
+
+var state = { cat: "all", search: "" };
+
+function getItems() {
+  var items = DATA.slice();
+  if (state.cat !== "all") {
+    items = items.filter(function(d) { return d.cat === state.cat; });
+  }
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    items = items.filter(function(d) {
+      return d.name.toLowerCase().includes(q) ||
+        d.lat.toLowerCase().includes(q) ||
+        d.def.toLowerCase().includes(q) ||
+        d.primer.toLowerCase().includes(q);
+    });
+  }
+  return items;
+}
+
+function render() {
+  var items = getItems();
+  document.getElementById("resultsCount").textContent = items.length + " figura";
+  var grid = document.getElementById("figuresGrid");
+  if (items.length === 0) {
+    grid.innerHTML = "<div class=\"no-results\">\u2606 Nema figura za zadati filter.</div>";
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < items.length; i++) {
+    var d = items[i];
+    var tagCls = "tag-" + d.cat;
+    var catLabel = d.cat === "trop" ? "Trop" : d.cat === "misao" ? "Figura misli" : "Figura dikcije";
+    html += "<div class=\"figure-card\" onclick=\"toggle(this)\">";
+    html += "<div class=\"figure-head\">";
+    html += "<div class=\"figure-icon\" style=\"background:var(--surface2)\">" + d.icon + "</div>";
+    html += "<div class=\"figure-info\">";
+    html += "<div class=\"figure-name\">" + d.name + "</div>";
+    html += "<div class=\"figure-name-lat\">" + d.lat + "</div>";
+    html += "</div>";
+    html += "<span class=\"figure-tag " + tagCls + "\">" + catLabel + "</span>";
+    html += "<span class=\"arrow-toggle\" style=\"margin-left:8px\">&#9660;</span>";
+    html += "</div>";
+    html += "<div class=\"figure-expand\">";
+    html += "<div class=\"figure-body\">";
+    html += "<div class=\"figure-def\">" + d.def + "</div>";
+    html += "<div class=\"figure-example\">";
+    html += "<div class=\"figure-example-label\">Primer</div>";
+    html += "<div class=\"figure-example-text\">" + d.primer + "</div>";
+    if (d.napomena) html += "<div class=\"figure-example-note\">\u2139\uFE0F " + d.napomena + "</div>";
+    html += "</div>";
+    html += "</div>";
+    html += "</div>";
+    html += "</div>";
+  }
+  grid.innerHTML = html;
+}
+
+function toggle(card) {
+  card.classList.toggle("open");
+}
+
+document.getElementById("searchBox").addEventListener("input", function() {
+  state.search = this.value.trim();
+  render();
+});
+
+var catBtns = document.querySelectorAll("[data-cat]");
+for (var i = 0; i < catBtns.length; i++) {
+  catBtns[i].addEventListener("click", function() {
+    state.cat = this.getAttribute("data-cat");
+    var all = document.querySelectorAll("[data-cat]");
+    for (var j = 0; j < all.length; j++) all[j].classList.remove("active");
+    this.classList.add("active");
+    render();
+  });
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Glasovne promene &ndash; Knji&#382;evnost</title>
+<style>
+:root {
+  --bg: #1a0f05;
+  --surface: #241508;
+  --surface2: #2e1a08;
+  --surface3: #3a2410;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --text: #f0e6d0;
+  --text2: #b89a70;
+  --border: #4a3010;
+  --hover: #3a2010;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--gold);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back {
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.header-back:hover { background: var(--hover); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+.header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.controls {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.search-box {
+  flex: 1;
+  min-width: 200px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  outline: none;
+}
+.search-box:focus { border-color: var(--gold); }
+.search-box::placeholder { color: var(--text2); }
+
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-label {
+  color: var(--text2);
+  font-size: 12px;
+  align-self: center;
+  margin-right: 2px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.filter-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text2);
+  padding: 6px 12px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+
+.main { padding: 24px; max-width: 960px; margin: 0 auto; }
+
+.results-count { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+
+.promena-list { display: flex; flex-direction: column; gap: 12px; }
+
+.promena-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.promena-card:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(201,162,39,0.12); }
+.promena-card.open { border-color: var(--gold); }
+
+.promena-head {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.promena-num {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface3);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--gold);
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.promena-info { flex: 1; }
+.promena-name {
+  font-size: 17px;
+  color: var(--gold2);
+  font-weight: bold;
+}
+.promena-subtitle {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 2px;
+  font-style: italic;
+}
+.promena-tag {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.tag-suglasnicki { background: #0e1a2e; color: #7090c0; border: 1px solid #1a3060; }
+.tag-samoglasnicki { background: #1a0e2e; color: #a070c0; border: 1px solid #3a1060; }
+.tag-morfoloski { background: #0a1a0a; color: #60b060; border: 1px solid #1a4a1a; }
+
+.arrow-toggle {
+  font-size: 14px;
+  color: var(--text2);
+  transition: transform 0.3s;
+  margin-left: 6px;
+}
+.promena-card.open .arrow-toggle { transform: rotate(180deg); }
+
+.promena-expand {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.promena-card.open .promena-expand { max-height: 600px; }
+
+.promena-body {
+  border-top: 1px solid var(--border);
+  padding: 16px 18px;
+}
+
+.promena-rule {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.change-box {
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.change-box-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+
+.change-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+.change-row:last-child { margin-bottom: 0; }
+
+.ch-from {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 10px;
+  color: var(--text2);
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  min-width: 70px;
+  text-align: center;
+}
+.ch-arrow { color: var(--gold); font-size: 16px; }
+.ch-to {
+  background: #1a2a08;
+  border: 1px solid #2a4a10;
+  border-radius: 4px;
+  padding: 3px 10px;
+  color: #90d060;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  min-width: 70px;
+  text-align: center;
+}
+.ch-note { color: var(--text2); font-size: 12px; font-style: italic; }
+
+.examples-box {
+  background: var(--bg);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 4px 4px 0;
+  padding: 10px 14px;
+}
+.examples-box-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.example-item {
+  font-size: 14px;
+  color: var(--gold2);
+  font-style: italic;
+  line-height: 1.7;
+}
+.example-item span {
+  color: var(--text2);
+  font-style: normal;
+  font-size: 12px;
+}
+
+.napomena-box {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+  padding: 8px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+}
+
+.no-results {
+  text-align: center;
+  color: var(--text2);
+  padding: 60px 20px;
+  font-size: 16px;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: var(--text2);
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+
+@media (max-width: 600px) {
+  .controls { padding: 10px 14px; }
+  .main { padding: 14px; }
+  .header-title h1 { font-size: 18px; }
+  .ch-from, .ch-to { min-width: 50px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#9670; GLASOVNE PROMENE</h1>
+    <p>Fonolo&#353;ke alternacije u srpskom jeziku</p>
+  </div>
+  <span style="font-size:28px">&#128442;</span>
+</header>
+
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretra&#382;i naziv, pravilo, primer...">
+  <div class="filter-group">
+    <span class="filter-label">Vrsta:</span>
+    <button class="filter-btn active" data-cat="all">Sve</button>
+    <button class="filter-btn" data-cat="suglasnicki">Suglasni&#269;ke</button>
+    <button class="filter-btn" data-cat="samoglasnicki">Samoglasni&#269;ke</button>
+    <button class="filter-btn" data-cat="morfoloski">Morfolo&#353;ke</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="legend">
+    <span class="legend-item"><span class="promena-tag tag-suglasnicki">Sugl.</span> promene suglasnika</span>
+    <span class="legend-item"><span class="promena-tag tag-samoglasnicki">Samogl.</span> promene samoglasnika</span>
+    <span class="legend-item"><span class="promena-tag tag-morfoloski">Morf.</span> morfološke alternacije</span>
+  </div>
+  <div class="results-count" id="resultsCount"></div>
+  <div class="promena-list" id="promenaList"></div>
+</div>
+
+<script>
+var DATA = [
+  {
+    name: "Jednačenje suglasnika po zvučnosti",
+    subtitle: "Asimilacija po zvučnosti",
+    cat: "suglasnicki",
+    rule: "Zvučni suglasnik ispred bezvučnog prelazi u odgovarajući bezvučni suglasnik, i obrnuto — bezvučni ispred zvučnog prelazi u zvučni. Cilj je lakši izgovor suglasničke grupe.",
+    changes: [
+      { from: "b → p", to: "ispred bezvučnog", note: "vrab + ci → vrapci" },
+      { from: "d → t", to: "ispred bezvučnog", note: "pred + sobom → pretsoba (predsoblje)" },
+      { from: "z → s", to: "ispred bezvučnog", note: "bez + krajnji → beskrajni" },
+      { from: "ž → š", to: "ispred bezvučnog", note: "niže + koji → niško (niže + ka)" },
+    ],
+    examples: [
+      "vrabci → vrapci",
+      "sladak → slatka (slatko)",
+      "topaz + ka → topatka? (retko)",
+      "bez + krajnji → beskrajni",
+      "svadba (< sват + ba — svat + ba; t ispred b → d)",
+    ],
+    napomena: "Ovo je OBAVEZNA promena u srpskom standardnom jeziku — ne poštuje se u pisanju (pišemo 'svadba', ali govorimo [zvučno])."
+  },
+  {
+    name: "Jednačenje suglasnika po mestu tvorbe",
+    subtitle: "Asimilacija po mestu artikulacije",
+    cat: "suglasnicki",
+    rule: "Suglasnik n ispred labijala (b, p, m) prelazi u m.",
+    changes: [
+      { from: "n + b", to: "m + b", note: "" },
+      { from: "n + p", to: "m + p", note: "" },
+      { from: "n + m", to: "m + m (mm → m)", note: "" },
+    ],
+    examples: [
+      "stan + beni → stambeni",
+      "stan + par → stampar → štampar",
+      "zelenilo → (zadržava se osnova)",
+      "jedan + put → jedamput",
+    ],
+    napomena: "Promena se ogleda u pisanju — standardni pravopis je uvažava."
+  },
+  {
+    name: "Palatalizacija",
+    subtitle: "1. i 2. palatalizacija",
+    cat: "suglasnicki",
+    rule: "Velari (k, g, h) menjaju se ispred prednjih vokala (e, i) ili sufiksa koji počinju sa e/i. Postoje dve palatalizacije: 1. — k/g/h → č/ž/š; 2. — k/g/h → c/z/s.",
+    changes: [
+      { from: "k → č", to: "(1. palatalizacija)", note: "vuk → vuče, vojnik → vojniče" },
+      { from: "g → ž", to: "(1. palatalizacija)", note: "bog → bože, drug → druže" },
+      { from: "h → š", to: "(1. palatalizacija)", note: "siromah → siromašan" },
+      { from: "k → c", to: "(2. palatalizacija)", note: "junak + i → junaci" },
+      { from: "g → z", to: "(2. palatalizacija)", note: "drug + i → druzi (arh.)" },
+      { from: "h → s", to: "(2. palatalizacija)", note: "siromah + i → siromasi" },
+    ],
+    examples: [
+      "vuk → vuče (vokativ)",
+      "vojnik → vojniče (vokativ)",
+      "junak + i → junaci (nominativ mn.)",
+      "snaha → snasi (dativ)",
+      "bog + ji → božji",
+    ],
+    napomena: "Palatalizacija = omekšavanje zadnjonepčanih suglasnika ispred prednjih vokala."
+  },
+  {
+    name: "Sibilarizacija",
+    subtitle: "Prelaz k/g/h u c/z/s ispred i",
+    cat: "suglasnicki",
+    rule: "Velari k, g, h ispred nastavka -i (nominativ množine, dativ jednine) prelaze u sibilante c, z, s. Ovo je poseban slučaj 2. palatalizacije.",
+    changes: [
+      { from: "k + i", to: "c + i", note: "junak → junaci" },
+      { from: "g + i", to: "z + i", note: "bug → buzi (arh.)" },
+      { from: "h + i", to: "s + i", note: "orah → orasi" },
+    ],
+    examples: [
+      "junak → junaci",
+      "vojnik → vojnici",
+      "orah → orasi",
+      "monah → monasi",
+      "snaha → snasi (dativ jd.)",
+    ],
+    napomena: "Sibilarizacija se dešava u određenim gramatičkim oblicima (nom. mn., dat. jd. ženskog roda)."
+  },
+  {
+    name: "Jotovanje",
+    subtitle: "Suglasnik + j → novi glas",
+    cat: "suglasnicki",
+    rule: "Suglasnik koji stoji ispred glasa j spaja se s njim u novi, palatalni glas. Ovo je jedna od najvažnijih glasovnih promena u srpskom.",
+    changes: [
+      { from: "d + j", to: "đ", note: "mladji → mlađi" },
+      { from: "t + j", to: "ć", note: "bratji → braća" },
+      { from: "l + j", to: "lj", note: "zelje (< zel + je)" },
+      { from: "n + j", to: "nj", note: "konje (< kon + je)" },
+      { from: "s + j", to: "š", note: "nose + ji → noši → noši" },
+      { from: "z + j", to: "ž", note: "groz + je → grožđe" },
+      { from: "b + j", to: "blj / bj", note: "grob + je → groblje" },
+      { from: "p + j", to: "plj / pj", note: "cop + je → coplje" },
+      { from: "v + j", to: "vlj", note: "zdravlje (< zdrav + je)" },
+      { from: "m + j", to: "mlj", note: "zemlja (< zem + ja)" },
+    ],
+    examples: [
+      "mlad + ji → mlađi",
+      "brat + ja → braća (t+j=ć)",
+      "grož + đe (z+j=ž, d+j=đ)",
+      "zdravlje (v+j=vlj)",
+      "zemlja (m+j=mlj)",
+      "lišće (st+j → šć)",
+    ],
+    napomena: "Jotovanje je nastalo u praslovenskom periodu — mnogi nastavci su nekad sadržali j koji je izazvao promenu prethodnog suglasnika."
+  },
+  {
+    name: "Gubljenje suglasnika",
+    subtitle: "Simplifikacija suglasničkih grupa",
+    cat: "suglasnicki",
+    rule: "U suglasničkim grupama koje su teške za izgovor, jedan suglasnik se gubi. Najčešće se gube d, t i strana suglasnička grupacija.",
+    changes: [
+      { from: "stn → sn", to: "gubi se t", note: "radostn- → radostan" },
+      { from: "stl → sl", to: "gubi se t", note: "poslanik (< postavl-)" },
+      { from: "zdn → zn", to: "gubi se d", note: "pozni (< pozdn-)" },
+      { from: "dsn → sn", to: "gubi se d", note: "kasni (< kadn-)" },
+      { from: "dn → n", to: "gubi se d", note: "gospodnji → gospon(d)ji (arh.)" },
+    ],
+    examples: [
+      "radost + an → radostan (ne 'radosttan')",
+      "žalost + an → žalostan",
+      "koristan (< korist + an)",
+      "bolest + an → bolestan",
+      "pozno (< pozdno, < pozdn-)",
+    ],
+    napomena: "Promena je obligatorna i odražava se u pisanju standardnog srpskog."
+  },
+  {
+    name: "Nepostojano A",
+    subtitle: "A koje se pojavljuje i nestaje",
+    cat: "morfoloski",
+    rule: "Samoglasnik A javlja se u određenim oblicima reči (nominativ jednine, genitiv množine) ali nestaje u ostalim oblicima. Nastalo od starih jerovskih vokala (ъ i ь).",
+    changes: [
+      { from: "pas (A postoji)", to: "psa (A nestalo)", note: "genitiv jd." },
+      { from: "san (A postoji)", to: "sna (A nestalo)", note: "genitiv jd." },
+      { from: "sestra (mn. sestara)", to: "sestara (A postoji)", note: "genitiv mn." },
+    ],
+    examples: [
+      "pas → psa (gen.), psu (dat.)",
+      "san → sna, snu",
+      "lakat → lakta, laktu",
+      "lonac → lonca",
+      "vetar → vetra",
+      "devojaka (gen. mn. od devojka)",
+    ],
+    napomena: "Nepostojano A je ostatak praslovenskih redukovanih vokala — jerova (ъ, ь). U nominativu jd. se vokalizovalo u A."
+  },
+  {
+    name: "Prelaz l u o",
+    subtitle: "Vokalizacija l na kraju sloga",
+    cat: "samoglasnicki",
+    rule: "Suglasnik l na kraju sloga ili ispred suglasnika prelazi u samoglasnik o. Promena se javlja u glagolskim pridevima radnim muškog roda i u pojedinim imenicama.",
+    changes: [
+      { from: "l (kraj sloga)", to: "o", note: "radil → radio" },
+    ],
+    examples: [
+      "čital → čitao",
+      "radil → radio",
+      "pisati → pisao (pisalo → pisao)",
+      "bil → bio",
+      "sol → so (imenica: so, soli)",
+      "vol → vo (imenica: vo, vola)",
+      "posao (< posal, psl. *posъlъ)",
+    ],
+    napomena: "Promena se desila u historijskom razvoju srpskog — l se vokalizovalo u poziciji na kraju sloga. U nekim dijalektima (kajkavskim) l se zadržalo."
+  },
+  {
+    name: "Alternacija e/je/ije",
+    subtitle: "Jat-refleksi (ijekavica / ekavica)",
+    cat: "samoglasnicki",
+    rule: "Staroslovenski glas jat (ě) u srpskom se reflektovao različito u zavisnosti od narečja: u ekavici kao e, u ijekavici kao je (kratki slog) ili ije (dugi slog).",
+    changes: [
+      { from: "jat (ě) — dugi", to: "ije (ijekavski) / e (ekavski)", note: "" },
+      { from: "jat (ě) — kratki", to: "je (ijekavski) / e (ekavski)", note: "" },
+    ],
+    examples: [
+      "bijel / beo (bela, belo)",
+      "dijete / dete",
+      "rijeka / reka",
+      "mlijeko / mleko",
+      "snijeg / sneg",
+      "vjera / vera",
+      "pjesma / pesma",
+    ],
+    napomena: "Srpski standardni jezik koristi oba refleksa (ekavica u Srbiji, ijekavica u BiH, Crnoj Gori i delu Srbije). Oba su ravnopravna u standardu."
+  },
+  {
+    name: "Promena o u a (vokalna alternacija)",
+    subtitle: "Alternacija vokala u korenu",
+    cat: "samoglasnicki",
+    rule: "U određenim glagolskim i imeničkim oblicima javlja se vokalna alternacija o/a u korenu reči. Ova promena je ostatak ablautnih smena iz praslovenskog.",
+    changes: [
+      { from: "o (osnova)", to: "a (u određenim oblicima)", note: "" },
+    ],
+    examples: [
+      "goniti → ganjati (o → a)",
+      "nositi → nošnja / nošati",
+      "tok → taka? (manje produktivno)",
+      "boj → bajati (manje produktivno)",
+      "zor → zarati? (stariji oblici)",
+    ],
+    napomena: "Ova promena nije više produktivna u savremenom srpskom — sreće se uglavnom u leksikalizovanim parovima."
+  }
+];
+
+var state = { cat: "all", search: "" };
+
+function getItems() {
+  var items = DATA.slice();
+  if (state.cat !== "all") {
+    items = items.filter(function(d) { return d.cat === state.cat; });
+  }
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    items = items.filter(function(d) {
+      return d.name.toLowerCase().includes(q) ||
+        d.subtitle.toLowerCase().includes(q) ||
+        d.rule.toLowerCase().includes(q) ||
+        d.examples.join(" ").toLowerCase().includes(q);
+    });
+  }
+  return items;
+}
+
+function render() {
+  var items = getItems();
+  document.getElementById("resultsCount").textContent = items.length + " promen" + (items.length === 1 ? "a" : items.length < 5 ? "e" : "a");
+  var list = document.getElementById("promenaList");
+  if (items.length === 0) {
+    list.innerHTML = "<div class=\"no-results\">\u2606 Nema promena za zadati filter.</div>";
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < items.length; i++) {
+    var d = items[i];
+    var tagCls = "tag-" + d.cat;
+    var catLabel = d.cat === "suglasnicki" ? "Suglasni\u010dka" : d.cat === "samoglasnicki" ? "Samoglasni\u010dka" : "Morfolo\u0161ka";
+    html += "<div class=\"promena-card\" onclick=\"toggle(this)\">";
+    html += "<div class=\"promena-head\">";
+    html += "<div class=\"promena-num\">" + (i + 1) + "</div>";
+    html += "<div class=\"promena-info\">";
+    html += "<div class=\"promena-name\">" + d.name + "</div>";
+    html += "<div class=\"promena-subtitle\">" + d.subtitle + "</div>";
+    html += "</div>";
+    html += "<span class=\"promena-tag " + tagCls + "\">" + catLabel + "</span>";
+    html += "<span class=\"arrow-toggle\">&#9660;</span>";
+    html += "</div>";
+
+    html += "<div class=\"promena-expand\">";
+    html += "<div class=\"promena-body\">";
+    html += "<div class=\"promena-rule\">" + d.rule + "</div>";
+
+    if (d.changes && d.changes.length > 0) {
+      html += "<div class=\"change-box\">";
+      html += "<div class=\"change-box-title\">Promena</div>";
+      for (var j = 0; j < d.changes.length; j++) {
+        var ch = d.changes[j];
+        html += "<div class=\"change-row\">";
+        html += "<span class=\"ch-from\">" + ch.from + "</span>";
+        html += "<span class=\"ch-arrow\">\u2192</span>";
+        html += "<span class=\"ch-to\">" + ch.to + "</span>";
+        if (ch.note) html += "<span class=\"ch-note\">" + ch.note + "</span>";
+        html += "</div>";
+      }
+      html += "</div>";
+    }
+
+    html += "<div class=\"examples-box\">";
+    html += "<div class=\"examples-box-title\">Primeri</div>";
+    for (var k = 0; k < d.examples.length; k++) {
+      html += "<div class=\"example-item\">" + d.examples[k] + "</div>";
+    }
+    html += "</div>";
+
+    if (d.napomena) {
+      html += "<div class=\"napomena-box\">\u2139\uFE0F " + d.napomena + "</div>";
+    }
+
+    html += "</div></div>";
+    html += "</div>";
+  }
+  list.innerHTML = html;
+}
+
+function toggle(card) {
+  card.classList.toggle("open");
+}
+
+document.getElementById("searchBox").addEventListener("input", function() {
+  state.search = this.value.trim();
+  render();
+});
+
+var catBtns = document.querySelectorAll("[data-cat]");
+for (var i = 0; i < catBtns.length; i++) {
+  catBtns[i].addEventListener("click", function() {
+    state.cat = this.getAttribute("data-cat");
+    var all = document.querySelectorAll("[data-cat]");
+    for (var j = 0; j < all.length; j++) all[j].classList.remove("active");
+    this.classList.add("active");
+    render();
+  });
+}
+
+render();
+</script>
+</body>
+</html>

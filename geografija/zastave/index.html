@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Zastave — Pub Quiz</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #1a0f05;
+  --surface: #241508;
+  --surface2: #2e1c0a;
+  --border: #3a2a12;
+  --text: #f0e6d0;
+  --muted: #9a8060;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #7a6015;
+  --europe: #c9a227;
+  --asia: #e07b39;
+  --africa: #5cb85c;
+  --namerica: #c0392b;
+  --samerica: #9b59b6;
+  --oceania: #2980b9;
+  --tooltip-bg: rgba(26,15,5,0.97);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image: radial-gradient(ellipse at 20% 0%, rgba(201,162,39,0.06) 0%, transparent 60%);
+}
+
+/* HEADER */
+.header {
+  text-align: center;
+  padding: 28px 20px 18px;
+  border-bottom: 2px solid var(--border);
+  background: linear-gradient(180deg, #0e0803 0%, transparent 100%);
+  position: relative;
+}
+.header-back {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gold-dim);
+  font-size: 13px;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+.header-back:hover { color: var(--gold); border-color: var(--gold-dim); }
+.header h1 {
+  font-size: clamp(22px, 4vw, 36px);
+  font-weight: normal;
+  color: var(--gold2);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-shadow: 0 0 40px rgba(201,162,39,0.3);
+}
+.header p { color: var(--muted); font-size: 13px; margin-top: 6px; letter-spacing: 1px; }
+
+/* LEGEND */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  color: var(--muted);
+}
+.legend-item:hover, .legend-item.active {
+  border-color: currentColor;
+  color: var(--text);
+}
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+
+/* MAIN LAYOUT */
+.main {
+  display: flex;
+  height: calc(100vh - 130px);
+}
+
+/* MAP AREA */
+.map-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* CONTINENT SECTION */
+.continent-section {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.continent-section.hidden { display: none; }
+.continent-section:hover { border-color: var(--accent-color); }
+
+.continent-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  cursor: pointer;
+  user-select: none;
+}
+.continent-header:hover { background: #3a2410; }
+.continent-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.continent-name {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.continent-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--bg);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.continent-toggle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-left: 8px;
+  transition: transform 0.2s;
+}
+.continent-section.collapsed .continent-toggle { transform: rotate(-90deg); }
+
+.flags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 14px 18px;
+}
+.continent-section.collapsed .flags-grid { display: none; }
+
+.flag-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 36px;
+  font-size: 26px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  line-height: 1;
+}
+.flag-btn:hover {
+  transform: scale(1.2) translateY(-2px);
+  z-index: 5;
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.flag-btn.active {
+  border-color: var(--accent-color);
+  background: var(--surface2);
+  box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+/* TOOLTIP */
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  background: var(--tooltip-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-width: 140px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.15s, transform 0.15s;
+  backdrop-filter: blur(8px);
+}
+.tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.tooltip-flag { font-size: 32px; display: block; text-align: center; margin-bottom: 6px; }
+.tooltip-country { font-size: 14px; font-weight: 600; color: var(--text); text-align: center; }
+.tooltip-continent {
+  font-size: 11px;
+  text-align: center;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  display: inline-block;
+  width: 100%;
+}
+
+/* DETAIL PANEL */
+.detail-panel {
+  width: 300px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.detail-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 30px;
+}
+.detail-empty .globe { font-size: 52px; opacity: 0.3; }
+
+.detail-content {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+.detail-content.visible { display: flex; }
+
+.detail-flag-banner {
+  padding: 30px 20px 20px;
+  text-align: center;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.detail-flag-banner .big-flag { font-size: 72px; display: block; margin-bottom: 10px; }
+.detail-flag-banner h2 { font-size: 18px; font-weight: 600; }
+.detail-flag-banner .continent-badge {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+  padding: 3px 12px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.close-detail {
+  position: absolute;
+  top: 12px; right: 12px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.close-detail:hover { color: var(--text); border-color: var(--text); }
+
+.detail-body { padding: 18px; }
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-row label { color: var(--muted); }
+.detail-row span { font-weight: 500; text-align: right; max-width: 180px; }
+
+/* SEARCH */
+.search-bar {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.search-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+}
+.search-input::placeholder { color: var(--muted); }
+.search-input:focus { border-color: var(--gold-dim); }
+.detail-flag-banner h2 { font-size: 18px; font-weight: normal; color: var(--gold2); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+@media (max-width: 768px) {
+  .main { flex-direction: column; height: auto; }
+  .detail-panel { width: 100%; border-left: none; border-top: 1px solid var(--border); max-height: 50vh; }
+  .controls { padding: 10px 12px; gap: 8px; flex-wrap: wrap; }
+  .search-box { min-width: 0; flex: 1; }
+  .flags-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+  .flag-item { padding: 8px 4px 6px; }
+  .flag-emoji { font-size: 32px; }
+  .flag-name { font-size: 9px; }
+}
+@media (max-width: 480px) {
+  .header { padding: 10px 12px; }
+  .header-title h1 { font-size: 18px; }
+  .continent-header { padding: 10px 12px; font-size: 14px; }
+  .flags-grid { grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="../../index.html" class="header-back">&#8592; Pub Quiz</a>
+  <h1>Zastave</h1>
+  <p>Hover ili klik na zastavu &#8212; prikazuje se naziv i kontinent</p>
+</div>
+
+<div class="legend" id="legend"></div>
+
+<div class="main">
+  <div class="map-area">
+    <div class="search-bar">
+      <input type="text" class="search-input" id="searchInput" placeholder="&#128269; Pretraži državu...">
+    </div>
+    <div id="continentsContainer"></div>
+  </div>
+
+  <div class="detail-panel">
+    <div class="detail-empty" id="detailEmpty">
+      <span class="globe">&#127760;</span>
+      <span>Klikni na zastavu da vidiš detalje</span>
+    </div>
+    <div class="detail-content" id="detailContent">
+      <div class="detail-flag-banner">
+        <button class="close-detail" onclick="closeDetail()">&#10005;</button>
+        <span class="big-flag" id="detailFlag"></span>
+        <h2 id="detailName"></h2>
+        <span class="continent-badge" id="detailBadge"></span>
+      </div>
+      <div class="detail-body">
+        <div class="detail-row"><label>Kontinent</label><span id="detailContinent"></span></div>
+        <div class="detail-row"><label>Prestonica</label><span id="detailCapital"></span></div>
+        <div class="detail-row"><label>Region</label><span id="detailRegion"></span></div>
+        <div class="detail-row"><label>Stanovnika</label><span id="detailPop"></span></div>
+        <div class="detail-row"><label>Jezik</label><span id="detailLang"></span></div>
+        <div class="detail-row"><label>Valuta</label><span id="detailCurrency"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip">
+  <span class="tooltip-flag" id="ttFlag"></span>
+  <div class="tooltip-country" id="ttCountry"></div>
+  <div class="tooltip-continent" id="ttContinent"></div>
+</div>
+
+<script>
+var continents = [
+  {
+    id: 'europe',
+    name: 'Europa',
+    color: '#3b82f6',
+    countries: [
+      { flag: '\uD83C\uDDE6\uD83C\uDDF1', name: 'Albanija',        capital: 'Tirana',      region: 'Jugoistočna Europa', pop: '2.9M', lang: 'Albanski', currency: 'Lek' },
+      { flag: '\uD83C\uDDE6\uD83C\uDDE9', name: 'Andora',          capital: 'Andora la Velja', region: 'Zapadna Europa', pop: '77K', lang: 'Katalonski', currency: 'Euro' },
+      { flag: '\uD83C\uDDE6\uD83C\uDDF9', name: 'Austrija',        capital: 'Beč',         region: 'Centralna Europa', pop: '9M',   lang: 'Nemački', currency: 'Euro' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDFE', name: 'Belorusija',      capital: 'Minsk',       region: 'Istočna Europa',  pop: '9.4M', lang: 'Beloruski', currency: 'Beloruska rublja' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDEA', name: 'Belgija',         capital: 'Brisel',      region: 'Zapadna Europa',  pop: '11.6M',lang: 'Francuski/Flamanski', currency: 'Euro' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDE6', name: 'Bosna i Hercegovina', capital: 'Sarajevo', region: 'Jugoistočna Europa', pop: '3.3M', lang: 'Bosanski', currency: 'KM' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDEC', name: 'Bugarska',        capital: 'Sofija',      region: 'Jugoistočna Europa', pop: '6.9M', lang: 'Bugarski', currency: 'Lev' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDFE', name: 'Kipar',           capital: 'Nikozija',    region: 'Jugoistočna Europa', pop: '1.2M', lang: 'Grčki', currency: 'Euro' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDFF', name: 'Češka',           capital: 'Prag',        region: 'Centralna Europa', pop: '10.9M',lang: 'Češki', currency: 'Kruna' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDF7', name: 'Hrvatska',        capital: 'Zagreb',      region: 'Jugoistočna Europa', pop: '3.9M', lang: 'Hrvatski', currency: 'Euro' },
+      { flag: '\uD83C\uDDE9\uD83C\uDDF0', name: 'Danska',          capital: 'Kopenhagen',  region: 'Severna Europa',   pop: '5.9M', lang: 'Danski', currency: 'Danska kruna' },
+      { flag: '\uD83C\uDDEA\uD83C\uDDEA', name: 'Estonija',        capital: 'Talin',       region: 'Severna Europa',   pop: '1.3M', lang: 'Estonski', currency: 'Euro' },
+      { flag: '\uD83C\uDDEB\uD83C\uDDEE', name: 'Finska',          capital: 'Helsinki',    region: 'Severna Europa',   pop: '5.5M', lang: 'Finski', currency: 'Euro' },
+      { flag: '\uD83C\uDDEB\uD83C\uDDF7', name: 'Francuska',       capital: 'Pariz',       region: 'Zapadna Europa',   pop: '67M',  lang: 'Francuski', currency: 'Euro' },
+      { flag: '\uD83C\uDDE9\uD83C\uDDEA', name: 'Nemačka',         capital: 'Berlin',      region: 'Centralna Europa', pop: '83M',  lang: 'Nemački', currency: 'Euro' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDF7', name: 'Grčka',           capital: 'Atina',       region: 'Jugoistočna Europa', pop: '10.7M', lang: 'Grčki', currency: 'Euro' },
+      { flag: '\uD83C\uDDED\uD83C\uDDFA', name: 'Mađarska',        capital: 'Budimpešta',  region: 'Centralna Europa', pop: '9.7M', lang: 'Mađarski', currency: 'Forinta' },
+      { flag: '\uD83C\uDDEE\uD83C\uDDEA', name: 'Irska',           capital: 'Dublin',      region: 'Severna Europa',   pop: '5M',   lang: 'Irski/Engleski', currency: 'Euro' },
+      { flag: '\uD83C\uDDEE\uD83C\uDDF8', name: 'Island',          capital: 'Rejkjavik',   region: 'Severna Europa',   pop: '370K', lang: 'Islandski', currency: 'Islandska kruna' },
+      { flag: '\uD83C\uDDEE\uD83C\uDDF9', name: 'Italija',         capital: 'Rim',         region: 'Južna Europa',     pop: '60M',  lang: 'Italijanski', currency: 'Euro' },
+      { flag: '\uD83C\uDDFD\uD83C\uDDF0', name: 'Kosovo',          capital: 'Priština',    region: 'Jugoistočna Europa', pop: '1.8M', lang: 'Albanski/Srpski', currency: 'Euro' },
+      { flag: '\uD83C\uDDF1\uD83C\uDDFB', name: 'Latvija',         capital: 'Riga',        region: 'Severna Europa',   pop: '1.8M', lang: 'Latvijski', currency: 'Euro' },
+      { flag: '\uD83C\uDDF1\uD83C\uDDEE', name: 'Lihtenštajn',     capital: 'Vaduz',       region: 'Centralna Europa', pop: '38K',  lang: 'Nemački', currency: 'Švajcarski franak' },
+      { flag: '\uD83C\uDDF1\uD83C\uDDF9', name: 'Litvanija',       capital: 'Vilnjus',     region: 'Severna Europa',   pop: '2.8M', lang: 'Litvanski', currency: 'Euro' },
+      { flag: '\uD83C\uDDF1\uD83C\uDDFA', name: 'Luksemburg',      capital: 'Luksemburg',  region: 'Zapadna Europa',   pop: '640K', lang: 'Luksemburški', currency: 'Euro' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDF0', name: 'Severna Makedonija', capital: 'Skoplje', region: 'Jugoistočna Europa', pop: '2.1M', lang: 'Makedonski', currency: 'Denar' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDF9', name: 'Malta',           capital: 'Valeta',      region: 'Južna Europa',     pop: '520K', lang: 'Malteški', currency: 'Euro' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDE9', name: 'Moldavija',       capital: 'Kišinjev',    region: 'Istočna Europa',   pop: '2.6M', lang: 'Rumunski', currency: 'Leja' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDE8', name: 'Monako',          capital: 'Monako',      region: 'Zapadna Europa',   pop: '40K',  lang: 'Francuski', currency: 'Euro' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDEA', name: 'Crna Gora',       capital: 'Podgorica',   region: 'Jugoistočna Europa', pop: '620K', lang: 'Crnogorski', currency: 'Euro' },
+      { flag: '\uD83C\uDDF3\uD83C\uDDF1', name: 'Holandija',       capital: 'Amsterdam',   region: 'Zapadna Europa',   pop: '17.6M',lang: 'Holandski', currency: 'Euro' },
+      { flag: '\uD83C\uDDF3\uD83C\uDDF4', name: 'Norveška',        capital: 'Oslo',        region: 'Severna Europa',   pop: '5.4M', lang: 'Norveški', currency: 'Norveška kruna' },
+      { flag: '\uD83C\uDDF5\uD83C\uDDF1', name: 'Poljska',         capital: 'Varšava',     region: 'Centralna Europa', pop: '37.9M',lang: 'Poljski', currency: 'Zlota' },
+      { flag: '\uD83C\uDDF5\uD83C\uDDF9', name: 'Portugalija',     capital: 'Lisabon',     region: 'Južna Europa',     pop: '10.3M',lang: 'Portugalski', currency: 'Euro' },
+      { flag: '\uD83C\uDDF7\uD83C\uDDF4', name: 'Rumunija',        capital: 'Bukurešt',    region: 'Jugoistočna Europa', pop: '19.2M', lang: 'Rumunski', currency: 'Leja' },
+      { flag: '\uD83C\uDDF7\uD83C\uDDFA', name: 'Rusija',          capital: 'Moskva',      region: 'Istočna Europa',   pop: '144M', lang: 'Ruski', currency: 'Rublja' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDF2', name: 'San Marino',      capital: 'San Marino',  region: 'Južna Europa',     pop: '34K',  lang: 'Italijanski', currency: 'Euro' },
+      { flag: '\uD83C\uDDF7\uD83C\uDDF8', name: 'Srbija',          capital: 'Beograd',     region: 'Jugoistočna Europa', pop: '6.9M', lang: 'Srpski', currency: 'Dinar' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDF0', name: 'Slovačka',        capital: 'Bratislava',  region: 'Centralna Europa', pop: '5.5M', lang: 'Slovački', currency: 'Euro' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDEE', name: 'Slovenija',       capital: 'Ljubljana',   region: 'Centralna Europa', pop: '2.1M', lang: 'Slovenački', currency: 'Euro' },
+      { flag: '\uD83C\uDDEA\uD83C\uDDF8', name: 'Španija',         capital: 'Madrid',      region: 'Južna Europa',     pop: '47.4M',lang: 'Španski', currency: 'Euro' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDEA', name: 'Švedska',         capital: 'Stokholm',    region: 'Severna Europa',   pop: '10.5M',lang: 'Švedski', currency: 'Švedska kruna' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDED', name: 'Švajcarska',      capital: 'Bern',        region: 'Centralna Europa', pop: '8.7M', lang: 'Nemački/Francuski', currency: 'Franak' },
+      { flag: '\uD83C\uDDFA\uD83C\uDDE6', name: 'Ukrajina',        capital: 'Kijev',       region: 'Istočna Europa',   pop: '43.5M',lang: 'Ukrajinski', currency: 'Grivna' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDE7', name: 'Velika Britanija', capital: 'London',     region: 'Severna Europa',   pop: '67M',  lang: 'Engleski', currency: 'Funta' },
+      { flag: '\uD83C\uDDFB\uD83C\uDDE6', name: 'Vatikan',         capital: 'Vatikan',     region: 'Južna Europa',     pop: '800',  lang: 'Latinski/Italijanski', currency: 'Euro' }
+    ]
+  },
+  {
+    id: 'asia',
+    name: 'Azija',
+    color: '#f59e0b',
+    countries: [
+      { flag: '\uD83C\uDDE6\uD83C\uDDEB', name: 'Avganistan',     capital: 'Kabul',       region: 'Centralna Azija',  pop: '40M',  lang: 'Pašto/Dari', currency: 'Afgani' },
+      { flag: '\uD83C\uDDE6\uD83C\uDDF2', name: 'Jermenija',      capital: 'Jerevan',     region: 'Kavkaz',           pop: '3M',   lang: 'Jermenski', currency: 'Dram' },
+      { flag: '\uD83C\uDDE6\uD83C\uDDFF', name: 'Azerbejdžan',    capital: 'Baku',        region: 'Kavkaz',           pop: '10.1M',lang: 'Azerbejdžanski', currency: 'Manat' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDED', name: 'Bahrein',        capital: 'Manama',      region: 'Bliski istok',     pop: '1.7M', lang: 'Arapski', currency: 'Dinar' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDE9', name: 'Bangladeš',      capital: 'Daka',        region: 'Južna Azija',      pop: '170M', lang: 'Bengalski', currency: 'Taka' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDF9', name: 'Butan',          capital: 'Timpu',       region: 'Južna Azija',      pop: '780K', lang: 'Dzongka', currency: 'Ngultrum' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDF3', name: 'Brunej',         capital: 'Bandar Seri Begavan', region: 'Jugoistočna Azija', pop: '440K', lang: 'Malajski', currency: 'Dolar Bruneja' },
+      { flag: '\uD83C\uDDF0\uD83C\uDDED', name: 'Kambodža',       capital: 'Pnom Pen',    region: 'Jugoistočna Azija', pop: '16.7M', lang: 'Kmerski', currency: 'Riel' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDF3', name: 'Kina',           capital: 'Peking',      region: 'Istočna Azija',    pop: '1.4B', lang: 'Mandarinski', currency: 'Juan' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDEA', name: 'Gruzija',        capital: 'Tbilisi',     region: 'Kavkaz',           pop: '3.7M', lang: 'Gruzijski', currency: 'Lari' },
+      { flag: '\uD83C\uDDEE\uD83C\uDDF3', name: 'Indija',         capital: 'Nju Delhi',   region: 'Južna Azija',      pop: '1.4B', lang: 'Hindi/Engleski', currency: 'Rupija' },
+      { flag: '\uD83C\uDDEE\uD83C\uDDE9', name: 'Indonezija',     capital: 'Džakarta',    region: 'Jugoistočna Azija', pop: '276M', lang: 'Indonežanski', currency: 'Rupija' },
+      { flag: '\uD83C\uDDEE\uD83C\uDDF7', name: 'Iran',           capital: 'Teheran',     region: 'Bliski istok',     pop: '86M',  lang: 'Persijski', currency: 'Rijal' },
+      { flag: '\uD83C\uDDEE\uD83C\uDDF6', name: 'Irak',           capital: 'Bagdad',      region: 'Bliski istok',     pop: '40M',  lang: 'Arapski', currency: 'Dinar' },
+      { flag: '\uD83C\uDDEE\uD83C\uDDF1', name: 'Izrael',         capital: 'Jerusalem',   region: 'Bliski istok',     pop: '9.4M', lang: 'Hebrejski', currency: 'Šekel' },
+      { flag: '\uD83C\uDDEF\uD83C\uDDF5', name: 'Japan',          capital: 'Tokio',       region: 'Istočna Azija',    pop: '126M', lang: 'Japanski', currency: 'Jen' },
+      { flag: '\uD83C\uDDEF\uD83C\uDDF4', name: 'Jordan',         capital: 'Aman',        region: 'Bliski istok',     pop: '10.2M',lang: 'Arapski', currency: 'Dinar' },
+      { flag: '\uD83C\uDDF0\uD83C\uDDFF', name: 'Kazahstan',      capital: 'Astana',      region: 'Centralna Azija',  pop: '19M',  lang: 'Kazaški', currency: 'Tenge' },
+      { flag: '\uD83C\uDDF0\uD83C\uDDFC', name: 'Kuvajt',         capital: 'Kuvajt Siti', region: 'Bliski istok',     pop: '4.3M', lang: 'Arapski', currency: 'Dinar' },
+      { flag: '\uD83C\uDDF0\uD83C\uDDEC', name: 'Kirgistan',      capital: 'Biškek',      region: 'Centralna Azija',  pop: '6.6M', lang: 'Kirgiski', currency: 'Som' },
+      { flag: '\uD83C\uDDF1\uD83C\uDDE6', name: 'Laos',           capital: 'Vijentan',    region: 'Jugoistočna Azija', pop: '7.3M', lang: 'Laoski', currency: 'Kip' },
+      { flag: '\uD83C\uDDF1\uD83C\uDDE7', name: 'Liban',          capital: 'Bejrut',      region: 'Bliski istok',     pop: '5.4M', lang: 'Arapski', currency: 'Funta' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDFE', name: 'Malezija',       capital: 'Kuala Lumpur',region: 'Jugoistočna Azija', pop: '32.4M', lang: 'Malajski', currency: 'Ringgit' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDFB', name: 'Maldivi',        capital: 'Malé',        region: 'Južna Azija',      pop: '540K', lang: 'Divehi', currency: 'Rufija' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDF3', name: 'Mongolija',      capital: 'Ulan Bator',  region: 'Istočna Azija',    pop: '3.3M', lang: 'Mongolski', currency: 'Tugrug' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDF2', name: 'Mjanmar',        capital: 'Nejpjido',    region: 'Jugoistočna Azija', pop: '54M',  lang: 'Burmanski', currency: 'Kjat' },
+      { flag: '\uD83C\uDDF3\uD83C\uDDF5', name: 'Nepal',          capital: 'Katmandu',    region: 'Južna Azija',      pop: '29.1M',lang: 'Nepalski', currency: 'Rupija' },
+      { flag: '\uD83C\uDDF0\uD83C\uDDF5', name: 'Severna Koreja', capital: 'Pjongjang',   region: 'Istočna Azija',    pop: '25.9M',lang: 'Korejski', currency: 'Von' },
+      { flag: '\uD83C\uDDF4\uD83C\uDDF2', name: 'Oman',           capital: 'Muskat',      region: 'Bliski istok',     pop: '4.5M', lang: 'Arapski', currency: 'Rijal' },
+      { flag: '\uD83C\uDDF5\uD83C\uDDF0', name: 'Pakistan',       capital: 'Islamabad',   region: 'Južna Azija',      pop: '220M', lang: 'Urdu', currency: 'Rupija' },
+      { flag: '\uD83C\uDDF5\uD83C\uDDED', name: 'Filipini',       capital: 'Manila',      region: 'Jugoistočna Azija', pop: '110M', lang: 'Filipinski', currency: 'Peso' },
+      { flag: '\uD83C\uDDF6\uD83C\uDDE6', name: 'Katar',          capital: 'Doha',        region: 'Bliski istok',     pop: '2.9M', lang: 'Arapski', currency: 'Rijal' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDE6', name: 'Saudijska Arabija', capital: 'Rijad',    region: 'Bliski istok',     pop: '35M',  lang: 'Arapski', currency: 'Rijal' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDEC', name: 'Singapur',       capital: 'Singapur',    region: 'Jugoistočna Azija', pop: '5.9M', lang: 'Engleski/Mandarinski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDF0\uD83C\uDDF7', name: 'Južna Koreja',   capital: 'Seul',        region: 'Istočna Azija',    pop: '51.7M',lang: 'Korejski', currency: 'Von' },
+      { flag: '\uD83C\uDDF1\uD83C\uDDF0', name: 'Šri Lanka',      capital: 'Kolombo',     region: 'Južna Azija',      pop: '21.9M',lang: 'Singaleski', currency: 'Rupija' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDFE', name: 'Sirija',         capital: 'Damask',      region: 'Bliski istok',     pop: '17.5M',lang: 'Arapski', currency: 'Funta' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDFC', name: 'Tajvan',         capital: 'Tajpej',      region: 'Istočna Azija',    pop: '23.5M',lang: 'Mandarinski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDEF', name: 'Tadžikistan',    capital: 'Dušanbe',     region: 'Centralna Azija',  pop: '9.7M', lang: 'Tadžički', currency: 'Somoni' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDED', name: 'Tajland',        capital: 'Bangkok',     region: 'Jugoistočna Azija', pop: '70M',  lang: 'Tajski', currency: 'Bat' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDF1', name: 'Istočni Timor',  capital: 'Dili',        region: 'Jugoistočna Azija', pop: '1.3M', lang: 'Tetum', currency: 'Dolar SAD' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDF7', name: 'Turska',         capital: 'Ankara',      region: 'Zapadna Azija',    pop: '84M',  lang: 'Turski', currency: 'Lira' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDF2', name: 'Turkmenistan',   capital: 'Ašhabad',     region: 'Centralna Azija',  pop: '6M',   lang: 'Turkmenski', currency: 'Manat' },
+      { flag: '\uD83C\uDDE6\uD83C\uDDEA', name: 'UAE',            capital: 'Abu Dabi',    region: 'Bliski istok',     pop: '9.9M', lang: 'Arapski', currency: 'Dirham' },
+      { flag: '\uD83C\uDDFA\uD83C\uDDFF', name: 'Uzbekistan',     capital: 'Taškent',     region: 'Centralna Azija',  pop: '35M',  lang: 'Uzbekistanski', currency: 'Som' },
+      { flag: '\uD83C\uDDFB\uD83C\uDDF3', name: 'Vijetnam',       capital: 'Hanoi',       region: 'Jugoistočna Azija', pop: '97.3M', lang: 'Vijetnamski', currency: 'Dong' },
+      { flag: '\uD83C\uDDFE\uD83C\uDDEA', name: 'Jemen',          capital: 'Sana',        region: 'Bliski istok',     pop: '33M',  lang: 'Arapski', currency: 'Rijal' }
+    ]
+  },
+  {
+    id: 'africa',
+    name: 'Afrika',
+    color: '#10b981',
+    countries: [
+      { flag: '\uD83C\uDDE9\uD83C\uDDFF', name: 'Alžir',           capital: 'Alžir',       region: 'Severna Afrika',   pop: '44M',  lang: 'Arapski', currency: 'Dinar' },
+      { flag: '\uD83C\uDDE6\uD83C\uDDF4', name: 'Angola',          capital: 'Luanda',      region: 'Centralna Afrika', pop: '32.9M',lang: 'Portugalski', currency: 'Kvanza' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDEF', name: 'Benin',           capital: 'Porto-Novo',  region: 'Zapadna Afrika',   pop: '12.1M',lang: 'Francuski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDFC', name: 'Bocvana',         capital: 'Gaborne',     region: 'Južna Afrika',     pop: '2.6M', lang: 'Engleski', currency: 'Pula' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDEB', name: 'Burkina Faso',    capital: 'Vagadugu',    region: 'Zapadna Afrika',   pop: '21.5M',lang: 'Francuski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDEE', name: 'Burundi',         capital: 'Gitega',      region: 'Centralna Afrika', pop: '11.9M',lang: 'Kirundi', currency: 'Frank' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDFB', name: 'Zelenortska Ostrva', capital: 'Praja',   region: 'Zapadna Afrika',   pop: '560K', lang: 'Portugalski', currency: 'Eskudo' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDF2', name: 'Kamerun',         capital: 'Jaunde',      region: 'Centralna Afrika', pop: '26.5M',lang: 'Francuski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDEB', name: 'Centralnoafrička Republika', capital: 'Bangui', region: 'Centralna Afrika', pop: '4.8M', lang: 'Sango', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDE9', name: 'Čad',             capital: 'Ndžamena',    region: 'Centralna Afrika', pop: '16.4M',lang: 'Arapski/Francuski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDF0\uD83C\uDDF2', name: 'Komorska Ostrva', capital: 'Moroni',      region: 'Istočna Afrika',   pop: '870K', lang: 'Komorski', currency: 'Frank' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDE9', name: 'Demokratska Republika Kongo', capital: 'Kinšasa', region: 'Centralna Afrika', pop: '89.6M', lang: 'Svahili', currency: 'Frank' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDEC', name: 'Republika Kongo', capital: 'Brazavil',   region: 'Centralna Afrika', pop: '5.8M', lang: 'Francuski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDEE', name: 'Obala Slonovače', capital: 'Jamousukro', region: 'Zapadna Afrika',   pop: '26M',  lang: 'Francuski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDE9\uD83C\uDDEF', name: 'Džibuti',         capital: 'Džibuti',     region: 'Istočna Afrika',   pop: '1M',   lang: 'Somali/Arapski', currency: 'Frank' },
+      { flag: '\uD83C\uDDEA\uD83C\uDDEC', name: 'Egipat',          capital: 'Kairo',       region: 'Severna Afrika',   pop: '102M', lang: 'Arapski', currency: 'Funta' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDF6', name: 'Ekvatorijalna Gvineja', capital: 'Malabo', region: 'Centralna Afrika', pop: '1.4M', lang: 'Španski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDEA\uD83C\uDDF7', name: 'Eritreja',        capital: 'Asmara',      region: 'Istočna Afrika',   pop: '3.6M', lang: 'Tigrinja', currency: 'Nakfa' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDFF', name: 'Svazilend',       capital: 'Mbabane',     region: 'Južna Afrika',     pop: '1.2M', lang: 'Svati', currency: 'Lilangeni' },
+      { flag: '\uD83C\uDDEA\uD83C\uDDF9', name: 'Etiopija',        capital: 'Adis Abeba',  region: 'Istočna Afrika',   pop: '115M', lang: 'Amharski', currency: 'Bir' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDE6', name: 'Gabon',           capital: 'Libreville',  region: 'Centralna Afrika', pop: '2.2M', lang: 'Francuski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDF2', name: 'Gambija',         capital: 'Bandžul',     region: 'Zapadna Afrika',   pop: '2.4M', lang: 'Engleski', currency: 'Dalasi' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDED', name: 'Gana',            capital: 'Akra',        region: 'Zapadna Afrika',   pop: '31.1M',lang: 'Engleski', currency: 'Cedi' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDF3', name: 'Gvineja',         capital: 'Konakri',     region: 'Zapadna Afrika',   pop: '13.1M',lang: 'Francuski', currency: 'Frank' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDFC', name: 'Gvineja Bisau',   capital: 'Bisau',       region: 'Zapadna Afrika',   pop: '2M',   lang: 'Portugalski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDF0\uD83C\uDDEA', name: 'Kenija',          capital: 'Najrobi',     region: 'Istočna Afrika',   pop: '53.8M',lang: 'Svahili/Engleski', currency: 'Šiling' },
+      { flag: '\uD83C\uDDF1\uD83C\uDDF8', name: 'Lesoto',          capital: 'Maseru',      region: 'Južna Afrika',     pop: '2.2M', lang: 'Sesoto', currency: 'Loti' },
+      { flag: '\uD83C\uDDF1\uD83C\uDDF7', name: 'Liberija',        capital: 'Monrovija',   region: 'Zapadna Afrika',   pop: '5.1M', lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDF1\uD83C\uDDFE', name: 'Libija',          capital: 'Tripoli',     region: 'Severna Afrika',   pop: '6.9M', lang: 'Arapski', currency: 'Dinar' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDEC', name: 'Madagaskar',      capital: 'Antananarivo',region: 'Istočna Afrika',   pop: '27.7M',lang: 'Malagaški', currency: 'Ariari' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDFC', name: 'Malavi',          capital: 'Lilogve',     region: 'Istočna Afrika',   pop: '19.1M',lang: 'Čičeva', currency: 'Kvača' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDF1', name: 'Mali',            capital: 'Bamako',      region: 'Zapadna Afrika',   pop: '21.9M',lang: 'Francuski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDF7', name: 'Mauritanija',     capital: 'Nuakšot',     region: 'Zapadna Afrika',   pop: '4.6M', lang: 'Arapski', currency: 'Ugija' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDFA', name: 'Mauricijus',      capital: 'Port Luis',   region: 'Istočna Afrika',   pop: '1.3M', lang: 'Engleski', currency: 'Rupija' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDE6', name: 'Maroko',          capital: 'Rabat',       region: 'Severna Afrika',   pop: '36.9M',lang: 'Arapski', currency: 'Dirham' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDFF', name: 'Mozambik',        capital: 'Maputo',      region: 'Istočna Afrika',   pop: '31.3M',lang: 'Portugalski', currency: 'Metical' },
+      { flag: '\uD83C\uDDF3\uD83C\uDDE6', name: 'Namibija',        capital: 'Vindhuk',     region: 'Južna Afrika',     pop: '2.6M', lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDF3\uD83C\uDDEA', name: 'Niger',           capital: 'Nijamej',     region: 'Zapadna Afrika',   pop: '24.2M',lang: 'Francuski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDF3\uD83C\uDDEC', name: 'Nigerija',        capital: 'Abudža',      region: 'Zapadna Afrika',   pop: '206M', lang: 'Engleski', currency: 'Naira' },
+      { flag: '\uD83C\uDDF7\uD83C\uDDFC', name: 'Ruanda',          capital: 'Kigali',      region: 'Centralna Afrika', pop: '13.3M',lang: 'Kinjarvanda', currency: 'Frank' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDF9', name: 'Sao Tome i Principe', capital: 'Sao Tome', region: 'Centralna Afrika', pop: '220K', lang: 'Portugalski', currency: 'Dobra' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDF3', name: 'Senegal',         capital: 'Dakar',       region: 'Zapadna Afrika',   pop: '16.7M',lang: 'Francuski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDF1', name: 'Sijera Leone',    capital: 'Fritaun',     region: 'Zapadna Afrika',   pop: '7.9M', lang: 'Engleski', currency: 'Leone' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDF4', name: 'Somalija',        capital: 'Mogadiš',     region: 'Istočna Afrika',   pop: '15.4M',lang: 'Somali', currency: 'Šiling' },
+      { flag: '\uD83C\uDDFF\uD83C\uDDE6', name: 'Južna Afrika',    capital: 'Pretorija',   region: 'Južna Afrika',     pop: '59.3M',lang: 'Zulu/Kosa', currency: 'Rand' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDF8', name: 'Južni Sudan',     capital: 'Džuba',       region: 'Centralna Afrika', pop: '11.1M',lang: 'Engleski', currency: 'Funta' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDE9', name: 'Sudan',           capital: 'Kartum',      region: 'Severna Afrika',   pop: '43.8M',lang: 'Arapski', currency: 'Funta' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDFF', name: 'Tanzanija',       capital: 'Dodoma',      region: 'Istočna Afrika',   pop: '61.5M',lang: 'Svahili', currency: 'Šiling' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDEC', name: 'Togo',            capital: 'Lome',        region: 'Zapadna Afrika',   pop: '8.3M', lang: 'Francuski', currency: 'CFA franak' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDF3', name: 'Tunis',           capital: 'Tunis',       region: 'Severna Afrika',   pop: '11.8M',lang: 'Arapski', currency: 'Dinar' },
+      { flag: '\uD83C\uDDFA\uD83C\uDDEC', name: 'Uganda',          capital: 'Kampala',     region: 'Centralna Afrika', pop: '45.7M',lang: 'Engleski', currency: 'Šiling' },
+      { flag: '\uD83C\uDDFF\uD83C\uDDF2', name: 'Zambija',         capital: 'Lusaka',      region: 'Južna Afrika',     pop: '18.4M',lang: 'Engleski', currency: 'Kvača' },
+      { flag: '\uD83C\uDDFF\uD83C\uDDFC', name: 'Zimbabve',        capital: 'Harare',      region: 'Južna Afrika',     pop: '14.8M',lang: 'Engleski', currency: 'Dolar SAD' }
+    ]
+  },
+  {
+    id: 'namerica',
+    name: 'Severna Amerika',
+    color: '#ef4444',
+    countries: [
+      { flag: '\uD83C\uDDE6\uD83C\uDDEC', name: 'Antigva i Barbuda', capital: 'Sent Džons', region: 'Karibi',         pop: '98K',  lang: 'Engleski', currency: 'Dolar EC' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDF8', name: 'Bahami',           capital: 'Nasau',       region: 'Karibi',           pop: '393K', lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDE7', name: 'Barbados',         capital: 'Bridžtaun',   region: 'Karibi',           pop: '287K', lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDFF', name: 'Belize',           capital: 'Belmospan',   region: 'Centralna Amerika',pop: '400K', lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDE6', name: 'Kanada',           capital: 'Otava',       region: 'Severna Amerika',  pop: '38M',  lang: 'Engleski/Francuski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDF7', name: 'Kostarika',        capital: 'San Hose',    region: 'Centralna Amerika',pop: '5.1M', lang: 'Španski', currency: 'Kolon' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDFA', name: 'Kuba',             capital: 'Havana',      region: 'Karibi',           pop: '11.3M',lang: 'Španski', currency: 'Peso' },
+      { flag: '\uD83C\uDDE9\uD83C\uDDF2', name: 'Dominika',         capital: 'Rozo',        region: 'Karibi',           pop: '72K',  lang: 'Engleski', currency: 'Dolar EC' },
+      { flag: '\uD83C\uDDE9\uD83C\uDDF4', name: 'Dominikanska Republika', capital: 'Santo Domingo', region: 'Karibi', pop: '10.8M',lang: 'Španski', currency: 'Peso' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDFB', name: 'El Salvador',      capital: 'San Salvador',region: 'Centralna Amerika',pop: '6.5M', lang: 'Španski', currency: 'Kolon' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDE9', name: 'Grenada',          capital: 'Sent Džordžs',region: 'Karibi',           pop: '113K', lang: 'Engleski', currency: 'Dolar EC' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDF9', name: 'Gvatemala',        capital: 'Gvatemala Siti', region: 'Centralna Amerika', pop: '17.1M', lang: 'Španski', currency: 'Kecal' },
+      { flag: '\uD83C\uDDED\uD83C\uDDF9', name: 'Haiti',            capital: 'Port-o-Prens',region: 'Karibi',           pop: '11.4M',lang: 'Haićanski kreolski', currency: 'Gurd' },
+      { flag: '\uD83C\uDDED\uD83C\uDDF3', name: 'Honduras',         capital: 'Tegusigalpa', region: 'Centralna Amerika',pop: '9.9M', lang: 'Španski', currency: 'Lempira' },
+      { flag: '\uD83C\uDDEF\uD83C\uDDF2', name: 'Jamajka',          capital: 'Kingston',    region: 'Karibi',           pop: '2.9M', lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDFD', name: 'Meksiko',          capital: 'Meksiko Siti',region: 'Severna Amerika',  pop: '130M', lang: 'Španski', currency: 'Peso' },
+      { flag: '\uD83C\uDDF3\uD83C\uDDEE', name: 'Nikaragva',        capital: 'Managva',     region: 'Centralna Amerika',pop: '6.6M', lang: 'Španski', currency: 'Kordoba' },
+      { flag: '\uD83C\uDDF5\uD83C\uDDE6', name: 'Panama',           capital: 'Panama Siti', region: 'Centralna Amerika',pop: '4.4M', lang: 'Španski', currency: 'Balboa' },
+      { flag: '\uD83C\uDDF0\uD83C\uDDF3', name: 'Sent Kits i Nevis',capital: 'Baseter',     region: 'Karibi',           pop: '53K',  lang: 'Engleski', currency: 'Dolar EC' },
+      { flag: '\uD83C\uDDF1\uD83C\uDDE8', name: 'Sveta Lucija',     capital: 'Kastris',     region: 'Karibi',           pop: '180K', lang: 'Engleski', currency: 'Dolar EC' },
+      { flag: '\uD83C\uDDFB\uD83C\uDDE8', name: 'Sveti Vinsent',    capital: 'Kingstaun',   region: 'Karibi',           pop: '111K', lang: 'Engleski', currency: 'Dolar EC' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDF9', name: 'Trinidad i Tobago',capital: 'Port of Spejn', region: 'Karibi',         pop: '1.4M', lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDFA\uD83C\uDDF8', name: 'SAD',              capital: 'Vašington D.C.', region: 'Severna Amerika', pop: '331M', lang: 'Engleski', currency: 'Dolar' }
+    ]
+  },
+  {
+    id: 'samerica',
+    name: 'Južna Amerika',
+    color: '#8b5cf6',
+    countries: [
+      { flag: '\uD83C\uDDE6\uD83C\uDDF7', name: 'Argentina',       capital: 'Buenos Ajres',region: 'Južni konus',      pop: '45.2M',lang: 'Španski', currency: 'Peso' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDF4', name: 'Bolivija',         capital: 'Sukre',       region: 'Zapadna J. Amerika', pop: '11.8M', lang: 'Španski', currency: 'Boliviano' },
+      { flag: '\uD83C\uDDE7\uD83C\uDDF7', name: 'Brazil',           capital: 'Brazilija',   region: 'Istočna J. Amerika', pop: '214M', lang: 'Portugalski', currency: 'Real' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDF1', name: 'Čile',             capital: 'Santjago',    region: 'Južni konus',      pop: '19.1M',lang: 'Španski', currency: 'Peso' },
+      { flag: '\uD83C\uDDE8\uD83C\uDDF4', name: 'Kolumbija',        capital: 'Bogota',      region: 'Severna J. Amerika', pop: '51M',  lang: 'Španski', currency: 'Peso' },
+      { flag: '\uD83C\uDDEA\uD83C\uDDE8', name: 'Ekvador',          capital: 'Kito',        region: 'Zapadna J. Amerika', pop: '17.7M', lang: 'Španski', currency: 'Dolar SAD' },
+      { flag: '\uD83C\uDDEC\uD83C\uDDFE', name: 'Gvajana',          capital: 'Džordžtaun',  region: 'Severna J. Amerika', pop: '787K', lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDF5\uD83C\uDDFE', name: 'Paragvaj',         capital: 'Asunsion',    region: 'Centralna J. Amerika', pop: '7.1M', lang: 'Španski', currency: 'Guarani' },
+      { flag: '\uD83C\uDDF5\uD83C\uDDEA', name: 'Peru',             capital: 'Lima',        region: 'Zapadna J. Amerika', pop: '32.5M', lang: 'Španski', currency: 'Sol' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDF7', name: 'Surinam',          capital: 'Paramaribo',  region: 'Severna J. Amerika', pop: '587K', lang: 'Holandski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDFA\uD83C\uDDFE', name: 'Urugvaj',          capital: 'Montevideo',  region: 'Južni konus',      pop: '3.5M', lang: 'Španski', currency: 'Peso' },
+      { flag: '\uD83C\uDDFB\uD83C\uDDEA', name: 'Venecuela',        capital: 'Karakas',     region: 'Severna J. Amerika', pop: '28.4M', lang: 'Španski', currency: 'Bolivar' }
+    ]
+  },
+  {
+    id: 'oceania',
+    name: 'Okeanija',
+    color: '#06b6d4',
+    countries: [
+      { flag: '\uD83C\uDDE6\uD83C\uDDFA', name: 'Australija',      capital: 'Kanbera',     region: 'Australazija',     pop: '25.7M',lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDEB\uD83C\uDDEF', name: 'Fidži',           capital: 'Suva',        region: 'Melanezija',       pop: '896K', lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDF0\uD83C\uDDEE', name: 'Kiribati',        capital: 'Tarawa',      region: 'Mikronezija',      pop: '119K', lang: 'Engleski', currency: 'Australijski dolar' },
+      { flag: '\uD83C\uDDF2\uD83C\uDDED', name: 'Maršalska Ostrva',capital: 'Madžuro',     region: 'Mikronezija',      pop: '42K',  lang: 'Maršalski', currency: 'Dolar SAD' },
+      { flag: '\uD83C\uDDEB\uD83C\uDDF2', name: 'Mikronezija',     capital: 'Palikir',     region: 'Mikronezija',      pop: '115K', lang: 'Engleski', currency: 'Dolar SAD' },
+      { flag: '\uD83C\uDDF3\uD83C\uDDF7', name: 'Nauru',           capital: 'Jaren',       region: 'Mikronezija',      pop: '10.8K',lang: 'Naurski', currency: 'Australijski dolar' },
+      { flag: '\uD83C\uDDF3\uD83C\uDDFF', name: 'Novi Zeland',     capital: 'Velington',   region: 'Australazija',     pop: '5M',   lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDF5\uD83C\uDDFC', name: 'Palau',           capital: 'Ngerulmud',   region: 'Mikronezija',      pop: '18K',  lang: 'Palauski', currency: 'Dolar SAD' },
+      { flag: '\uD83C\uDDF5\uD83C\uDDEC', name: 'Papua Nova Gvineja', capital: 'Port Morsbi', region: 'Melanezija',  pop: '9.1M', lang: 'Tok Pisin', currency: 'Kina' },
+      { flag: '\uD83C\uDDFC\uD83C\uDDF8', name: 'Samoa',           capital: 'Apija',       region: 'Polinezija',       pop: '218K', lang: 'Samoanski', currency: 'Tala' },
+      { flag: '\uD83C\uDDF8\uD83C\uDDE7', name: 'Solomonska Ostrva', capital: 'Honiara',   region: 'Melanezija',       pop: '686K', lang: 'Engleski', currency: 'Dolar' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDF4', name: 'Tonga',           capital: 'Nukualofa',   region: 'Polinezija',       pop: '100K', lang: 'Tonganški', currency: 'Paanga' },
+      { flag: '\uD83C\uDDF9\uD83C\uDDFB', name: 'Tuvalu',          capital: 'Funafuti',    region: 'Polinezija',       pop: '11K',  lang: 'Tuvalanski', currency: 'Australijski dolar' },
+      { flag: '\uD83C\uDDFB\uD83C\uDDFA', name: 'Vanuatu',         capital: 'Port Vila',   region: 'Melanezija',       pop: '320K', lang: 'Bislama', currency: 'Vatu' }
+    ]
+  }
+];
+
+// ─── BUILD UI ────────────────────────────────────────────────────────────────
+var tooltip = document.getElementById('tooltip');
+var ttFlag = document.getElementById('ttFlag');
+var ttCountry = document.getElementById('ttCountry');
+var ttContinent = document.getElementById('ttContinent');
+var activeFlag = null;
+var filterContinent = null;
+
+function buildLegend() {
+  var legend = document.getElementById('legend');
+  continents.forEach(function(c) {
+    var item = document.createElement('div');
+    item.className = 'legend-item';
+    item.style.color = c.color;
+    item.innerHTML = '<div class="legend-dot" style="background:' + c.color + '"></div>' + c.name;
+    item.addEventListener('click', function() {
+      if (filterContinent === c.id) {
+        filterContinent = null;
+        item.classList.remove('active');
+        document.querySelectorAll('.legend-item').forEach(function(l){ l.style.opacity = '1'; });
+        document.querySelectorAll('.continent-section').forEach(function(s){ s.classList.remove('hidden'); });
+      } else {
+        filterContinent = c.id;
+        document.querySelectorAll('.legend-item').forEach(function(l){ l.classList.remove('active'); l.style.opacity = '0.4'; });
+        item.classList.add('active');
+        item.style.opacity = '1';
+        document.querySelectorAll('.continent-section').forEach(function(s){
+          s.classList.toggle('hidden', s.dataset.id !== c.id);
+        });
+      }
+    });
+    legend.appendChild(item);
+  });
+}
+
+function buildContinents() {
+  var container = document.getElementById('continentsContainer');
+  continents.forEach(function(c) {
+    var section = document.createElement('div');
+    section.className = 'continent-section';
+    section.dataset.id = c.id;
+    section.style.setProperty('--accent-color', c.color);
+
+    var header = document.createElement('div');
+    header.className = 'continent-header';
+    header.innerHTML =
+      '<div class="continent-dot" style="background:' + c.color + '"></div>' +
+      '<span class="continent-name" style="color:' + c.color + '">' + c.name + '</span>' +
+      '<span class="continent-count">' + c.countries.length + ' drzava</span>' +
+      '<span class="continent-toggle">&#9660;</span>';
+    header.addEventListener('click', function() {
+      section.classList.toggle('collapsed');
+    });
+
+    var grid = document.createElement('div');
+    grid.className = 'flags-grid';
+
+    c.countries.forEach(function(country) {
+      var btn = document.createElement('span');
+      btn.className = 'flag-btn';
+      btn.setAttribute('title', country.name);
+      btn.dataset.country = country.name;
+      btn.dataset.continent = c.name;
+      btn.textContent = country.flag;
+
+      btn.addEventListener('mouseenter', function(e) {
+        showTooltip(e, country, c);
+      });
+      btn.addEventListener('mousemove', function(e) {
+        positionTooltip(e);
+      });
+      btn.addEventListener('mouseleave', function() {
+        hideTooltip();
+      });
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (activeFlag) activeFlag.classList.remove('active');
+        btn.classList.add('active');
+        activeFlag = btn;
+        showDetail(country, c);
+      });
+
+      grid.appendChild(btn);
+    });
+
+    section.appendChild(header);
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
+}
+
+function showTooltip(e, country, continent) {
+  ttFlag.textContent = country.flag;
+  ttCountry.textContent = country.name;
+  ttContinent.textContent = continent.name;
+  ttContinent.style.background = continent.color + '22';
+  ttContinent.style.color = continent.color;
+  tooltip.style.borderColor = continent.color + '44';
+  tooltip.classList.add('visible');
+  positionTooltip(e);
+}
+
+function positionTooltip(e) {
+  var x = e.clientX + 14;
+  var y = e.clientY - 20;
+  if (x + 160 > window.innerWidth) x = e.clientX - 160;
+  if (y + 100 > window.innerHeight) y = e.clientY - 100;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+
+function hideTooltip() {
+  tooltip.classList.remove('visible');
+}
+
+function showDetail(country, continent) {
+  document.getElementById('detailEmpty').style.display = 'none';
+  var content = document.getElementById('detailContent');
+  content.classList.add('visible');
+  document.getElementById('detailFlag').textContent = country.flag;
+  document.getElementById('detailName').textContent = country.name;
+  var badge = document.getElementById('detailBadge');
+  badge.textContent = continent.name;
+  badge.style.background = continent.color + '22';
+  badge.style.color = continent.color;
+  badge.style.border = '1px solid ' + continent.color + '44';
+  document.getElementById('detailContinent').textContent = continent.name;
+  document.getElementById('detailCapital').textContent = country.capital;
+  document.getElementById('detailRegion').textContent = country.region;
+  document.getElementById('detailPop').textContent = country.pop;
+  document.getElementById('detailLang').textContent = country.lang;
+  document.getElementById('detailCurrency').textContent = country.currency;
+}
+
+function closeDetail() {
+  document.getElementById('detailEmpty').style.display = '';
+  document.getElementById('detailContent').classList.remove('visible');
+  if (activeFlag) { activeFlag.classList.remove('active'); activeFlag = null; }
+}
+
+// SEARCH
+document.getElementById('searchInput').addEventListener('input', function() {
+  var q = this.value.toLowerCase().trim();
+  document.querySelectorAll('.flag-btn').forEach(function(btn) {
+    var match = btn.dataset.country.toLowerCase().includes(q);
+    btn.style.display = (q === '' || match) ? '' : 'none';
+    if (match && q !== '') btn.style.outline = '2px solid #60a5fa';
+    else btn.style.outline = '';
+  });
+});
+
+if (!document.getElementById('legend').hasChildNodes()) {
+  buildLegend();
+  buildContinents();
+}
+</script>
+</body>
+</html>

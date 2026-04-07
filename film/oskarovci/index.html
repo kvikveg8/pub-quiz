@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Oskarovci</title>
+<style>
+  :root {
+    --bg: #1a0f05;
+    --surface: #241508;
+    --surface2: #2e1a08;
+    --gold: #c9a227;
+    --gold2: #e8c84a;
+    --text: #f0e6d0;
+    --text2: #b89a70;
+    --border: #4a3010;
+    --hover: #3a2010;
+    --oscar: #c9a227;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: Georgia, 'Times New Roman', serif;
+    min-height: 100vh;
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--gold);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-back {
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .header-back:hover { background: var(--hover); }
+  .header-title { flex: 1; text-align: center; }
+  .header-title h1 { font-size: 24px; color: var(--gold2); letter-spacing: 2px; }
+  .header-title p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .oscar-icon { font-size: 28px; }
+
+  .controls {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    color: var(--text);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    outline: none;
+  }
+  .search-box:focus { border-color: var(--gold); }
+  .search-box::placeholder { color: var(--text2); }
+  .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text2);
+    padding: 6px 12px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+
+  .cat-tabs {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .cat-tab {
+    padding: 12px 18px;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 13px;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .cat-tab:hover { color: var(--gold); }
+  .cat-tab.active { color: var(--gold2); border-bottom-color: var(--gold); }
+
+  .main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+  .results-count { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead tr { background: var(--surface); border-bottom: 2px solid var(--gold); }
+  th {
+    padding: 12px 14px;
+    text-align: left;
+    color: var(--gold);
+    font-weight: normal;
+    letter-spacing: 1px;
+    font-size: 12px;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+  }
+  th:hover { color: var(--gold2); }
+  th .sort-arrow { margin-left: 4px; opacity: 0.5; }
+  th.sorted .sort-arrow { opacity: 1; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:hover { background: var(--hover); }
+  td { padding: 11px 14px; color: var(--text); vertical-align: middle; }
+  td.year { color: var(--gold2); font-size: 15px; font-weight: bold; white-space: nowrap; }
+  td.winner { color: var(--text); }
+  td.film { color: var(--text2); font-style: italic; }
+  td.country { color: var(--text2); font-size: 13px; }
+  td.notes { color: var(--text2); font-size: 12px; }
+  .oscar-star { color: var(--gold); margin-right: 4px; }
+
+  .winner-cell { display: flex; align-items: center; gap: 10px; }
+  .winner-cell > div { line-height: 1.4; }
+  .author-photo {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    background: var(--surface2);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .author-photo.loaded { opacity: 1; }
+
+  .no-results { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 16px; }
+
+  .cat-film .oscar-star { color: #e8c84a; }
+  .cat-actor .oscar-star { color: #7ec8e3; }
+  .cat-actress .oscar-star { color: #e3a0c0; }
+  .cat-director .oscar-star { color: #98e87e; }
+  .cat-intl .oscar-star { color: #e8a87e; }
+
+  @media (max-width: 700px) {
+    .controls { padding: 10px 14px; }
+    .main { padding: 14px; }
+    th, td { padding: 8px 10px; }
+    .header-title h1 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#127942; OSKAROVCI</h1>
+    <p>Dobitnici Oskara &mdash; 1980&ndash;2025</p>
+  </div>
+  <span class="oscar-icon">&#127916;</span>
+</header>
+
+<div class="controls">
+  <input type="text" class="search-box" id="searchBox" placeholder="Pretra&#382;i film, ime, dr&#382;avu...">
+  <div class="filter-group" id="decadeFilter">
+    <button class="filter-btn active" data-decade="all">Sve godine</button>
+    <button class="filter-btn" data-decade="1980">1980-e</button>
+    <button class="filter-btn" data-decade="1990">1990-e</button>
+    <button class="filter-btn" data-decade="2000">2000-e</button>
+    <button class="filter-btn" data-decade="2010">2010-e</button>
+    <button class="filter-btn" data-decade="2020">2020-e</button>
+  </div>
+</div>
+
+<div class="cat-tabs" id="catTabs">
+  <div class="cat-tab active" data-cat="film">&#127916; Najbolji film</div>
+  <div class="cat-tab" data-cat="actor">&#128100; Glumac</div>
+  <div class="cat-tab" data-cat="actress">&#128100; Glumica</div>
+  <div class="cat-tab" data-cat="director">&#127909; Redatelj</div>
+  <div class="cat-tab" data-cat="intl">&#127758; Me&#273;unarodni film</div>
+</div>
+
+<div class="main">
+  <div class="results-count" id="resultsCount"></div>
+  <div id="tableContainer"></div>
+</div>
+
+<script>
+var DATA = {
+  film: [
+    {year:1980, wiki:"Kramer_vs._Kramer", winner:"Kramer vs. Kramer", film:"", country:"SAD", notes:"Robert Benton"},
+    {year:1981, wiki:"Ordinary_People_(film)", winner:"Obi\u010dni ljudi", film:"Ordinary People", country:"SAD", notes:"Robert Redford"},
+    {year:1982, wiki:"Chariots_of_Fire", winner:"Chariots of Fire", film:"", country:"UK", notes:"Hugh Hudson"},
+    {year:1983, wiki:"Gandhi_(film)", winner:"Gandhi", film:"", country:"UK/Indija", notes:"Richard Attenborough"},
+    {year:1984, wiki:"Terms_of_Endearment", winner:"Tenderness", film:"Terms of Endearment", country:"SAD", notes:"James L. Brooks"},
+    {year:1985, wiki:"Amadeus_(film)", winner:"Amadeus", film:"", country:"SAD", notes:"Milo\u0161 Forman"},
+    {year:1986, wiki:"Out_of_Africa_(film)", winner:"Out of Africa", film:"", country:"SAD", notes:"Sydney Pollack"},
+    {year:1987, wiki:"Platoon_(film)", winner:"Platoon", film:"", country:"SAD", notes:"Oliver Stone"},
+    {year:1988, wiki:"The_Last_Emperor", winner:"The Last Emperor", film:"", country:"UK/Italija/Kina", notes:"Bernardo Bertolucci"},
+    {year:1989, wiki:"Rain_Man", winner:"Rain Man", film:"", country:"SAD", notes:"Barry Levinson"},
+    {year:1990, wiki:"Driving_Miss_Daisy_(film)", winner:"Driving Miss Daisy", film:"", country:"SAD", notes:"Bruce Beresford"},
+    {year:1991, wiki:"Dances_with_Wolves", winner:"Ples s vukovima", film:"Dances with Wolves", country:"SAD", notes:"Kevin Costner"},
+    {year:1992, wiki:"The_Silence_of_the_Lambs_(film)", winner:"Silence of the Lambs", film:"", country:"SAD", notes:"Jonathan Demme"},
+    {year:1993, wiki:"Unforgiven_(1992_film)", winner:"Neproste\u0107eno", film:"Unforgiven", country:"SAD", notes:"Clint Eastwood"},
+    {year:1994, wiki:"Schindler%27s_List", winner:"Schindler\u2019s List", film:"", country:"SAD", notes:"Steven Spielberg"},
+    {year:1995, wiki:"Forrest_Gump", winner:"Forrest Gump", film:"", country:"SAD", notes:"Robert Zemeckis"},
+    {year:1996, wiki:"Braveheart", winner:"Braveheart", film:"", country:"SAD/UK", notes:"Mel Gibson"},
+    {year:1997, wiki:"The_English_Patient_(film)", winner:"The English Patient", film:"", country:"UK/Italija", notes:"Anthony Minghella"},
+    {year:1998, wiki:"Titanic_(1997_film)", winner:"Titanic", film:"", country:"SAD", notes:"James Cameron"},
+    {year:1999, wiki:"Shakespeare_in_Love", winner:"Shakespeare in Love", film:"", country:"SAD/UK", notes:"John Madden"},
+    {year:2000, wiki:"American_Beauty_(1999_film)", winner:"American Beauty", film:"", country:"SAD", notes:"Sam Mendes"},
+    {year:2001, wiki:"Gladiator_(2000_film)", winner:"Gladiator", film:"", country:"SAD/UK", notes:"Ridley Scott"},
+    {year:2002, wiki:"A_Beautiful_Mind_(film)", winner:"A Beautiful Mind", film:"", country:"SAD", notes:"Ron Howard"},
+    {year:2003, wiki:"Chicago_(2002_film)", winner:"Chicago", film:"", country:"SAD", notes:"Rob Marshall"},
+    {year:2004, wiki:"The_Lord_of_the_Rings:_The_Return_of_the_King", winner:"The Lord of the Rings: Return of the King", film:"", country:"SAD/NZ", notes:"Peter Jackson"},
+    {year:2005, wiki:"Million_Dollar_Baby", winner:"Million Dollar Baby", film:"", country:"SAD", notes:"Clint Eastwood"},
+    {year:2006, wiki:"Crash_(2004_film)", winner:"Crash", film:"", country:"SAD", notes:"Paul Haggis"},
+    {year:2007, wiki:"The_Departed", winner:"The Departed", film:"", country:"SAD", notes:"Martin Scorsese"},
+    {year:2008, wiki:"No_Country_for_Old_Men", winner:"No Country for Old Men", film:"", country:"SAD", notes:"Coen Brothers"},
+    {year:2009, wiki:"Slumdog_Millionaire", winner:"Slumdog Millionaire", film:"", country:"UK", notes:"Danny Boyle"},
+    {year:2010, wiki:"The_Hurt_Locker", winner:"The Hurt Locker", film:"", country:"SAD", notes:"Kathryn Bigelow"},
+    {year:2011, wiki:"The_King%27s_Speech", winner:"The King\u2019s Speech", film:"", country:"UK", notes:"Tom Hooper"},
+    {year:2012, wiki:"The_Artist_(film)", winner:"The Artist", film:"", country:"Francuska", notes:"Michel Hazanavicius"},
+    {year:2013, wiki:"Argo_(film)", winner:"Argo", film:"", country:"SAD", notes:"Ben Affleck"},
+    {year:2014, wiki:"12_Years_a_Slave_(film)", winner:"12 Years a Slave", film:"", country:"SAD/UK", notes:"Steve McQueen"},
+    {year:2015, wiki:"Birdman_(film)", winner:"Birdman", film:"", country:"SAD", notes:"Alejandro G. I\u00f1\u00e1rritu"},
+    {year:2016, wiki:"Spotlight_(film)", winner:"Spotlight", film:"", country:"SAD", notes:"Tom McCarthy"},
+    {year:2017, wiki:"Moonlight_(2016_film)", winner:"Moonlight", film:"", country:"SAD", notes:"Barry Jenkins"},
+    {year:2018, wiki:"The_Shape_of_Water_(film)", winner:"The Shape of Water", film:"", country:"SAD", notes:"Guillermo del Toro"},
+    {year:2019, wiki:"Green_Book_(film)", winner:"Green Book", film:"", country:"SAD", notes:"Peter Farrelly"},
+    {year:2020, wiki:"Parasite_(2019_film)", winner:"Parasite", film:"", country:"Ju\u017ena Koreja", notes:"Bong Joon-ho"},
+    {year:2021, wiki:"Nomadland", winner:"Nomadland", film:"", country:"SAD", notes:"Chlo\u00e9 Zhao"},
+    {year:2022, wiki:"CODA_(film)", winner:"CODA", film:"", country:"SAD", notes:"Sian Heder"},
+    {year:2023, wiki:"Everything_Everywhere_All_at_Once", winner:"Everything Everywhere All at Once", film:"", country:"SAD", notes:"Daniels"},
+    {year:2024, wiki:"Oppenheimer_(film)", winner:"Oppenheimer", film:"", country:"SAD/UK", notes:"Christopher Nolan"},
+    {year:2025, wiki:"Anora", winner:"Anora", film:"", country:"SAD", notes:"Sean Baker"}
+  ],
+  actor: [
+    {year:1980, wiki:"Dustin_Hoffman", winner:"Dustin Hoffman", film:"Kramer vs. Kramer", country:"SAD", notes:""},
+    {year:1981, wiki:"Robert_De_Niro", winner:"Robert De Niro", film:"Raging Bull", country:"SAD", notes:""},
+    {year:1982, wiki:"Henry_Fonda", winner:"Henry Fonda", film:"On Golden Pond", country:"SAD", notes:"posthumno"},
+    {year:1983, wiki:"Ben_Kingsley", winner:"Ben Kingsley", film:"Gandhi", country:"UK", notes:""},
+    {year:1984, wiki:"Robert_Duvall", winner:"Robert Duvall", film:"Tender Mercies", country:"SAD", notes:""},
+    {year:1985, wiki:"F._Murray_Abraham", winner:"F. Murray Abraham", film:"Amadeus", country:"SAD", notes:""},
+    {year:1986, wiki:"William_Hurt", winner:"William Hurt", film:"Kiss of the Spider Woman", country:"SAD", notes:""},
+    {year:1987, wiki:"Paul_Newman", winner:"Paul Newman", film:"The Color of Money", country:"SAD", notes:""},
+    {year:1988, wiki:"Michael_Douglas", winner:"Michael Douglas", film:"Wall Street", country:"SAD", notes:""},
+    {year:1989, wiki:"Dustin_Hoffman", winner:"Dustin Hoffman", film:"Rain Man", country:"SAD", notes:"drugi Oskar"},
+    {year:1990, wiki:"Daniel_Day-Lewis", winner:"Daniel Day-Lewis", film:"My Left Foot", country:"Irska", notes:""},
+    {year:1991, wiki:"Jeremy_Irons", winner:"Jeremy Irons", film:"Reversal of Fortune", country:"UK", notes:""},
+    {year:1992, wiki:"Anthony_Hopkins", winner:"Anthony Hopkins", film:"The Silence of the Lambs", country:"UK", notes:""},
+    {year:1993, wiki:"Al_Pacino", winner:"Al Pacino", film:"Scent of a Woman", country:"SAD", notes:""},
+    {year:1994, wiki:"Tom_Hanks", winner:"Tom Hanks", film:"Philadelphia", country:"SAD", notes:""},
+    {year:1995, wiki:"Tom_Hanks", winner:"Tom Hanks", film:"Forrest Gump", country:"SAD", notes:"dva uzastopna Oskara"},
+    {year:1996, wiki:"Nicolas_Cage", winner:"Nicolas Cage", film:"Leaving Las Vegas", country:"SAD", notes:""},
+    {year:1997, wiki:"Geoffrey_Rush", winner:"Geoffrey Rush", film:"Shine", country:"Australija", notes:""},
+    {year:1998, wiki:"Jack_Nicholson", winner:"Jack Nicholson", film:"As Good as It Gets", country:"SAD", notes:"tre\u0107i Oskar"},
+    {year:1999, wiki:"Roberto_Benigni", winner:"Roberto Benigni", film:"La vita \u00e8 bella", country:"Italija", notes:""},
+    {year:2000, wiki:"Kevin_Spacey", winner:"Kevin Spacey", film:"American Beauty", country:"SAD", notes:""},
+    {year:2001, wiki:"Russell_Crowe", winner:"Russell Crowe", film:"Gladiator", country:"Australija", notes:""},
+    {year:2002, wiki:"Denzel_Washington", winner:"Denzel Washington", film:"Training Day", country:"SAD", notes:""},
+    {year:2003, wiki:"Adrien_Brody", winner:"Adrien Brody", film:"The Pianist", country:"SAD", notes:"najmladi dobitnik"},
+    {year:2004, wiki:"Sean_Penn", winner:"Sean Penn", film:"Mystic River", country:"SAD", notes:""},
+    {year:2005, wiki:"Jamie_Foxx", winner:"Jamie Foxx", film:"Ray", country:"SAD", notes:""},
+    {year:2006, wiki:"Philip_Seymour_Hoffman", winner:"Philip Seymour Hoffman", film:"Capote", country:"SAD", notes:""},
+    {year:2007, wiki:"Forest_Whitaker", winner:"Forest Whitaker", film:"The Last King of Scotland", country:"SAD", notes:""},
+    {year:2008, wiki:"Daniel_Day-Lewis", winner:"Daniel Day-Lewis", film:"There Will Be Blood", country:"UK/Irska", notes:"tre\u0107i Oskar"},
+    {year:2009, wiki:"Sean_Penn", winner:"Sean Penn", film:"Milk", country:"SAD", notes:""},
+    {year:2010, wiki:"Jeff_Bridges", winner:"Jeff Bridges", film:"Crazy Heart", country:"SAD", notes:""},
+    {year:2011, wiki:"Colin_Firth", winner:"Colin Firth", film:"The King\u2019s Speech", country:"UK", notes:""},
+    {year:2012, wiki:"Jean_Dujardin", winner:"Jean Dujardin", film:"The Artist", country:"Francuska", notes:""},
+    {year:2013, wiki:"Daniel_Day-Lewis", winner:"Daniel Day-Lewis", film:"Lincoln", country:"UK/Irska", notes:"\u010detvrti Oskar"},
+    {year:2014, wiki:"Matthew_McConaughey", winner:"Matthew McConaughey", film:"Dallas Buyers Club", country:"SAD", notes:""},
+    {year:2015, wiki:"Eddie_Redmayne", winner:"Eddie Redmayne", film:"The Theory of Everything", country:"UK", notes:""},
+    {year:2016, wiki:"Leonardo_DiCaprio", winner:"Leonardo DiCaprio", film:"The Revenant", country:"SAD", notes:"prvi Oskar"},
+    {year:2017, wiki:"Casey_Affleck", winner:"Casey Affleck", film:"Manchester by the Sea", country:"SAD", notes:""},
+    {year:2018, wiki:"Gary_Oldman", winner:"Gary Oldman", film:"Darkest Hour", country:"UK", notes:""},
+    {year:2019, wiki:"Rami_Malek", winner:"Rami Malek", film:"Bohemian Rhapsody", country:"SAD", notes:""},
+    {year:2020, wiki:"Joaquin_Phoenix", winner:"Joaquin Phoenix", film:"Joker", country:"SAD", notes:""},
+    {year:2021, wiki:"Anthony_Hopkins", winner:"Anthony Hopkins", film:"The Father", country:"UK", notes:""},
+    {year:2022, wiki:"Will_Smith", winner:"Will Smith", film:"King Richard", country:"SAD", notes:""},
+    {year:2023, wiki:"Brendan_Fraser", winner:"Brendan Fraser", film:"The Whale", country:"SAD", notes:""},
+    {year:2024, wiki:"Cillian_Murphy", winner:"Cillian Murphy", film:"Oppenheimer", country:"Irska", notes:""},
+    {year:2025, wiki:"Adrien_Brody", winner:"Adrien Brody", film:"The Brutalist", country:"SAD", notes:"drugi Oskar"}
+  ],
+  actress: [
+    {year:1980, wiki:"Sally_Field", winner:"Sally Field", film:"Norma Rae", country:"SAD", notes:""},
+    {year:1981, wiki:"Sissy_Spacek", winner:"Sissy Spacek", film:"Coal Miner\u2019s Daughter", country:"SAD", notes:""},
+    {year:1982, wiki:"Katharine_Hepburn", winner:"Katharine Hepburn", film:"On Golden Pond", country:"SAD", notes:"\u010detvrti Oskar"},
+    {year:1983, wiki:"Meryl_Streep", winner:"Meryl Streep", film:"Sophie\u2019s Choice", country:"SAD", notes:""},
+    {year:1984, wiki:"Shirley_MacLaine", winner:"Shirley MacLaine", film:"Terms of Endearment", country:"SAD", notes:""},
+    {year:1985, wiki:"Sally_Field", winner:"Sally Field", film:"Places in the Heart", country:"SAD", notes:"drugi Oskar"},
+    {year:1986, wiki:"Geraldine_Page", winner:"Geraldine Page", film:"The Trip to Bountiful", country:"SAD", notes:""},
+    {year:1987, wiki:"Marlee_Matlin", winner:"Marlee Matlin", film:"Children of a Lesser God", country:"SAD", notes:"najmlada dobitnica"},
+    {year:1988, wiki:"Cher", winner:"Cher", film:"Moonstruck", country:"SAD", notes:""},
+    {year:1989, wiki:"Jodie_Foster", winner:"Jodie Foster", film:"The Accused", country:"SAD", notes:""},
+    {year:1990, wiki:"Jessica_Tandy", winner:"Jessica Tandy", film:"Driving Miss Daisy", country:"SAD", notes:"najstarija dobitnica"},
+    {year:1991, wiki:"Kathy_Bates", winner:"Kathy Bates", film:"Misery", country:"SAD", notes:""},
+    {year:1992, wiki:"Jodie_Foster", winner:"Jodie Foster", film:"The Silence of the Lambs", country:"SAD", notes:"drugi Oskar"},
+    {year:1993, wiki:"Emma_Thompson", winner:"Emma Thompson", film:"Howards End", country:"UK", notes:""},
+    {year:1994, wiki:"Holly_Hunter", winner:"Holly Hunter", film:"The Piano", country:"SAD", notes:""},
+    {year:1995, wiki:"Jessica_Lange", winner:"Jessica Lange", film:"Blue Sky", country:"SAD", notes:""},
+    {year:1996, wiki:"Susan_Sarandon", winner:"Susan Sarandon", film:"Dead Man Walking", country:"SAD", notes:""},
+    {year:1997, wiki:"Frances_McDormand", winner:"Frances McDormand", film:"Fargo", country:"SAD", notes:""},
+    {year:1998, wiki:"Helen_Hunt", winner:"Helen Hunt", film:"As Good as It Gets", country:"SAD", notes:""},
+    {year:1999, wiki:"Gwyneth_Paltrow", winner:"Gwyneth Paltrow", film:"Shakespeare in Love", country:"SAD", notes:""},
+    {year:2000, wiki:"Hilary_Swank", winner:"Hilary Swank", film:"Boys Don\u2019t Cry", country:"SAD", notes:""},
+    {year:2001, wiki:"Julia_Roberts", winner:"Julia Roberts", film:"Erin Brockovich", country:"SAD", notes:""},
+    {year:2002, wiki:"Halle_Berry", winner:"Halle Berry", film:"Monster\u2019s Ball", country:"SAD", notes:"prva Afroamerikanka"},
+    {year:2003, wiki:"Nicole_Kidman", winner:"Nicole Kidman", film:"The Hours", country:"Australija", notes:""},
+    {year:2004, wiki:"Charlize_Theron", winner:"Charlize Theron", film:"Monster", country:"JAR", notes:""},
+    {year:2005, wiki:"Hilary_Swank", winner:"Hilary Swank", film:"Million Dollar Baby", country:"SAD", notes:"drugi Oskar"},
+    {year:2006, wiki:"Reese_Witherspoon", winner:"Reese Witherspoon", film:"Walk the Line", country:"SAD", notes:""},
+    {year:2007, wiki:"Helen_Mirren", winner:"Helen Mirren", film:"The Queen", country:"UK", notes:""},
+    {year:2008, wiki:"Marion_Cotillard", winner:"Marion Cotillard", film:"La Vie en Rose", country:"Francuska", notes:""},
+    {year:2009, wiki:"Kate_Winslet", winner:"Kate Winslet", film:"The Reader", country:"UK", notes:""},
+    {year:2010, wiki:"Sandra_Bullock", winner:"Sandra Bullock", film:"The Blind Side", country:"SAD", notes:""},
+    {year:2011, wiki:"Natalie_Portman", winner:"Natalie Portman", film:"Black Swan", country:"SAD/Izrael", notes:""},
+    {year:2012, wiki:"Meryl_Streep", winner:"Meryl Streep", film:"The Iron Lady", country:"SAD", notes:"tre\u0107i Oskar"},
+    {year:2013, wiki:"Jennifer_Lawrence", winner:"Jennifer Lawrence", film:"Silver Linings Playbook", country:"SAD", notes:""},
+    {year:2014, wiki:"Cate_Blanchett", winner:"Cate Blanchett", film:"Blue Jasmine", country:"Australija", notes:""},
+    {year:2015, wiki:"Julianne_Moore", winner:"Julianne Moore", film:"Still Alice", country:"SAD", notes:""},
+    {year:2016, wiki:"Brie_Larson", winner:"Brie Larson", film:"Room", country:"SAD", notes:""},
+    {year:2017, wiki:"Emma_Stone", winner:"Emma Stone", film:"La La Land", country:"SAD", notes:""},
+    {year:2018, wiki:"Frances_McDormand", winner:"Frances McDormand", film:"Three Billboards Outside Ebbing, Missouri", country:"SAD", notes:"drugi Oskar"},
+    {year:2019, wiki:"Olivia_Colman", winner:"Olivia Colman", film:"The Favourite", country:"UK", notes:""},
+    {year:2020, wiki:"Ren%C3%A9e_Zellweger", winner:"Ren\u00e9e Zellweger", film:"Judy", country:"SAD", notes:""},
+    {year:2021, wiki:"Frances_McDormand", winner:"Frances McDormand", film:"Nomadland", country:"SAD", notes:"tre\u0107i Oskar"},
+    {year:2022, wiki:"Jessica_Chastain", winner:"Jessica Chastain", film:"The Eyes of Tammy Faye", country:"SAD", notes:""},
+    {year:2023, wiki:"Cate_Blanchett", winner:"Cate Blanchett", film:"T\u00e1r", country:"Australija", notes:"tre\u0107i Oskar"},
+    {year:2024, wiki:"Emma_Stone", winner:"Emma Stone", film:"Poor Things", country:"SAD", notes:"drugi Oskar"},
+    {year:2025, wiki:"Demi_Moore", winner:"Demi Moore", film:"The Substance", country:"SAD", notes:"prvi Oskar"}
+  ],
+  director: [
+    {year:1980, wiki:"Robert_Benton", winner:"Robert Benton", film:"Kramer vs. Kramer", country:"SAD", notes:""},
+    {year:1981, wiki:"Robert_Redford", winner:"Robert Redford", film:"Ordinary People", country:"SAD", notes:""},
+    {year:1982, wiki:"Warren_Beatty", winner:"Warren Beatty", film:"Reds", country:"SAD", notes:""},
+    {year:1983, wiki:"Richard_Attenborough", winner:"Richard Attenborough", film:"Gandhi", country:"UK", notes:""},
+    {year:1984, wiki:"James_L._Brooks", winner:"James L. Brooks", film:"Terms of Endearment", country:"SAD", notes:""},
+    {year:1985, wiki:"Milo%C5%A1_Forman", winner:"Milo\u0161 Forman", film:"Amadeus", country:"\u010ce\u0161ka/SAD", notes:""},
+    {year:1986, wiki:"Sydney_Pollack", winner:"Sydney Pollack", film:"Out of Africa", country:"SAD", notes:""},
+    {year:1987, wiki:"Oliver_Stone", winner:"Oliver Stone", film:"Platoon", country:"SAD", notes:""},
+    {year:1988, wiki:"Bernardo_Bertolucci", winner:"Bernardo Bertolucci", film:"The Last Emperor", country:"Italija", notes:""},
+    {year:1989, wiki:"Barry_Levinson", winner:"Barry Levinson", film:"Rain Man", country:"SAD", notes:""},
+    {year:1990, wiki:"Oliver_Stone", winner:"Oliver Stone", film:"Born on the Fourth of July", country:"SAD", notes:""},
+    {year:1991, wiki:"Kevin_Costner", winner:"Kevin Costner", film:"Dances with Wolves", country:"SAD", notes:""},
+    {year:1992, wiki:"Jonathan_Demme", winner:"Jonathan Demme", film:"The Silence of the Lambs", country:"SAD", notes:""},
+    {year:1993, wiki:"Clint_Eastwood", winner:"Clint Eastwood", film:"Unforgiven", country:"SAD", notes:""},
+    {year:1994, wiki:"Steven_Spielberg", winner:"Steven Spielberg", film:"Schindler\u2019s List", country:"SAD", notes:"prvi Oskar za re\u017eiju"},
+    {year:1995, wiki:"Robert_Zemeckis", winner:"Robert Zemeckis", film:"Forrest Gump", country:"SAD", notes:""},
+    {year:1996, wiki:"Mel_Gibson", winner:"Mel Gibson", film:"Braveheart", country:"SAD/Australija", notes:""},
+    {year:1997, wiki:"Anthony_Minghella", winner:"Anthony Minghella", film:"The English Patient", country:"UK", notes:""},
+    {year:1998, wiki:"James_Cameron", winner:"James Cameron", film:"Titanic", country:"SAD/Kanada", notes:""},
+    {year:1999, wiki:"Steven_Spielberg", winner:"Steven Spielberg", film:"Saving Private Ryan", country:"SAD", notes:""},
+    {year:2000, wiki:"Sam_Mendes", winner:"Sam Mendes", film:"American Beauty", country:"UK", notes:""},
+    {year:2001, wiki:"Steven_Soderbergh", winner:"Steven Soderbergh", film:"Traffic", country:"SAD", notes:""},
+    {year:2002, wiki:"Ron_Howard", winner:"Ron Howard", film:"A Beautiful Mind", country:"SAD", notes:""},
+    {year:2003, wiki:"Roman_Polanski", winner:"Roman Polanski", film:"The Pianist", country:"Polska/Francuska", notes:""},
+    {year:2004, wiki:"Peter_Jackson", winner:"Peter Jackson", film:"The Lord of the Rings: Return of the King", country:"Novi Zeland", notes:""},
+    {year:2005, wiki:"Clint_Eastwood", winner:"Clint Eastwood", film:"Million Dollar Baby", country:"SAD", notes:"tre\u0107i Oskar"},
+    {year:2006, wiki:"Ang_Lee", winner:"Ang Lee", film:"Brokeback Mountain", country:"Tajvan", notes:""},
+    {year:2007, wiki:"Martin_Scorsese", winner:"Martin Scorsese", film:"The Departed", country:"SAD", notes:"prvi Oskar za re\u017eiju"},
+    {year:2008, wiki:"Joel_Coen", winner:"Joel & Ethan Coen", film:"No Country for Old Men", country:"SAD", notes:""},
+    {year:2009, wiki:"Danny_Boyle", winner:"Danny Boyle", film:"Slumdog Millionaire", country:"UK", notes:""},
+    {year:2010, wiki:"Kathryn_Bigelow", winner:"Kathryn Bigelow", film:"The Hurt Locker", country:"SAD", notes:"prva \u017eena dobitnica"},
+    {year:2011, wiki:"Tom_Hooper", winner:"Tom Hooper", film:"The King\u2019s Speech", country:"UK", notes:""},
+    {year:2012, wiki:"Michel_Hazanavicius", winner:"Michel Hazanavicius", film:"The Artist", country:"Francuska", notes:""},
+    {year:2013, wiki:"Ang_Lee", winner:"Ang Lee", film:"Life of Pi", country:"Tajvan", notes:"drugi Oskar"},
+    {year:2014, wiki:"Alfonso_Cuar%C3%B3n", winner:"Alfonso Cuar\u00f3n", film:"Gravity", country:"Meksiko", notes:""},
+    {year:2015, wiki:"Alejandro_G._I%C3%B1%C3%A1rritu", winner:"Alejandro G. I\u00f1\u00e1rritu", film:"Birdman", country:"Meksiko", notes:""},
+    {year:2016, wiki:"Alejandro_G._I%C3%B1%C3%A1rritu", winner:"Alejandro G. I\u00f1\u00e1rritu", film:"The Revenant", country:"Meksiko", notes:"dva uzastopna Oskara"},
+    {year:2017, wiki:"Damien_Chazelle", winner:"Damien Chazelle", film:"La La Land", country:"SAD", notes:"najmladi dobitnik"},
+    {year:2018, wiki:"Guillermo_del_Toro", winner:"Guillermo del Toro", film:"The Shape of Water", country:"Meksiko", notes:""},
+    {year:2019, wiki:"Alfonso_Cuar%C3%B3n", winner:"Alfonso Cuar\u00f3n", film:"Roma", country:"Meksiko", notes:"tre\u0107i Oskar"},
+    {year:2020, wiki:"Bong_Joon-ho", winner:"Bong Joon-ho", film:"Parasite", country:"Ju\u017ena Koreja", notes:"prvi korejski redatelj"},
+    {year:2021, wiki:"Chlo%C3%A9_Zhao", winner:"Chlo\u00e9 Zhao", film:"Nomadland", country:"Kina/SAD", notes:"prva \u017eena boje ko\u017ee"},
+    {year:2022, wiki:"Jane_Campion", winner:"Jane Campion", film:"The Power of the Dog", country:"Novi Zeland", notes:""},
+    {year:2023, wiki:"Daniels_(filmmaking_duo)", winner:"Daniel Kwan & Daniel Scheinert", film:"Everything Everywhere All at Once", country:"SAD", notes:""},
+    {year:2024, wiki:"Christopher_Nolan", winner:"Christopher Nolan", film:"Oppenheimer", country:"UK/SAD", notes:"prvi Oskar za re\u017eiju"},
+    {year:2025, wiki:"Brady_Corbet", winner:"Brady Corbet", film:"The Brutalist", country:"SAD", notes:""}
+  ],
+  intl: [
+    {year:1980, wiki:"The_Tin_Drum_(film)", winner:"The Tin Drum", film:"Die Blechtrommel", country:"Zapadna Nema\u010dka", notes:"Volker Schl\u00f6ndorff"},
+    {year:1981, wiki:"Moscow_Does_Not_Believe_in_Tears", winner:"Moscow Does Not Believe in Tears", film:"Moskva slezam ne verit", country:"SSSR", notes:"Vladimir Men\u0161ov"},
+    {year:1982, wiki:"Mephisto_(1981_film)", winner:"Mephisto", film:"", country:"Ma\u0111arska", notes:"Istv\u00e1n Szab\u00f3"},
+    {year:1983, wiki:"Volver_a_empezar", winner:"Volver a Empezar", film:"", country:"\u0160panija", notes:"Jose Luis Garci"},
+    {year:1984, wiki:"Fanny_and_Alexander", winner:"Fanny and Alexander", film:"Fanny och Alexander", country:"\u0160vedska", notes:"Ingmar Bergman"},
+    {year:1985, wiki:"Dangerous_Moves", winner:"Dangerous Moves", film:"La Diagonale du fou", country:"\u0160vajcarska", notes:"Richard Dembo"},
+    {year:1986, wiki:"The_Official_Story", winner:"The Official Story", film:"La Historia oficial", country:"Argentina", notes:"Luis Puenzo"},
+    {year:1987, wiki:"The_Assault_(1986_film)", winner:"The Assault", film:"De aanslag", country:"Holandija", notes:"Fons Rademakers"},
+    {year:1988, wiki:"Babette%27s_Feast", winner:"Babette\u2019s Feast", film:"Babettes g\u00e6stebud", country:"Danska", notes:"Gabriel Axel"},
+    {year:1989, wiki:"Pelle_the_Conqueror", winner:"Pelle the Conqueror", film:"Pelle Erobreren", country:"Danska", notes:"Bille August"},
+    {year:1990, wiki:"Cinema_Paradiso", winner:"Cinema Paradiso", film:"Nuovo Cinema Paradiso", country:"Italija", notes:"Giuseppe Tornatore"},
+    {year:1991, wiki:"Journey_of_Hope_(film)", winner:"Journey of Hope", film:"Reise der Hoffnung", country:"\u0160vajcarska", notes:"Xavier Koller"},
+    {year:1992, wiki:"Mediterraneo_(film)", winner:"Mediterraneo", film:"", country:"Italija", notes:"Gabriele Salvatores"},
+    {year:1993, wiki:"Indochine_(film)", winner:"Indochine", film:"", country:"Francuska", notes:"R\u00e9gis Wargnier"},
+    {year:1994, wiki:"Belle_%C3%89poque_(film)", winner:"Belle Epoque", film:"", country:"\u0160panija", notes:"Fernando Trueba"},
+    {year:1995, wiki:"Burnt_by_the_Sun", winner:"Burnt by the Sun", film:"Utomlyonnye solntsem", country:"Rusija", notes:"Nikita Mihalkov"},
+    {year:1996, wiki:"Antonia%27s_Line", winner:"Antonia\u2019s Line", film:"Antonia", country:"Holandija", notes:"Marleen Gorris"},
+    {year:1997, wiki:"Kolya_(film)", winner:"Kolya", film:"Kolja", country:"\u010ce\u0161ka", notes:"Jan Sv\u011br\u00e1k"},
+    {year:1998, wiki:"Character_(film)", winner:"Character", film:"Karakter", country:"Holandija", notes:"Mike van Diem"},
+    {year:1999, wiki:"Life_Is_Beautiful", winner:"Life Is Beautiful", film:"La vita \u00e8 bella", country:"Italija", notes:"Roberto Benigni"},
+    {year:2000, wiki:"All_About_My_Mother", winner:"All About My Mother", film:"Todo sobre mi madre", country:"\u0160panija", notes:"Pedro Almod\u00f3var"},
+    {year:2001, wiki:"Crouching_Tiger,_Hidden_Dragon", winner:"Crouching Tiger, Hidden Dragon", film:"Wo hu cang long", country:"Tajvan", notes:"Ang Lee"},
+    {year:2002, wiki:"No_Man%27s_Land_(2001_film)", winner:"No Man\u2019s Land", film:"Ni\u010dija zemlja", country:"BiH/Francuska", notes:"Danis Tanovi\u0107"},
+    {year:2003, wiki:"Nowhere_in_Africa", winner:"Nowhere in Africa", film:"Nirgendwo in Afrika", country:"Nema\u010dka", notes:"Caroline Link"},
+    {year:2004, wiki:"The_Barbarian_Invasions", winner:"The Barbarian Invasions", film:"Les Invasions barbares", country:"Kanada", notes:"Denys Arcand"},
+    {year:2005, wiki:"The_Sea_Inside", winner:"The Sea Inside", film:"Mar adentro", country:"\u0160panija", notes:"Alejandro Amen\u00e1bar"},
+    {year:2006, wiki:"Tsotsi", winner:"Tsotsi", film:"", country:"JAR", notes:"Gavin Hood"},
+    {year:2007, wiki:"The_Lives_of_Others", winner:"The Lives of Others", film:"Das Leben der Anderen", country:"Nema\u010dka", notes:"Florian Henckel von Donnersmarck"},
+    {year:2008, wiki:"The_Counterfeiters_(film)", winner:"The Counterfeiters", film:"Die F\u00e4lscher", country:"Austrija", notes:"Stefan Ruzowitzky"},
+    {year:2009, wiki:"Departures_(2008_film)", winner:"Departures", film:"Okuribito", country:"Japan", notes:"Y\u014djir\u014d Takita"},
+    {year:2010, wiki:"The_Secret_in_Their_Eyes", winner:"The Secret in Their Eyes", film:"El secreto de sus ojos", country:"Argentina", notes:"Juan Jos\u00e9 Campanella"},
+    {year:2011, wiki:"In_a_Better_World", winner:"In a Better World", film:"H\u00e6vnen", country:"Danska", notes:"Susanne Bier"},
+    {year:2012, wiki:"A_Separation", winner:"A Separation", film:"Jodaeiye Nader az Simin", country:"Iran", notes:"Asghar Farhadi"},
+    {year:2013, wiki:"Amour_(film)", winner:"Amour", film:"", country:"Austrija/Francuska", notes:"Michael Haneke"},
+    {year:2014, wiki:"The_Great_Beauty", winner:"The Great Beauty", film:"La grande bellezza", country:"Italija", notes:"Paolo Sorrentino"},
+    {year:2015, wiki:"Ida_(film)", winner:"Ida", film:"", country:"Polska", notes:"Pawe\u0142 Pawlikowski"},
+    {year:2016, wiki:"Son_of_Saul", winner:"Son of Saul", film:"Saul fia", country:"Ma\u0111arska", notes:"L\u00e1szl\u00f3 Nemes"},
+    {year:2017, wiki:"The_Salesman_(film)", winner:"The Salesman", film:"Forushande", country:"Iran", notes:"Asghar Farhadi"},
+    {year:2018, wiki:"A_Fantastic_Woman", winner:"A Fantastic Woman", film:"Una mujer fant\u00e1stica", country:"\u010cile", notes:"Sebasti\u00e1n Lelio"},
+    {year:2019, wiki:"Roma_(2018_film)", winner:"Roma", film:"", country:"Meksiko", notes:"Alfonso Cuar\u00f3n"},
+    {year:2020, wiki:"Parasite_(2019_film)", winner:"Parasite", film:"Gisaengchung", country:"Ju\u017ena Koreja", notes:"Bong Joon-ho; jedini film dobitnik i Najboljeg filma"},
+    {year:2021, wiki:"Another_Round_(film)", winner:"Another Round", film:"Druk", country:"Danska", notes:"Thomas Vinterberg"},
+    {year:2022, wiki:"Drive_My_Car_(film)", winner:"Drive My Car", film:"Doraibu mai k\u0101", country:"Japan", notes:"Ry\u016bsuke Hamaguchi"},
+    {year:2023, wiki:"All_Quiet_on_the_Western_Front_(2022_film)", winner:"All Quiet on the Western Front", film:"Im Westen nichts Neues", country:"Nema\u010dka", notes:"Edward Berger"},
+    {year:2024, wiki:"The_Zone_of_Interest_(film)", winner:"The Zone of Interest", film:"", country:"UK/Polska", notes:"Jonathan Glazer"},
+    {year:2025, wiki:"I%27m_Still_Here_(2025_film)", winner:"I\u2019m Still Here", film:"Ainda Estou Aqui", country:"Brazil", notes:"Walter Salles"}
+  ]
+};
+
+var COL_LABELS = {
+  film: ["Godina", "Najbolji film", "Dr\u017eava / Produkcija", "Redatelj"],
+  actor: ["Godina", "Glumac", "Film", "Dr\u017eava", "Napomena"],
+  actress: ["Godina", "Glumica", "Film", "Dr\u017eava", "Napomena"],
+  director: ["Godina", "Redatelj", "Film", "Dr\u017eava", "Napomena"],
+  intl: ["Godina", "Film (originalni naziv)", "Dr\u017eava", "Redatelj"]
+};
+
+var state = { cat: "film", decade: "all", search: "", sortCol: 0, sortDir: -1 };
+
+function getRows() {
+  var rows = DATA[state.cat].slice();
+  if (state.decade !== "all") {
+    var d = parseInt(state.decade);
+    rows = rows.filter(function(r) { return r.year >= d && r.year < d + 10; });
+  }
+  if (state.search) {
+    var q = state.search.toLowerCase();
+    rows = rows.filter(function(r) {
+      return String(r.year).includes(q) ||
+        r.winner.toLowerCase().includes(q) ||
+        r.film.toLowerCase().includes(q) ||
+        r.country.toLowerCase().includes(q) ||
+        r.notes.toLowerCase().includes(q);
+    });
+  }
+  rows.sort(function(a, b) {
+    var av, bv;
+    if (state.sortCol === 0) { av = a.year; bv = b.year; }
+    else { av = a.winner.toLowerCase(); bv = b.winner.toLowerCase(); }
+    if (av < bv) return state.sortDir;
+    if (av > bv) return -state.sortDir;
+    return 0;
+  });
+  return rows;
+}
+
+function winnerCell(r, starClass, label) {
+  return "<div class=\"winner-cell\"><img class=\"author-photo\" data-wiki=\"" + r.wiki + "\" alt=\"" + r.winner + "\"><div><span class=\"oscar-star " + starClass + "\">\u2606</span>" + label + "</div></div>";
+}
+
+function renderTable() {
+  var rows = getRows();
+  var cat = state.cat;
+  var labels = COL_LABELS[cat];
+  var html = "";
+
+  if (rows.length === 0) {
+    document.getElementById("resultsCount").textContent = "Nema rezultata.";
+    document.getElementById("tableContainer").innerHTML = "<div class=\"no-results\">\u2606 Nema dobitnika za zadati filter.</div>";
+    return;
+  }
+  document.getElementById("resultsCount").textContent = rows.length + " dobitnika";
+
+  html += "<table class=\"cat-" + cat + "\"><thead><tr>";
+  for (var i = 0; i < labels.length; i++) {
+    var arrow = "";
+    var sorted = "";
+    if (i === 0 || i === 1) {
+      arrow = (state.sortCol === i) ? (state.sortDir === -1 ? " \u25BC" : " \u25B2") : " \u25BD";
+      sorted = (state.sortCol === i) ? " sorted" : "";
+    }
+    html += "<th class=\"" + sorted + "\" data-col=\"" + i + "\">" + labels[i] + "<span class=\"sort-arrow\">" + arrow + "</span></th>";
+  }
+  html += "</tr></thead><tbody>";
+
+  for (var ri = 0; ri < rows.length; ri++) {
+    var r = rows[ri];
+    html += "<tr>";
+    html += "<td class=\"year\">" + r.year + "</td>";
+    if (cat === "film") {
+      html += "<td class=\"winner\">" + winnerCell(r, "", r.winner) + "</td>";
+      html += "<td class=\"country\">" + r.country + "</td>";
+      html += "<td class=\"notes\">" + r.notes + "</td>";
+    } else if (cat === "actor" || cat === "actress") {
+      html += "<td class=\"winner\">" + winnerCell(r, "", r.winner) + "</td>";
+      html += "<td class=\"film\">" + r.film + "</td>";
+      html += "<td class=\"country\">" + r.country + "</td>";
+      html += "<td class=\"notes\">" + r.notes + "</td>";
+    } else if (cat === "director") {
+      html += "<td class=\"winner\">" + winnerCell(r, "", r.winner) + "</td>";
+      html += "<td class=\"film\">" + r.film + "</td>";
+      html += "<td class=\"country\">" + r.country + "</td>";
+      html += "<td class=\"notes\">" + r.notes + "</td>";
+    } else if (cat === "intl") {
+      var label = r.winner + (r.film ? " <em style=\"color:var(--text2);font-size:12px;\">(" + r.film + ")</em>" : "");
+      html += "<td class=\"winner\">" + winnerCell(r, "", label) + "</td>";
+      html += "<td class=\"country\">" + r.country + "</td>";
+      html += "<td class=\"notes\">" + r.notes + "</td>";
+    }
+    html += "</tr>";
+  }
+  html += "</tbody></table>";
+  document.getElementById("tableContainer").innerHTML = html;
+  loadPhotos();
+
+  var ths = document.querySelectorAll("thead th[data-col]");
+  for (var ti = 0; ti < ths.length; ti++) {
+    ths[ti].addEventListener("click", function() {
+      var col = parseInt(this.getAttribute("data-col"));
+      if (col !== 0 && col !== 1) return;
+      if (state.sortCol === col) { state.sortDir *= -1; }
+      else { state.sortCol = col; state.sortDir = -1; }
+      renderTable();
+    });
+  }
+}
+
+function loadPhotos() {
+  var imgs = document.querySelectorAll('img.author-photo');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      var img = entry.target;
+      if (img.getAttribute('data-loaded')) return;
+      img.setAttribute('data-loaded', '1');
+      observer.unobserve(img);
+      var wiki = img.getAttribute('data-wiki');
+      fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + wiki)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.thumbnail && data.thumbnail.source) {
+            img.src = data.thumbnail.source;
+            img.onload = function() { img.classList.add('loaded'); };
+          }
+        })
+        .catch(function() {});
+    });
+  }, { rootMargin: '150px' });
+  for (var i = 0; i < imgs.length; i++) observer.observe(imgs[i]);
+}
+
+document.getElementById("searchBox").addEventListener("input", function() {
+  state.search = this.value.trim();
+  renderTable();
+});
+
+var decBtns = document.querySelectorAll("#decadeFilter .filter-btn");
+for (var i = 0; i < decBtns.length; i++) {
+  decBtns[i].addEventListener("click", function() {
+    state.decade = this.getAttribute("data-decade");
+    for (var j = 0; j < decBtns.length; j++) decBtns[j].classList.remove("active");
+    this.classList.add("active");
+    renderTable();
+  });
+}
+
+var catTabs = document.querySelectorAll("#catTabs .cat-tab");
+for (var i = 0; i < catTabs.length; i++) {
+  catTabs[i].addEventListener("click", function() {
+    state.cat = this.getAttribute("data-cat");
+    for (var j = 0; j < catTabs.length; j++) catTabs[j].classList.remove("active");
+    this.classList.add("active");
+    renderTable();
+  });
+}
+
+renderTable();
+</script>
+</body>
+</html>

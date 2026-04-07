@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../icon.svg">
+<title>Nemanjići — Dinastija Srpskih Vladara</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0a07;
+    --surface: #1a1308;
+    --surface2: #251c0d;
+    --gold: #c9a227;
+    --gold2: #e8c84a;
+    --gold-dim: #7a6015;
+    --red: #8b1a1a;
+    --red2: #c0392b;
+    --text: #f0e6d0;
+    --muted: #9a8a6a;
+    --border: #3a2e1a;
+    --node-bg: #1e1508;
+    --node-border: #c9a227;
+    --line: #5a4a2a;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: Georgia, 'Times New Roman', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 40px 20px 30px;
+    background: linear-gradient(180deg, #1a0f05 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .header::before {
+    content: '☩';
+    font-size: 32px;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 10px;
+    opacity: 0.7;
+  }
+  .header h1 {
+    font-size: clamp(24px, 5vw, 42px);
+    color: var(--gold2);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-weight: normal;
+    text-shadow: 0 0 40px rgba(201,162,39,0.4);
+  }
+  .header p {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+  .header .dynasty-line {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--gold-dim);
+    letter-spacing: 1px;
+  }
+
+  /* TIMELINE BAR */
+  .timeline-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 16px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .timeline-bar::-webkit-scrollbar { display: none; }
+  .tl-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    min-width: fit-content;
+    position: relative;
+  }
+  .tl-item:hover { background: var(--surface2); }
+  .tl-item.active { background: var(--surface2); }
+  .tl-item .tl-name {
+    font-size: 11px;
+    color: var(--gold);
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+  .tl-item .tl-year {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .tl-sep {
+    width: 20px;
+    height: 1px;
+    background: var(--gold-dim);
+    flex-shrink: 0;
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    display: flex;
+    min-height: calc(100vh - 180px);
+  }
+
+  /* TREE PANEL */
+  .tree-panel {
+    flex: 1;
+    padding: 30px 20px;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  /* DETAIL PANEL */
+  .detail-panel {
+    width: 380px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 0;
+    overflow-y: auto;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .detail-panel.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .detail-panel.empty .hint {
+    color: var(--muted);
+    font-size: 14px;
+    text-align: center;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .detail-panel.empty .hint-icon {
+    font-size: 48px;
+    opacity: 0.3;
+    display: block;
+    text-align: center;
+    padding-top: 40px;
+  }
+
+  /* DETAIL CONTENT */
+  .detail-header {
+    background: linear-gradient(135deg, var(--red) 0%, #3a0f0f 100%);
+    padding: 28px 24px 22px;
+    border-bottom: 2px solid var(--gold);
+    position: relative;
+    overflow: hidden;
+  }
+  .detail-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a227' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .detail-header .ruler-title {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .detail-header h2 {
+    font-size: 22px;
+    color: var(--gold2);
+    font-weight: normal;
+    line-height: 1.2;
+    position: relative;
+    z-index: 1;
+  }
+  .detail-header .detail-subtitle {
+    margin-top: 6px;
+    font-size: 13px;
+    color: rgba(240,230,208,0.7);
+    font-style: italic;
+    position: relative;
+    z-index: 1;
+  }
+  .detail-header .reign-badge {
+    display: inline-block;
+    margin-top: 10px;
+    background: rgba(201,162,39,0.15);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .detail-body {
+    padding: 20px 24px;
+  }
+
+  .detail-section {
+    margin-bottom: 22px;
+  }
+  .detail-section h3 {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .info-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .info-item.full { grid-column: 1 / -1; }
+  .info-item label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .info-item span {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .achievements-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .achievements-list li {
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-left: 3px solid var(--gold-dim);
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .achievements-list li::before {
+    content: '✦ ';
+    color: var(--gold);
+    font-size: 10px;
+  }
+
+  .zaduzbine-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .zaduzbina-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .zaduzbina-item .z-name {
+    font-size: 14px;
+    color: var(--gold2);
+    font-style: italic;
+  }
+  .zaduzbina-item .z-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  /* FAMILY TREE SVG */
+  .tree-svg-container {
+    min-width: 700px;
+    width: 100%;
+  }
+
+  svg.family-tree {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .node-group {
+    cursor: pointer;
+  }
+  .node-rect {
+    fill: var(--node-bg);
+    stroke: var(--node-border);
+    stroke-width: 1.5;
+    rx: 8;
+    transition: all 0.2s;
+  }
+  .node-group:hover .node-rect,
+  .node-group.active .node-rect {
+    fill: #2a1e08;
+    stroke: var(--gold2);
+    stroke-width: 2.5;
+    filter: drop-shadow(0 0 8px rgba(201,162,39,0.4));
+  }
+  .node-group.active .node-rect {
+    fill: #2e1f05;
+  }
+  .node-name {
+    fill: var(--gold2);
+    font-family: 'Georgia', serif;
+    font-size: 12px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+  .node-years {
+    fill: var(--muted);
+    font-family: 'Georgia', serif;
+    font-size: 10px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+  .node-title {
+    fill: var(--gold-dim);
+    font-family: 'Georgia', serif;
+    font-size: 9px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+    font-style: italic;
+  }
+  .tree-line {
+    stroke: var(--line);
+    stroke-width: 1.5;
+    fill: none;
+  }
+  .tree-line-gold {
+    stroke: var(--gold-dim);
+    stroke-width: 1.5;
+    fill: none;
+    stroke-dasharray: 4 3;
+  }
+
+  .crown-icon {
+    fill: var(--gold);
+    font-size: 14px;
+    text-anchor: middle;
+    pointer-events: none;
+  }
+
+  /* CLOSE BUTTON */
+  .close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 10;
+    transition: all 0.2s;
+  }
+  .close-btn:hover {
+    color: var(--text);
+    border-color: var(--gold);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .main { flex-direction: column; }
+    .detail-panel {
+      width: 100%;
+      border-left: none;
+      border-top: 1px solid var(--border);
+      max-height: 60vh;
+    }
+    .tree-panel { padding: 20px 10px; }
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    padding: 10px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .legend-line {
+    width: 24px;
+    height: 2px;
+    background: var(--line);
+  }
+  .legend-line.dashed {
+    background: repeating-linear-gradient(90deg, var(--gold-dim) 0, var(--gold-dim) 4px, transparent 4px, transparent 7px);
+    height: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="../../index.html" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);color:var(--gold-dim);font-size:13px;text-decoration:none;border:1px solid var(--border);padding:6px 12px;border-radius:6px;transition:all 0.2s;font-family:Georgia,serif;" onmouseover="this.style.color='#c9a227'" onmouseout="this.style.color='var(--gold-dim)'">&#8592; Pub Quiz</a>
+  <h1>Nemanjići</h1>
+  <p>Dinastija Srpskih Vladara · 1166 — 1371</p>
+  <div class="dynasty-line">Od Stefana Nemanje do Uroša V · Dvesta godina srpske slave</div>
+</div>
+
+<!-- TIMELINE -->
+<div class="timeline-bar" id="timelineBar"></div>
+
+<div class="main">
+  <!-- TREE -->
+  <div class="tree-panel">
+    <div class="tree-svg-container">
+      <svg class="family-tree" id="familyTree" viewBox="0 0 820 720" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="detail-panel empty" id="detailPanel">
+    <span class="hint-icon">☩</span>
+    <div class="hint">Klikni na vladara u porodičnom stablu da vidiš njegove najvažnije informacije</div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-line"></div> Direktno nasledstvo</div>
+  <div class="legend-item"><div class="legend-line dashed"></div> Bočna linija</div>
+</div>
+
+<script>
+const rulers = {
+  nemanja: {
+    id: 'nemanja',
+    name: 'Stefan Nemanja',
+    shortName: 'Stefan Nemanja',
+    title: 'Veliki \u017dupan',
+    born: 'oko 1113.',
+    died: '1199.',
+    reignStart: 1166,
+    reignEnd: 1196,
+    reign: '1166 \u2014 1196',
+    spouse: 'Kneginja Ana',
+    children: ['vukan', 'stefan1', 'rastko'],
+    parent: null,
+    bio: 'Osniva\u010d dinastije Nemnji\u0107a i srpske srednjovekovne dr\u017eave. Ujedinio srpske \u017eupe i stvorio mo\u0107nu srpsku dr\u017eavu, odbiv\u0161i vizantijsko vrhovni\u0161tvo.',
+    achievements: [
+      'Ujedinio sve srpske \u017eupe pod jednom vla\u0161\u0107u',
+      'Proterao bogumile i utvrdio pravoslavlje kao dr\u017eavnu veru',
+      'Odbio vizantijsku prevlast i izvojevao nezavisnost',
+      'Na Studeni\u010dkom saboru 1196. predao vlast sinu Stefanu',
+      'Primio mona\u0161ki postrig pod imenom Simeon \u2014 progla\u0161en svetim',
+      'Zajedno sa sinom Savom zasadio Hilandar na Svetoj Gori'
+    ],
+    zaduzbine: [
+      { name: 'Manastir Studenica', desc: 'Najzna\u010dajnija srpska zadu\u017ebina, "Majka srpskih manastira", Ra\u0161ka, 1183\u20131196.' },
+      { name: '\u0110ur\u0111evi Stupovi', desc: 'Manastir u Rasu (Novi Pazar), jedna od prvih Nemnji\u0107kih crkava, 1171.' },
+      { name: 'Manastir Hilandar', desc: 'Zajedni\u010dki sa sinom Savom obnovio srpski manastir na Svetoj Gori Atonskoj, 1198.' }
+    ]
+  },
+  vukan: {
+    id: 'vukan',
+    name: 'Vukan Nemnji\u0107',
+    shortName: 'Vukan',
+    title: 'Knez Zete',
+    born: 'oko 1165.',
+    died: 'oko 1209.',
+    reignStart: 1196,
+    reignEnd: 1208,
+    reign: '1196 \u2014 1208 (Zeta)',
+    spouse: '\u2014',
+    children: [],
+    parent: 'nemanja',
+    bio: 'Stariji sin Stefana Nemanje, vladao Zetom. Vodio borbu za presto sa bratom Stefanom uz pomo\u0107 ugarskog kralja, ali je na kraju izgubio.',
+    achievements: [
+      'Vladao Zetom kao posebnom oblasti',
+      'Kratko preoteo presto od brata Stefana uz ugarsku pomo\u0107 (1202\u20131204)',
+      'Primio rimokatoličanstvo kao politi\u010dki potez',
+      'Na kraju pomirio se s bratom Stefanom'
+    ],
+    zaduzbine: [
+      { name: '\u2014', desc: 'Nema poznatih zadu\u017ebina koje se pripisuju Vukanu.' }
+    ]
+  },
+  stefan1: {
+    id: 'stefan1',
+    name: 'Stefan Prvoven\u010dani',
+    shortName: 'Stefan Prvoven\u010dani',
+    title: 'Kralj Srbije',
+    born: 'oko 1165.',
+    died: '1228.',
+    reignStart: 1196,
+    reignEnd: 1228,
+    reign: '1196 \u2014 1228',
+    spouse: 'Eudokija Angelina, Anastazija',
+    children: ['radoslav', 'vladislav', 'uros1'],
+    parent: 'nemanja',
+    bio: 'Drugi sin Stefana Nemanje. Dobio kraljevsku krunu od pape 1217 \u2014 prvi srpski kralj. Brat svetog Save koji mu je pribavio autokefalnost srpske crkve.',
+    achievements: [
+      'Prvi srpski kralj \u2014 okrunjen 1217. od papskog legata',
+      'Zahvaljuju\u0107i bratu Savi, Srbija dobila autokefalnu crkvu 1219.',
+      'U\u010dvrstio srpsku kraljevinu i dr\u017eavnu organizaciju',
+      'Napisao "\u017ditije Svetog Simeona" \u2014 jedno od prvih srpskih knji\u017eevnih dela'
+    ],
+    zaduzbine: [
+      { name: 'Manastir \u017di\u010da', desc: 'Episkopska crkva srpske crkve, krunisaonica srpskih vladara, kod Kraljeva, oko 1220.' }
+    ]
+  },
+  rastko: {
+    id: 'rastko',
+    name: 'Sveti Sava',
+    shortName: 'Sveti Sava',
+    title: 'Arhiepiskop / Svetac',
+    born: '1175.',
+    died: '1236.',
+    reignStart: 1219,
+    reignEnd: 1235,
+    reign: '1219 \u2014 1235 (Arhiepiskop)',
+    spouse: '\u2014',
+    children: [],
+    parent: 'nemanja',
+    bio: 'Tre\u0107i sin Stefana Nemanje, rodom knez Rastko. Pobegao na Svetu Goru i zamona\u0161io se. Utemeljio autokefalnu Srpsku pravoslavnu crkvu i postao njen prvi arhiepiskop.',
+    achievements: [
+      'Osnovao autokefalnu Srpsku pravoslavnu crkvu 1219.',
+      'Organizovao srpsku crkvu i napisao Zakonopravilo (Nomokanon)',
+      'Progla\u0161en svetim odmah po smrti \u2014 za\u0161titnik Srbije',
+      'Napisao \u017eitija oca i brata \u2014 za\u010detnik srpske pismenosti',
+      'Obi\u0161ao Svetu Zemlju i doneo relikvije u Srbiju'
+    ],
+    zaduzbine: [
+      { name: 'Manastir Hilandar', desc: 'Obnovio zajedno s ocem na Svetoj Gori Atonskoj, 1198. \u2014 srpska duhovna prestonica.' },
+      { name: 'Manastir Mile\u0161eva', desc: 'Zadu\u017ebina u Polimlje, 1218\u20131228, gde su \u010duvane njegove mo\u0161ti.' }
+    ]
+  },
+  radoslav: {
+    id: 'radoslav',
+    name: 'Stefan Radoslav',
+    shortName: 'Radoslav',
+    title: 'Kralj Srbije',
+    born: 'oko 1192.',
+    died: 'oko 1235.',
+    reignStart: 1228,
+    reignEnd: 1234,
+    reign: '1228 \u2014 1234',
+    spouse: 'Eudokija Angelina (Vizantija)',
+    children: [],
+    parent: 'stefan1',
+    bio: 'Sin Stefana Prvoven\u010danog, vladao kratko. Bio pod jakim vizantijskim uticajem zbog \u017eene, \u0161to je izazvalo nezadovoljstvo vlastele. Svrgnut od brata Vladislava.',
+    achievements: [
+      'Nasledio oca i nastavio vladavinu',
+      'Orijentisan ka Vizantiji \u2014 vizantijski kulturni uticaj',
+      'Svrgnut od brata Vladislava uz podr\u0161ku vlastele'
+    ],
+    zaduzbine: [
+      { name: 'Crkva u Studenici', desc: 'Pripisuje mu se ktitorstvo nekih gra\u0111evinskih zahvata u Studenici.' }
+    ]
+  },
+  vladislav: {
+    id: 'vladislav',
+    name: 'Stefan Vladislav',
+    shortName: 'Vladislav',
+    title: 'Kralj Srbije',
+    born: 'oko 1198.',
+    died: 'oko 1264.',
+    reignStart: 1234,
+    reignEnd: 1243,
+    reign: '1234 \u2014 1243',
+    spouse: 'Beloslava (k\u0107i bugarskog cara)',
+    children: [],
+    parent: 'stefan1',
+    bio: 'Sin Stefana Prvoven\u010danog. Svrgao brata Radoslava, oslanjao se na Bugarsku. Zba\u010den od mla\u0111eg brata Uro\u0161a I koji je u\u017eivao podr\u0161ku doma\u0107e vlastele.',
+    achievements: [
+      'Uspe\u0161no preuzeo presto svrgavanjem brata',
+      'Orijentisan ka Bugarskoj umesto Vizantiji',
+      'Zba\u010den 1243. od brata Uro\u0161a I',
+      'Posle toga vladao Zetom kao oblasni gospodar'
+    ],
+    zaduzbine: [
+      { name: 'Manastir Mile\u0161eva', desc: 'Dovr\u0161io i ukrasio manastir koji je po\u010deo otac, preneo mo\u0161ti Svetog Save iz Tarnova 1237.' }
+    ]
+  },
+  uros1: {
+    id: 'uros1',
+    name: 'Stefan Uro\u0161 I',
+    shortName: 'Uro\u0161 I',
+    title: 'Kralj Srbije',
+    born: 'oko 1203.',
+    died: '1277.',
+    reignStart: 1243,
+    reignEnd: 1276,
+    reign: '1243 \u2014 1276',
+    spouse: 'Jelena An\u017eujska (Francuska)',
+    children: ['dragutin', 'milutin'],
+    parent: 'stefan1',
+    bio: 'Tre\u0107i sin Stefana Prvoven\u010danog. Duga i mirna vladavina, razvijao rudarstvo i trgovinu. O\u017eenio se Jelenom An\u017eujskom \u010dime je otvorio veze sa Zapadom.',
+    achievements: [
+      'Vladao rekordnih 33 godine \u2014 stabilnost i prosperitet',
+      'Razvio rudarstvo srebra i zlata \u2014 Brskovo, Rudnik',
+      'Uveo dubrova\u010dke trgovce i razvio spoljnu trgovinu',
+      'Uspostavio dobre odnose sa Ugarskom i Vizantijom',
+      'Zba\u010den od sina Dragutina 1276.'
+    ],
+    zaduzbine: [
+      { name: 'Manastir Sopo\u0107ani', desc: 'Zadu\u017ebina kraj Ra\u0161a (Novi Pazar), ~1265. Crkva Svete Trojice, poznat po freskama svetske vrednosti.' },
+      { name: 'Crkva u Bistrici', desc: 'Manja zadu\u017ebina u oblasti Ra\u0161ke.' }
+    ]
+  },
+  dragutin: {
+    id: 'dragutin',
+    name: 'Stefan Dragutin',
+    shortName: 'Dragutin',
+    title: 'Kralj Srbije',
+    born: 'oko 1253.',
+    died: '1316.',
+    reignStart: 1276,
+    reignEnd: 1282,
+    reign: '1276 \u2014 1282',
+    spouse: 'Katalina Ugarska',
+    children: [],
+    parent: 'uros1',
+    bio: 'Sin Uro\u0161a I. Uz pomo\u0107 tasta ugarskog kralja zbacio oca. Nakon povrede na konju 1282. predao vlast bratu Milutinu, a sam vladao severnim oblastima kao ugarski vazal.',
+    achievements: [
+      'Zbacio oca uz ugarsku pomo\u0107 i preuzeo presto',
+      'Nakon povrede predao vlast bratu i vladao Sremom',
+      'Vladao severnom Srbijom \u2014 "Zemlja kralja Dragutina"',
+      'Primio franjevačke redovnike \u2014 mostovi prema Zapadu',
+      'Posle smrti progla\u0161en bla\u017eenim od Rimokatoli\u010dke crkve'
+    ],
+    zaduzbine: [
+      { name: 'Manastir Arilje', desc: 'Zadu\u017ebina u Moravi\u010dkoj oblasti, crkva Sv. Ahilija, 1296. Odli\u010dne freske.' },
+      { name: 'Crkva u Beogradu', desc: 'Obnavljao crkve u Beogradu koji mu je bio pod upravom.' }
+    ]
+  },
+  milutin: {
+    id: 'milutin',
+    name: 'Stefan Uro\u0161 II Milutin',
+    shortName: 'Milutin',
+    title: 'Kralj Srbije',
+    born: 'oko 1253.',
+    died: '1321.',
+    reignStart: 1282,
+    reignEnd: 1321,
+    reign: '1282 \u2014 1321',
+    spouse: 'Simonida (k\u0107i vizantijskog cara)',
+    children: ['decanski'],
+    parent: 'uros1',
+    bio: 'Jedan od najve\u0107ih srpskih vladara. Pro\u0161irio teritoriju na jug \u2014 Makedonija, Kosovo. Izgradio je 40 crkava i manastira. Vladao je skoro 40 godina.',
+    achievements: [
+      'Pro\u0161irio Srbiju na Makedoniju, Kosovo i Metohiju',
+      'Pobedio Vizantiju i uzeo kao miraz veoma mlade Simonide',
+      'Sagradio ili obnovio oko 40 crkava i manastira',
+      'Razvio srpsko "zlatno doba" kulture i umetnosti',
+      'Progla\u0161en svetim od Srpske pravoslavne crkve'
+    ],
+    zaduzbine: [
+      { name: 'Manastir Gra\u010danica', desc: 'Kosovo, 1313\u20131321. Biseri srpske arhitekture, UNESCO za\u0161tita. Posvecen Uspenju Bogorodice.' },
+      { name: 'Manastir Hilandar (obnova)', desc: 'Potpuno obnovio Hilandar na Svetoj Gori \u2014 novi konaci, kula Milutina.' },
+      { name: 'Manastir Banjska', desc: 'Zami\u0161ljen kao mauzolej, Zve\u010dan, oko 1313. Jedna od najve\u0107ih crkava svog doba.' },
+      { name: 'Sveti Nikita kod Skoplja', desc: 'Crkva u Banjani, oko 1307\u20131308, odli\u010dne freske.' },
+      { name: 'Crkva Sv. \u0110or\u0111a u Staroj Nagori\u010dani', desc: 'Obnovio staru crkvu kraj Kumanova 1317\u20131318, freske svetske vrednosti.' }
+    ]
+  },
+  decanski: {
+    id: 'decanski',
+    name: 'Stefan Uro\u0161 III De\u010danski',
+    shortName: 'De\u010danski',
+    title: 'Kralj Srbije',
+    born: 'oko 1285.',
+    died: '1331.',
+    reignStart: 1321,
+    reignEnd: 1331,
+    reign: '1321 \u2014 1331',
+    spouse: 'Teodora Bugarska, Marija Paleolog',
+    children: ['dusan'],
+    parent: 'milutin',
+    bio: 'Sin Milutina. Oslepljen po o\u010devoj naredbi, \u010dudesno prozreo \u2014 progla\u0161en svetim. Pobedio Bugarsku i Vizantiju u bici na Velbu\u017edu 1330. Ubijen po nare\u0111enju sopstvenog sina Du\u0161ana.',
+    achievements: [
+      'Pobedio bugarsko-vizantijsku koaliciju u bici na Velbu\u017edu 1330.',
+      'Bitka na Velbu\u017edu \u2014 prekretnica, Srbija postala sila na Balkanu',
+      'Progla\u0161en svetim \u2014 mo\u0161ti \u010duvane u De\u010danima',
+      'Svrgnut i ubijen od sina Du\u0161ana 1331.',
+      'Bio oslepljen od oca, ali se \u010dudesno izle\u010dio \u2014 odatle nadimak'
+    ],
+    zaduzbine: [
+      { name: 'Manastir Visoki De\u010dani', desc: 'Kraj De\u010dana, Metohija, 1327\u20131335. Najve\u0107a srpska sredovekovna crkva. UNESCO svetska bastina.' }
+    ]
+  },
+  dusan: {
+    id: 'dusan',
+    name: 'Stefan Uro\u0161 IV Du\u0161an',
+    shortName: 'Car Du\u0161an',
+    title: 'Kralj (1331), potom Car Srba i Grka (1346)',
+    born: '1308.',
+    died: '1355.',
+    reignStart: 1331,
+    reignEnd: 1355,
+    reign: '1331 \u2014 1355',
+    spouse: 'Jelena Bugarska',
+    children: ['uros5'],
+    parent: 'decanski',
+    bio: 'Najve\u0107i srpski vladar. Proklamovao Srpsko Carstvo 1346. Doneo Du\u0161anov zakonik \u2014 najrazvijeniji pravni kodeks svog vremena na Balkanu. Pro\u0161irio dr\u017eavu do maksimuma.',
+    achievements: [
+      'Progla\u0161en carem 1346. \u2014 Srpsko Carstvo na vrhuncu mo\u0107i',
+      'Doneo Du\u0161anov zakonik 1349. i 1354. \u2014 kodifikacija prava',
+      'Pro\u0161irio Srbiju na ceo Balkan sem Carigrada i Soluna',
+      'Pe\u0107anska patrijar\u0161ija \u2014 Srpska crkva uzdignuta na nivo patrijar\u0161ije',
+      'Planirao osvajanje Carigrada ali umro iznenada 1355.',
+      'Izgradio mo\u0107nu vojsku i dvorsku administraciju po vizantijskom uzoru'
+    ],
+    zaduzbine: [
+      { name: 'Manastir Sveta Arhan\u0111ela kod Prizrena', desc: 'Zami\u0161ljen kao carski mauzolej, 1343\u20131352. Jedna od najve\u0107ih crkava Balkana, danas u ruinama.' },
+      { name: 'Manastir Lesnovo', desc: 'Obnovio i pro\u0161irio manastir kod Kratova u Makedoniji, 1341.' }
+    ]
+  },
+  uros5: {
+    id: 'uros5',
+    name: 'Stefan Uro\u0161 V',
+    shortName: 'Uro\u0161 V',
+    title: 'Car Srbije',
+    born: '1336.',
+    died: '1371.',
+    reignStart: 1355,
+    reignEnd: 1371,
+    reign: '1355 \u2014 1371',
+    spouse: '\u2014',
+    children: [],
+    parent: 'dusan',
+    bio: 'Poslednji Nemnji\u0107. Nasledio carstvo od oca ali nije imao njegovu snagu. Carstvo se raspalo na oblasti oblasnih gospodara. Poginuo ili umro 1371. bez naslednika \u2014 kraj dinastije.',
+    achievements: [
+      'Poslednji car iz dinastije Nemnji\u0107a',
+      'Srpsko carstvo se raspalo na feudalne oblasti',
+      'Nije imao dece \u2014 kraj Nemnji\u0107a',
+      'Oblast prepu\u0161tena oblasnim gospodarima: Mrnjavčevici, Lazarevici',
+      'Smrt 1371. ozna\u010dila kraj ere Nemnji\u0107a i po\u010detak novih srpskih vlasteoskih porodica'
+    ],
+    zaduzbine: [
+      { name: '\u2014', desc: 'Nema poznatih ve\u0107ih zadu\u017ebina \u2014 vladavina obele\u017eena raspadom carstva.' }
+    ]
+  }
+};
+
+const nodeLayout = {
+  nemanja:   { x: 310, y: 20,  w: 170, h: 62 },
+  vukan:     { x: 30,  y: 145, w: 130, h: 56 },
+  stefan1:   { x: 310, y: 145, w: 170, h: 56 },
+  rastko:    { x: 630, y: 145, w: 140, h: 56 },
+  radoslav:  { x: 100, y: 290, w: 130, h: 56 },
+  vladislav: { x: 310, y: 290, w: 130, h: 56 },
+  uros1:     { x: 510, y: 290, w: 130, h: 56 },
+  dragutin:  { x: 390, y: 430, w: 130, h: 56 },
+  milutin:   { x: 580, y: 430, w: 140, h: 56 },
+  decanski:  { x: 570, y: 560, w: 160, h: 56 },
+  dusan:     { x: 560, y: 645, w: 160, h: 58 },
+  uros5:     { x: 400, y: 645, w: 140, h: 58 }
+};
+
+const connections = [
+  { from: 'nemanja',  to: 'vukan',     style: 'side' },
+  { from: 'nemanja',  to: 'stefan1',   style: 'direct' },
+  { from: 'nemanja',  to: 'rastko',    style: 'side' },
+  { from: 'stefan1',  to: 'radoslav',  style: 'side' },
+  { from: 'stefan1',  to: 'vladislav', style: 'side' },
+  { from: 'stefan1',  to: 'uros1',     style: 'side' },
+  { from: 'uros1',    to: 'dragutin',  style: 'side' },
+  { from: 'uros1',    to: 'milutin',   style: 'direct' },
+  { from: 'milutin',  to: 'decanski',  style: 'direct' },
+  { from: 'decanski', to: 'dusan',     style: 'direct' },
+  { from: 'dusan',    to: 'uros5',     style: 'side' }
+];
+
+function cx(id) { return nodeLayout[id].x + nodeLayout[id].w / 2; }
+function bottom(id) { return nodeLayout[id].y + nodeLayout[id].h; }
+function nodeTop(id) { return nodeLayout[id].y; }
+
+function buildTree() {
+  var svg = document.getElementById('familyTree');
+  connections.forEach(function(c) {
+    var fx = cx(c.from), fy = bottom(c.from);
+    var tx = cx(c.to),   ty = nodeTop(c.to);
+    var my = (fy + ty) / 2;
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M '+fx+' '+fy+' C '+fx+' '+my+', '+tx+' '+my+', '+tx+' '+ty);
+    path.setAttribute('class', c.style === 'direct' ? 'tree-line' : 'tree-line-gold');
+    svg.appendChild(path);
+  });
+  Object.keys(nodeLayout).forEach(function(id) {
+    var r = rulers[id], l = nodeLayout[id];
+    var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('class', 'node-group');
+    g.setAttribute('id', 'node-' + id);
+    var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('class', 'node-rect');
+    rect.setAttribute('x', l.x); rect.setAttribute('y', l.y);
+    rect.setAttribute('width', l.w); rect.setAttribute('height', l.h);
+    rect.setAttribute('rx', 8);
+    g.appendChild(rect);
+    var nameEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    nameEl.setAttribute('class', 'node-name');
+    nameEl.setAttribute('x', cx(id)); nameEl.setAttribute('y', l.y + 18);
+    nameEl.textContent = r.shortName;
+    g.appendChild(nameEl);
+    var titleEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    titleEl.setAttribute('class', 'node-title');
+    titleEl.setAttribute('x', cx(id)); titleEl.setAttribute('y', l.y + 32);
+    titleEl.textContent = r.title.length > 22 ? r.title.slice(0,22)+'\u2026' : r.title;
+    g.appendChild(titleEl);
+    var yearsEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    yearsEl.setAttribute('class', 'node-years');
+    yearsEl.setAttribute('x', cx(id)); yearsEl.setAttribute('y', l.y + 47);
+    yearsEl.textContent = r.reign;
+    g.appendChild(yearsEl);
+    g.addEventListener('click', (function(i){ return function(){ showRuler(i); }; })(id));
+    svg.appendChild(g);
+  });
+}
+
+function buildTimeline() {
+  var bar = document.getElementById('timelineBar');
+  var order = ['nemanja','stefan1','radoslav','vladislav','uros1','dragutin','milutin','decanski','dusan','uros5'];
+  order.forEach(function(id, i) {
+    var r = rulers[id];
+    var item = document.createElement('div');
+    item.className = 'tl-item';
+    item.id = 'tl-' + id;
+    item.innerHTML = '<span class="tl-name">'+r.shortName+'</span><span class="tl-year">'+r.reignStart+'</span>';
+    item.addEventListener('click', (function(i){ return function(){ showRuler(i); }; })(id));
+    bar.appendChild(item);
+    if (i < order.length - 1) {
+      var sep = document.createElement('div');
+      sep.className = 'tl-sep';
+      bar.appendChild(sep);
+    }
+  });
+}
+
+function showRuler(id) {
+  var r = rulers[id];
+  var panel = document.getElementById('detailPanel');
+  document.querySelectorAll('.node-group').forEach(function(n){ n.classList.remove('active'); });
+  document.querySelectorAll('.tl-item').forEach(function(n){ n.classList.remove('active'); });
+  var node = document.getElementById('node-' + id);
+  if (node) node.classList.add('active');
+  var tl = document.getElementById('tl-' + id);
+  if (tl) { tl.classList.add('active'); tl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
+  panel.classList.remove('empty');
+  var achievementsHTML = r.achievements.map(function(a){ return '<li>'+a+'</li>'; }).join('');
+  var zaduzbineHTML = r.zaduzbine.map(function(z){
+    return '<div class="zaduzbina-item"><div class="z-name">&#9962; '+z.name+'</div><div class="z-desc">'+z.desc+'</div></div>';
+  }).join('');
+  var childNames = (r.children || []).map(function(cid){ return rulers[cid] ? rulers[cid].shortName : ''; }).filter(Boolean).join(', ') || '\u2014';
+  var parentName = r.parent ? (rulers[r.parent] ? rulers[r.parent].shortName : '\u2014') : 'Osniva\u010d';
+  panel.innerHTML =
+    '<div class="detail-header">' +
+      '<button class="close-btn" onclick="closeDetail()">\u2715</button>' +
+      '<div class="ruler-title">Vladar Srbije</div>' +
+      '<h2>'+r.name+'</h2>' +
+      '<div class="detail-subtitle">'+r.title+'</div>' +
+      '<span class="reign-badge">&#x2629; '+r.reign+'</span>' +
+    '</div>' +
+    '<div class="detail-body">' +
+      '<div class="detail-section"><h3>Li\u010dni podaci</h3>' +
+        '<div class="info-grid">' +
+          '<div class="info-item"><label>Ro\u0111en</label><span>'+r.born+'</span></div>' +
+          '<div class="info-item"><label>Umro</label><span>'+r.died+'</span></div>' +
+          '<div class="info-item"><label>Vladavina</label><span>'+r.reign+'</span></div>' +
+          '<div class="info-item"><label>Supruznik</label><span>'+r.spouse+'</span></div>' +
+          '<div class="info-item"><label>Otac / Prethodnik</label><span>'+parentName+'</span></div>' +
+          '<div class="info-item"><label>Naslednici</label><span>'+childNames+'</span></div>' +
+          '<div class="info-item full"><label>Biografija</label><span>'+r.bio+'</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="detail-section"><h3>Najva\u017enija dostignu\u0107a</h3>' +
+        '<ul class="achievements-list">'+achievementsHTML+'</ul>' +
+      '</div>' +
+      '<div class="detail-section"><h3>Zadu\u017ebine</h3>' +
+        '<div class="zaduzbine-list">'+zaduzbineHTML+'</div>' +
+      '</div>' +
+    '</div>';
+}
+
+function closeDetail() {
+  var panel = document.getElementById('detailPanel');
+  panel.classList.add('empty');
+  panel.innerHTML = '<span class="hint-icon">&#x2629;</span><div class="hint">Klikni na vladara u porodi\u010dnom stablu da vidi\u0161 njegove najva\u017enije informacije</div>';
+  document.querySelectorAll('.node-group').forEach(function(n){ n.classList.remove('active'); });
+  document.querySelectorAll('.tl-item').forEach(function(n){ n.classList.remove('active'); });
+}
+
+buildTree();
+buildTimeline();
+</script>
+</body>
+</html>
