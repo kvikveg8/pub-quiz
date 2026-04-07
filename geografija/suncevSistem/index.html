@@ -434,7 +434,7 @@ var BODIES = [
       ['Temperatura (povr\u0161ina)','~5.505\u00b0C'],
       ['Temperatura (jezgro)','~15.000.000\u00b0C'],
       ['Starost','~4,6 milijardi godina'],
-      ['Sastav','H\u2082 (73%), He (25%)'],
+      ['Sastav','vodonik ~73%, helijum ~25%'],
       ['Rotacija (ekvator)','25,4 dana']
     ],
     sats:[],
@@ -491,8 +491,8 @@ var BODIES = [
       ['Atmosfera','N\u2082 (78%), O\u2082 (21%)']
     ],
     sats:[
-      {name:'Mesec (Luna)', size:3474, dot:22, color:'#c0c0c0',
-       info:'Jedini prirodni satelit Zemlje. Pre\u010dnik 3.474 km.'}
+      {name:'Mesec (Luna)', size:3476, dot:22, color:'#c0c0c0',
+       info:'Jedini prirodni satelit Zemlje. Pre\u010dnik 3.476 km.'}
     ], satTotal:1,
     fact:'Zemlja je jedina poznata planeta sa \u017eivotom. Ima aktivne tektonske plo\u010de, te\u010dnu vodu i kiseoniku bogatu atmosferu. Njen Mesec je relativno veliki \u2014 ~1/4 pre\u010dnika Zemlje.'
   },
@@ -512,7 +512,7 @@ var BODIES = [
     ],
     sats:[
       {name:'Fobos', size:22, dot:8, color:'#9a8878', info:'Pre\u010dnik ~22 km. Orbita se smanjuje \u2014 za ~50 miliona god. \u0107e se raspasti.'},
-      {name:'Dejmos', size:12, dot:5, color:'#8a7868', info:'Pre\u010dnik ~12 km. Najmanji prirodni satelit u SS.'}
+      {name:'Dejmos', size:12, dot:5, color:'#8a7868', info:'Pre\u010dnik ~12 km. Manji od dva Marsova meseca; jedan od najmanjih planetarnih meseci u SS.'}
     ], satTotal:2,
     fact:'Na Marsu se nalazi Olympus Mons, najvi\u0161a planina u Sun\u010devom sistemu (21,9 km). Postoje dokazi da je nekada imao te\u010dnu vodu. NASA-ini roveri i danas istra\u017euju Mars.'
   },
@@ -553,17 +553,17 @@ var BODIES = [
       ['Orbitalni period','29,46 godina'],
       ['Rotacioni period','10h 42min'],
       ['Temperatura','-178\u00b0C'],
-      ['Prstenovi','Pre\u010dnik 282.000 km, debljina 10\u201330 m']
+      ['Prstenovi','Prečnik 282.000 km, debljina tipično ~10 m']
     ],
     sats:[
       {name:'Titan', size:5150, dot:20, color:'#d0a840', info:'Jedini mesec sa gustom atmosferom i jezerima te\u010dnog metana. Pre\u010dnik 5.150 km.'},
-      {name:'Enceladus', size:504, dot:9, color:'#f0f0f8', info:'Ima gejzire koji izbacuju vodu \u2014 mogu\u0107a stanou za \u017eivot. Pre\u010dnik 504 km.'},
-      {name:'Rija (Rhea)', size:1529, dot:13, color:'#d0c8b8', info:'Pre\u010dnik 1.529 km. Ima tanak prsten.'},
+      {name:'Enceladus', size:504, dot:9, color:'#f0f0f8', info:'Ima gejzire koji izbacuju vodu \u2014 mogu\u0107e stanište za život. Prečnik 504 km.'},
+      {name:'Rija (Rhea)', size:1529, dot:13, color:'#d0c8b8', info:'Prečnik 1.529 km. Postoje indicije o prstenastom materijalu, ali bez direktne naučne potvrde.'},
       {name:'Mimas', size:396, dot:8, color:'#c8c0b0', info:'Pre\u010dnik 396 km. Sli\u010dan Zvezdama Ratovima Zvezdi Smrti.'},
       {name:'Tetis (Tethys)', size:1066, dot:11, color:'#d8d0c0', info:'Pre\u010dnik 1.066 km.'}
-    ], satTotal:146,
-    satNote:'+ jo\u0161 141 manji satelit',
-    fact:'Saturn je jedina planeta u SS \u010dija je prose\u010dna gustina manja od gustine vode \u2014 plutao bi! Prstenovi su sastavljeni od leda i stene, a njihova debljina je samo 10\u201330 metara.'
+    ], satTotal:274,
+    satNote:'+ jo\u0161 269 manjih satelita',
+    fact:'Saturn je jedina planeta u SS čija je prosečna gustina manja od gustine vode \u2014 plutao bi! Prstenovi su sastavljeni od leda i stene, a njihova debljina u glavnim prstenovima je tipično oko 10 metara.'
   },
   {
     id:'uran', name:'Uran', latin:'Uranus', type:'Ledeni div',
@@ -585,8 +585,8 @@ var BODIES = [
       {name:'Umbriel', size:1170, dot:11, color:'#888090', info:'Najtamniji mesec Urana. Pre\u010dnik 1.170 km.'},
       {name:'Ariel', size:1158, dot:11, color:'#d0c8d0', info:'Pre\u010dnik 1.158 km.'},
       {name:'Miranda', size:472, dot:8, color:'#b8b0a8', info:'Pre\u010dnik 472 km. Ima kanjon dubok 20 km.'}
-    ], satTotal:27,
-    satNote:'+ jo\u0161 22 manja satelita',
+    ], satTotal:28,
+    satNote:'+ jo\u0161 23 manja satelita',
     fact:'Uran je nagnut gotovo na bok \u2014 osa rotacije je nagnuta 98\u00b0, pa rotira "kotrljaju\u0107i se" oko Sunca. Ima najhladniju izmerenu temperaturu od svih planeta (-224\u00b0C).'
   },
   {
@@ -693,7 +693,7 @@ function makeBelt(label) {
 var beltAdded = false;
 BODIES.slice(1).forEach(function(p) {
   if (!beltAdded && (p.id === 'jupiter')) {
-    orrery.appendChild(makeBelt('Asteroid\u0441ki pojas'));
+    orrery.appendChild(makeBelt('Asteroidski pojas'));
     beltAdded = true;
   }
   if (p.id === 'pluton') {
