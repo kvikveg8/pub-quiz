@@ -73,8 +73,13 @@ header {
 .card:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(201,162,39,0.15); }
 .card.cancelled { opacity: 0.6; border-style: dashed; }
 .card.future { border-color: var(--gold); background: #1e1500; }
+.card.zimska { background: #050e18; border-color: #1a3050; }
+.card.zimska:hover { border-color: #4090c0; box-shadow: 0 2px 12px rgba(64,144,192,0.2); }
+.card.zimska.future { border-color: #4090c0; background: #040c18; }
+.card.zimska.cancelled { border-color: #1a3050; }
 
 .card-year { font-size: 28px; font-weight: bold; color: var(--gold2); line-height: 1; }
+.card.zimska .card-year { color: #80c8f0; }
 .card-city { font-size: 18px; color: var(--text); margin: 4px 0 2px; font-weight: bold; }
 .card-country { font-size: 13px; color: var(--text2); margin-bottom: 10px; }
 .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
@@ -88,6 +93,8 @@ header {
 .tag-oc  { background: #081820; color: #60b0c0; border: 1px solid #103040; }
 .tag-off { background: #201010; color: #c05050; border: 1px solid #401010; }
 .tag-fut { background: #1a1600; color: var(--gold); border: 1px solid var(--gold); }
+.tag-let { background: #201408; color: #e08848; border: 1px solid #402010; }
+.tag-zim { background: #04121e; color: #60b0e0; border: 1px solid #103050; }
 .card-fact { font-size: 12px; color: var(--text2); line-height: 1.5; }
 .card-athletes { font-size: 11px; color: var(--text2); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
 
@@ -107,13 +114,19 @@ header {
   <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
   <div class="header-title">
     <h1>&#127941; DOMA&#262;INI OI</h1>
-    <p>Letnje olimpijske igre &mdash; 1896&ndash;2032</p>
+    <p id="subtitle">Letnje i zimske olimpijske igre &mdash; 1896&ndash;2034</p>
   </div>
   <span style="font-size:28px">&#127758;</span>
 </header>
 
 <div class="controls">
   <input type="text" class="search-box" id="searchBox" placeholder="Pretra&#382;i grad, dr&#382;avu, godinu...">
+  <div class="filter-group">
+    <span class="filter-label">Sezona:</span>
+    <button class="filter-btn active" data-season="all">Sve</button>
+    <button class="filter-btn" data-season="letnje">&#9728;&#65039; Letnje</button>
+    <button class="filter-btn" data-season="zimske">&#10052;&#65039; Zimske</button>
+  </div>
   <div class="filter-group">
     <span class="filter-label">Kontinent:</span>
     <button class="filter-btn active" data-cat="all">Sve</button>
@@ -131,7 +144,7 @@ header {
 </div>
 
 <script>
-var DATA = [
+var LETNJE = [
   {year:1896, city:"Atina", country:"Gr\u010dka", cat:"EU", athletes:241, sports:9, fact:"Prve moderne olimpijske igre — ideja barona Pjer de Kubertena. U\u010destvovalo 14 zemalja."},
   {year:1900, city:"Pariz", country:"Francuska", cat:"EU", athletes:997, sports:19, fact:"Odr\u017eane uz Svetsku izlo\u017ebu. Prve OI na kojima su u\u010destvovale \u017eene."},
   {year:1904, city:"St. Louis", country:"SAD", cat:"AM", athletes:651, sports:17, fact:"Prve OI u Severnoj Americi. Ve\u0107ina takmi\u010dara bila je iz SAD."},
@@ -145,7 +158,7 @@ var DATA = [
   {year:1936, city:"Berlin", country:"Nema\u010dka", cat:"EU", athletes:3963, sports:19, fact:"Jesse Owens osv. 4 zlatne medalje. Nacisti\u010dke OI — Hitlerov propagandni spektakl."},
   {year:1940, city:"Tokio", country:"Japan", cat:"OFF", athletes:0, sports:0, fact:"Nije odr\u017eano — Drugi svetski rat. Tokio se odrekao, doma\u0107instvo dodeljeno Helsinkiju pa i to otpalo."},
   {year:1944, city:"London", country:"Velika Britanija", cat:"OFF", athletes:0, sports:0, fact:"Nije odr\u017eano zbog Drugog svetskog rata."},
-  {year:1948, city:"London", country:"Velika Britanija", cat:"EU", athletes:4104, sports:17, fact:"Prve posleratne OI — zvane 'OI na {tednji'. Nema\u010dka i Japan nisu pozvani."},
+  {year:1948, city:"London", country:"Velika Britanija", cat:"EU", athletes:4104, sports:17, fact:"Prve posleratne OI — zvane 'OI na \u0161tednji'. Nema\u010dka i Japan nisu pozvani."},
   {year:1952, city:"Helsinki", country:"Finska", cat:"EU", athletes:4955, sports:17, fact:"SSSR prvi put u\u010destvovao. Emil Z\u00e1topek osv. trku na 5km, 10km i maraton u istim igrama."},
   {year:1956, city:"Melburn", country:"Australija", cat:"OC", athletes:3314, sports:17, fact:"Prve OI na Ju\u017enoj polulopti. Konjski deo odr\u017ean u \u0160tokholmu zbog australijskih karantinskih zakona."},
   {year:1960, city:"Rim", country:"Italija", cat:"EU", athletes:5338, sports:17, fact:"Kasijus Klej (Muhammad Ali) osv. zlato u boksu. Maraton odr\u017ean no\u0107u."},
@@ -157,8 +170,8 @@ var DATA = [
   {year:1984, city:"Los An\u0111eles", country:"SAD", cat:"AM", athletes:6829, sports:21, fact:"Protivbojkot SSSR-a i isto\u010dnog bloka. Carl Lewis 4 zlatne medalje."},
   {year:1988, city:"Seoul", country:"Ju\u017ena Koreja", cat:"AS", athletes:8391, sports:23, fact:"Ben Johnson pozitivan na doping. Florence Griffith-Joyner rekord 100m (10.49s) koji stoji i danas."},
   {year:1992, city:"Barselona", country:"\u0160panija", cat:"EU", athletes:9356, sports:25, fact:"'Dream Team' SAD u ko\u0161arci. Prve OI bez bojkota od 1972. Jugoslovija nastupila kao 'Nezavisni olimpijci'."},
-  {year:1996, city:"Atlanta", country:"SAD", cat:"AM", athletes:10318, sports:26, fact:"Centennijalne OI. Bomba{ki napad u parku. Michael Johnson 200m i 400m rekord."},
-  {year:2000, city:"Sidnej", country:"Australija", cat:"OC", athletes:10651, sports:28, fact:"Zvane 'najboljim igrama ikad'. Cathy Freeman zapalila bakljU i osv. zlato na 400m."},
+  {year:1996, city:"Atlanta", country:"SAD", cat:"AM", athletes:10318, sports:26, fact:"Centennijalne OI. Bomba\u0161ki napad u parku. Michael Johnson 200m i 400m rekord."},
+  {year:2000, city:"Sidnej", country:"Australija", cat:"OC", athletes:10651, sports:28, fact:"Zvane 'najboljim igrama ikad'. Cathy Freeman zapalila baklju i osv. zlato na 400m."},
   {year:2004, city:"Atina", country:"Gr\u010dka", cat:"EU", athletes:10625, sports:28, fact:"Povratak u domovinu olimpijskog pokreta. Michael Phelps 6 zlatnih, 2 bronzane."},
   {year:2008, city:"Peking", country:"Kina", cat:"AS", athletes:10942, sports:28, fact:"Usain Bolt 9.69s na 100m. Michael Phelps rekordnih 8 zlatnih medalja na jednim igrama."},
   {year:2012, city:"London", country:"Velika Britanija", cat:"EU", athletes:10568, sports:26, fact:"Tre\u0107e doma\u0107instvo Londona. Usain Bolt odbranio titule. Prve OI na kojima svaka zemlja ima \u017eene."},
@@ -169,10 +182,50 @@ var DATA = [
   {year:2032, city:"Brizbejn", country:"Australija", cat:"OC", athletes:0, sports:0, fact:"Tre\u0107e australijsko doma\u0107instvo. Dodeljeno 2021.", future:true}
 ];
 
-var state = { cat: "all", search: "" };
+var ZIMSKE = [
+  {year:1924, city:"\u0160amonij", country:"Francuska", cat:"EU", athletes:258, sports:6, fact:"Prve zimske olimpijske igre u istoriji! 16 nacija, 258 sportista. Bob, saonice, nordijsko skijanje, klizanje, hokej."},
+  {year:1928, city:"Sent Moric", country:"\u0160vajcarska", cat:"EU", athletes:464, sports:8, fact:"Jedine ZOI na kojima je bob bio otkazan zbog to\u010dine (premalo leda). 25 nacija u\u010destvovalo."},
+  {year:1932, city:"Lejk Plased", country:"SAD", cat:"AM", athletes:252, sports:7, fact:"Velika depresija — svega 17 nacija. Amerikan Irvin Jaffe zlato na 5000m i 10000m u klizanju."},
+  {year:1936, city:"Garmi\u0161-Partenkirhen", country:"Nema\u010dka", cat:"EU", athletes:646, sports:8, fact:"Uveden alpski slalom i spust. Poslednje ZOI pre 12-godišnje pauze zbog rata. Nacistička propaganda."},
+  {year:1940, city:"Saporo", country:"Japan", cat:"OFF", athletes:0, sports:0, fact:"Nije odr\u017eano zbog Drugog svetskog rata. Japan se odrekao, Garmisch i Sent Moric takodje otpali."},
+  {year:1944, city:"Kortina d'Ampeco", country:"Italija", cat:"OFF", athletes:0, sports:0, fact:"Nije odr\u017eano zbog Drugog svetskog rata."},
+  {year:1948, city:"Sent Moric", country:"\u0160vajcarska", cat:"EU", athletes:669, sports:9, fact:"Prve posleratne ZOI. Nema\u010dka i Japan nisu pozvani. \u0160vajcarska opet doma\u0107in za samo 20 godina."},
+  {year:1952, city:"Oslo", country:"Norve\u0161ka", cat:"EU", athletes:694, sports:8, fact:"Prve ZOI u Skandinaviji. Norve\u0161ka dominirala pred doma\u0107om publikom. Halvard Bjørnstad — legenda skokova."},
+  {year:1956, city:"Kortina d'Ampeco", country:"Italija", cat:"EU", athletes:821, sports:8, fact:"SSSR prvi put na ZOI — odmah dominirao u brzom klizanju i hokeju. Italijanska organizacija pohvaljena."},
+  {year:1960, city:"Skvo Veli", country:"SAD", cat:"AM", athletes:665, sports:8, fact:"Prve ZOI prikazane na televiziji. Uveden biatljon. Skijašica Carol Heiss zlato u umetni\u010dkom klizanju."},
+  {year:1964, city:"Insbruk", country:"Austrija", cat:"EU", athletes:1091, sports:10, fact:"Uvedene saonice (luge) kao olimpijski sport. Austrijanac Egon Zimmermann osv. zlato u spustu."},
+  {year:1968, city:"Grenobl", country:"Francuska", cat:"EU", athletes:1158, sports:10, fact:"Jean-Claude Killy osv. sve 3 alpske zlatne medalje. Prve ZOI u boji na TV. Grenobl — revolucija."},
+  {year:1972, city:"Saporo", country:"Japan", cat:"AS", athletes:1006, sports:10, fact:"Prve ZOI u Aziji. Japanski skija\u010di \u0161okirali svet u ski skokovima. Karl Schranz isklju\u010den zbog profesionalizma."},
+  {year:1976, city:"Insbruk", country:"Austrija", cat:"EU", athletes:1123, sports:10, fact:"Denver odbio doma\u0107instvo referendumom! Insbruk spasio igre za samo 3 meseca. Franz Klammer — nezaboravan spust."},
+  {year:1980, city:"Lejk Plased", country:"SAD", cat:"AM", athletes:1072, sports:10, fact:"'\u010cudo na ledu' — SAD pobedio SSSR u hokeju 4:3! Eric Heiden osv. svih 5 disciplina u brzom klizanju!"},
+  {year:1984, city:"Sarajevo", country:"Jugoslavija", cat:"EU", athletes:1272, sports:10, fact:"Jedine ZOI u Jugoslaviji! Jure Franko — prvo zimsko odli\u010dje Jug. (srebro, veleslalom). Besprekorna organizacija."},
+  {year:1988, city:"Kalgari", country:"Kanada", cat:"AM", athletes:1423, sports:10, fact:"Eddie 'Orao' Edwards i jamajkanska bob ekipa — postali ve\u010dite legende. Film 'Cool Runnings' po njima."},
+  {year:1992, city:"Albervilj", country:"Francuska", cat:"EU", athletes:1801, sports:12, fact:"Poslednje ZOI iste godine kao letnje. Uvedeni freestyle skijanje i kratka staza (short track)."},
+  {year:1994, city:"Lilehamer", country:"Norve\u0161ka", cat:"EU", athletes:1737, sports:12, fact:"Skandal Tonya Harding — napad na Nancy Kerrigan. Johan Olav Koss 3 zlatne u klizanju. Vrhunska atmosfera."},
+  {year:1998, city:"Nagano", country:"Japan", cat:"AS", athletes:2176, sports:14, fact:"Uveden snowboard. NHL igra\u010di po prvi put mogli da igraju hokej. \u010ce\u0161ka pobedila Kanadu i Rusiju u finalu!"},
+  {year:2002, city:"Solt Lejk Siti", country:"SAD", cat:"AM", athletes:2399, sports:15, fact:"Skandal u umeti\u010dkom klizanju — sudija kupovao glasove. Kanada pobedila u hokeju posle 50 godina!"},
+  {year:2006, city:"Torino", country:"Italija", cat:"EU", athletes:2508, sports:15, fact:"Rusija dominirala. Bode Miller — veliki talenat bez zlata. Japonka Shizuka Arakawa zlato za Japan."},
+  {year:2010, city:"Vankuver", country:"Kanada", cat:"AM", athletes:2566, sports:15, fact:"Kanada rekordnih 14 zlatnih medalja! Sidney Crosby — zlatni gol u produ\u017eetku u finalnom hokeju!"},
+  {year:2014, city:"So\u010di", country:"Rusija", cat:"EU", athletes:2873, sports:15, fact:"Najskuplje OI ikad — procena 51 milijarda $. Rusija 13 zlatnih. Po\u010detak dugog dopinškog skandala."},
+  {year:2018, city:"Pjong\u010dang", country:"Ju\u017ena Koreja", cat:"AS", athletes:2922, sports:15, fact:"Zajedni\u010dka korejska ekipa u hokeju. Marit Bj\u00f8rgen — rekordnih 8 zimskih zlatnih medalja u karijeri."},
+  {year:2022, city:"Peking", country:"Kina", cat:"AS", athletes:2871, sports:15, fact:"Kina jedina zemlja doma\u0107in i letnjim (2008) i zimskim OI. Norve\u0161ka rekordnih 16 zlatnih."},
+  {year:2026, city:"Milano-Kortina", country:"Italija", cat:"EU", athletes:0, sports:0, fact:"Dvostruko doma\u0107instvo — Milano i Kortina d'Ampeco. Italija tre\u0107i put doma\u0107in zimskih OI.", future:true},
+  {year:2030, city:"Francuske Alpe", country:"Francuska", cat:"EU", athletes:0, sports:0, fact:"Tre\u0107e zimsko doma\u0107instvo Francuske. Niovo, Brian\u00e7on i Albervilj kao mesta odr\u017eavanja.", future:true},
+  {year:2034, city:"Solt Lejk Siti", country:"SAD", cat:"AM", athletes:0, sports:0, fact:"Povratak u Solt Lejk Siti — 32 godine posle prvog doma\u0107instva 2002.", future:true}
+];
+
+var state = { season: "all", cat: "all", search: "" };
+
+function getData() {
+  if (state.season === "letnje") return LETNJE.map(function(d){ return d; });
+  if (state.season === "zimske") return ZIMSKE.map(function(d){ return d; });
+  var letnje = LETNJE.map(function(d){ return Object.assign({}, d, {_season:"letnje"}); });
+  var zimske = ZIMSKE.map(function(d){ return Object.assign({}, d, {_season:"zimske"}); });
+  return letnje.concat(zimske).sort(function(a, b){ return a.year - b.year; });
+}
 
 function getItems() {
-  var items = DATA.slice();
+  var items = getData();
   if (state.cat !== "all") items = items.filter(function(d){ return d.cat === state.cat; });
   if (state.search) {
     var q = state.search.toLowerCase();
@@ -185,23 +238,37 @@ function getItems() {
 
 var TAG_CLS  = {EU:"tag-eu", AM:"tag-am", AS:"tag-as", OC:"tag-oc", OFF:"tag-off"};
 var TAG_LBL  = {EU:"Evropa", AM:"Amerike", AS:"Azija", OC:"Okeanija", OFF:"Nije odr\u017eano"};
+var SUBTITLE = {
+  all:    "Letnje i zimske olimpijske igre \u2014 1896\u20132034",
+  letnje: "Letnje olimpijske igre \u2014 1896\u20132032",
+  zimske: "Zimske olimpijske igre \u2014 1924\u20132034"
+};
 
 function render() {
+  document.getElementById("subtitle").textContent = SUBTITLE[state.season] || SUBTITLE.all;
   var items = getItems();
-  document.getElementById("resultsCount").textContent = items.length + " olimpijada";
+  var countLabel = state.season === "all" ? " olimpijada" : state.season === "zimske" ? " zimske olimpijada" : " letnje olimpijada";
+  document.getElementById("resultsCount").textContent = items.length + countLabel;
   var grid = document.getElementById("grid");
   if (!items.length) { grid.innerHTML = "<div class=\"no-results\">\u2606 Nema rezultata.</div>"; return; }
   var html = "";
   for (var i = 0; i < items.length; i++) {
     var d = items[i];
-    var cls = "card" + (d.cat === "OFF" ? " cancelled" : "") + (d.future ? " future" : "");
+    var isZimska = (state.season === "zimske") || (d._season === "zimske");
+    var cls = "card" + (d.cat === "OFF" ? " cancelled" : "") + (d.future ? " future" : "") + (isZimska ? " zimska" : "");
     var tc = TAG_CLS[d.cat] || "";
     var tl = TAG_LBL[d.cat] || "";
     html += "<div class=\"" + cls + "\">";
     html += "<div class=\"card-year\">" + d.year + (d.future ? " \u23f3" : "") + "</div>";
     html += "<div class=\"card-city\">" + (d.cat === "OFF" ? "\u2014" : d.city) + "</div>";
     html += "<div class=\"card-country\">" + (d.cat === "OFF" ? "Nije odr\u017eano" : d.country) + "</div>";
-    html += "<div class=\"card-tags\"><span class=\"tag " + tc + "\">" + tl + "</span></div>";
+    html += "<div class=\"card-tags\">";
+    if (state.season === "all") {
+      html += isZimska
+        ? "<span class=\"tag tag-zim\">\u2744\ufe0f Zimske</span>"
+        : "<span class=\"tag tag-let\">\u2600\ufe0f Letnje</span>";
+    }
+    html += "<span class=\"tag " + tc + "\">" + tl + "</span></div>";
     html += "<div class=\"card-fact\">" + d.fact + "</div>";
     if (d.athletes > 0) html += "<div class=\"card-athletes\">\ud83d\udc64 " + d.athletes.toLocaleString() + " sportista &nbsp;\u00b7&nbsp; \ud83c\udfc5 " + d.sports + " sportova</div>";
     html += "</div>";
@@ -210,6 +277,16 @@ function render() {
 }
 
 document.getElementById("searchBox").addEventListener("input", function(){ state.search = this.value.trim(); render(); });
+
+document.querySelectorAll("[data-season]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.season = this.getAttribute("data-season");
+    document.querySelectorAll("[data-season]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active");
+    render();
+  });
+});
+
 document.querySelectorAll("[data-cat]").forEach(function(btn){
   btn.addEventListener("click", function(){
     state.cat = this.getAttribute("data-cat");

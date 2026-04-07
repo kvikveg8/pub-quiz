@@ -54,25 +54,28 @@ header { background: var(--surface); border-bottom: 2px solid var(--gold); paddi
 .ath-card.srebro { border-left: 4px solid #c0c8d8; }
 .ath-card.bronza { border-left: 4px solid #d0905a; }
 .ath-card.ekipno { background: #201a08; }
+.ath-card.zimska { background: #050e18; border-color: #1a3050; }
+.ath-card.zimska:hover { border-color: #4090c0; }
+.ath-card.zimska.zlato  { border-left: 4px solid #80c8f0; }
+.ath-card.zimska.srebro { border-left: 4px solid #c0d8f0; }
+.ath-card.zimska.bronza { border-left: 4px solid #a070b0; }
 
 .ath-medal { font-size: 32px; line-height: 1; }
 .ath-info { }
 .ath-name { font-size: 17px; color: var(--gold2); font-weight: bold; margin-bottom: 3px; }
+.ath-card.zimska .ath-name { color: #80c8f0; }
 .ath-sport { font-size: 13px; color: var(--text2); margin-bottom: 4px; }
 .ath-desc { font-size: 13px; color: var(--text); line-height: 1.5; }
 .ath-meta { text-align: right; }
 .ath-year { font-size: 20px; font-weight: bold; color: var(--gold2); white-space: nowrap; }
+.ath-card.zimska .ath-year { color: #80c8f0; }
 .ath-city { font-size: 12px; color: var(--text2); margin-top: 2px; }
-.ath-zastava { font-size: 18px; }
 .era-tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 3px; margin-left: 8px; vertical-align: middle; }
 .era-yu { background: #1a1008; color: #c0a060; border: 1px solid #3a2810; }
 .era-srb { background: #080e20; color: #6080c0; border: 1px solid #102040; }
-
-.section-head {
-  font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: var(--text2);
-  padding: 10px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; margin-top: 20px;
-}
-.section-head:first-child { margin-top: 0; }
+.season-tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 3px; margin-left: 6px; vertical-align: middle; }
+.tag-let { background: #201408; color: #e08848; border: 1px solid #402010; }
+.tag-zim { background: #04121e; color: #60b0e0; border: 1px solid #103050; }
 
 .no-results { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 16px; }
 
@@ -100,6 +103,12 @@ header { background: var(--surface); border-bottom: 2px solid var(--gold); paddi
 <div class="controls">
   <input type="text" class="search-box" id="searchBox" placeholder="Pretra&#382;i ime, sport, grad...">
   <div class="filter-group">
+    <span class="filter-label">Sezona:</span>
+    <button class="filter-btn active" data-season="all">Sve</button>
+    <button class="filter-btn" data-season="letnje">&#9728;&#65039; Letnje</button>
+    <button class="filter-btn" data-season="zimske">&#10052;&#65039; Zimske</button>
+  </div>
+  <div class="filter-group">
     <span class="filter-label">Medalja:</span>
     <button class="filter-btn active" data-med="all">Sve</button>
     <button class="filter-btn" data-med="zlato">&#129351; Zlato</button>
@@ -109,8 +118,8 @@ header { background: var(--surface); border-bottom: 2px solid var(--gold); paddi
   <div class="filter-group">
     <span class="filter-label">Era:</span>
     <button class="filter-btn active" data-era="all">Sve</button>
-    <button class="filter-btn" data-era="yu">Jugoslavija</button>
-    <button class="filter-btn" data-era="srb">Srbija</button>
+    <button class="filter-btn" data-era="yu">&#127470;&#127482; Jugoslavija</button>
+    <button class="filter-btn" data-era="srb">&#127479;&#127480; Srbija</button>
   </div>
 </div>
 
@@ -120,66 +129,75 @@ header { background: var(--surface); border-bottom: 2px solid var(--gold); paddi
 </div>
 
 <script>
-var DATA = [
+var LETNJE = [
   // EKIPNA ZLATA — JUGOSLAVIJA
-  {name:"Vaterpolo reprezentacija",    sport:"Vaterpolo \u2014 mu\u0161karci",  medal:"zlato", year:1968, city:"Meksiko Siti", era:"yu", ekipno:true,
+  {name:"Vaterpolo reprezentacija",    sport:"Vaterpolo \u2014 mu\u0161karci", medal:"zlato",  year:1968, city:"Meksiko Siti", era:"yu", ekipno:true, season:"letnje",
    desc:"Prvo olimpijsko zlato u vaterpolu za Jugoslaviju. Dominantna generacija predvo\u0111ena Milom Marini\u0107em i dru\u0161tvom."},
-  {name:"Rukomet reprezentacija",      sport:"Rukomet \u2014 mu\u0161karci",    medal:"zlato", year:1972, city:"Minhen",       era:"yu", ekipno:true,
+  {name:"Rukomet reprezentacija",      sport:"Rukomet \u2014 mu\u0161karci",   medal:"zlato",  year:1972, city:"Minhen",       era:"yu", ekipno:true, season:"letnje",
    desc:"Zlatna generacija rukometnog. Jug. pobedila SSSR u finalu. Jedan od najve\u0107ih uspeha jugoslovenskog sporta."},
-  {name:"Ko\u0161arka reprezentacija", sport:"Ko\u0161arka \u2014 mu\u0161karci",medal:"zlato", year:1980, city:"Moskva",       era:"yu", ekipno:true,
-   desc:"Bojkot SAD otvorio put — ali Jugosloveni su bili pravi \u0161ampioni! Ekipa s Dalipagi\u0107em i Ki\u010danovi\u0107em."},
-  {name:"Vaterpolo reprezentacija",    sport:"Vaterpolo \u2014 mu\u0161karci",  medal:"zlato", year:1984, city:"Los An\u0111eles",era:"yu", ekipno:true,
+  {name:"Ko\u0161arka reprezentacija", sport:"Ko\u0161arka \u2014 mu\u0161karci",medal:"zlato", year:1980, city:"Moskva",       era:"yu", ekipno:true, season:"letnje",
+   desc:"Bojkot SAD otvorio put — ali Jugosloveni su bili pravi \u0161ampioni! Ekipa sa Dalipagi\u0107em i Ki\u010danovi\u0107em."},
+  {name:"Vaterpolo reprezentacija",    sport:"Vaterpolo \u2014 mu\u0161karci", medal:"zlato",  year:1984, city:"Los An\u0111eles",era:"yu", ekipno:true, season:"letnje",
    desc:"Drugo zlatno u vaterpolu. SAD bojkotovao Moskvu 1980, Jug. ne bojkotuje LA 1984."},
-  {name:"Vaterpolo reprezentacija",    sport:"Vaterpolo \u2014 mu\u0161karci",  medal:"zlato", year:1988, city:"Seul",         era:"yu", ekipno:true,
+  {name:"Vaterpolo reprezentacija",    sport:"Vaterpolo \u2014 mu\u0161karci", medal:"zlato",  year:1988, city:"Seul",          era:"yu", ekipno:true, season:"letnje",
    desc:"Tre\u0107e zlato u vaterpolu \u2014 po tome jedina ekipa u istoriji! Trijumfalna generacija."},
-  {name:"Odbojka\u0161ka reprezentacija",sport:"Odbojka \u2014 mu\u0161karci",  medal:"zlato", year:2000, city:"Sidnej",       era:"yu", ekipno:true,
-   desc:"Poslednje olimpijsko zlato pod zastavom SRJ/Jugoslavije. Kapiten Nikola Grbić predvodi tim do finala protiv Rusije."},
+  {name:"Odbojka\u0161ka reprezentacija",sport:"Odbojka \u2014 mu\u0161karci", medal:"zlato",  year:2000, city:"Sidnej",        era:"yu", ekipno:true, season:"letnje",
+   desc:"Poslednje olimpijsko zlato pod zastavom SRJ/Jugoslavije. Kapiten Nikola Grbi\u0107 predvodi tim do finala protiv Rusije."},
 
   // EKIPNA SREBRA/BRONZE — JUGOSLAVIJA
-  {name:"Ko\u0161arka reprezentacija", sport:"Ko\u0161arka \u2014 mu\u0161karci",medal:"srebro", year:1968, city:"Meksiko Siti",era:"yu", ekipno:true,
-   desc:"Srebro iza SAD. Generacija koja je ucrtala put ka budućem zlatu."},
-  {name:"Ko\u0161arka reprezentacija", sport:"Ko\u0161arka \u2014 mu\u0161karci",medal:"srebro", year:1976, city:"Montreal",    era:"yu", ekipno:true,
+  {name:"Ko\u0161arka reprezentacija", sport:"Ko\u0161arka \u2014 mu\u0161karci",medal:"srebro",year:1968, city:"Meksiko Siti", era:"yu", ekipno:true, season:"letnje",
+   desc:"Srebro iza SAD. Generacija koja je ucrtala put ka budu\u0107em zlatu."},
+  {name:"Ko\u0161arka reprezentacija", sport:"Ko\u0161arka \u2014 mu\u0161karci",medal:"srebro",year:1976, city:"Montreal",     era:"yu", ekipno:true, season:"letnje",
    desc:"Opet srebro, opet iza SAD. Ali kvalitet je bio tu."},
-  {name:"Rukomet reprezentacija",      sport:"Rukomet \u2014 mu\u0161karci",    medal:"srebro", year:1980, city:"Moskva",       era:"yu", ekipno:true,
+  {name:"Rukomet reprezentacija",      sport:"Rukomet \u2014 mu\u0161karci",   medal:"srebro", year:1980, city:"Moskva",        era:"yu", ekipno:true, season:"letnje",
    desc:"Srebro u rukometu na bojkotovanim OI u Moskvi."},
-  {name:"Ko\u0161arka reprezentacija", sport:"Ko\u0161arka \u2014 mu\u0161karci",medal:"bronza", year:1984, city:"Los An\u0111eles",era:"yu", ekipno:true,
+  {name:"Ko\u0161arka reprezentacija", sport:"Ko\u0161arka \u2014 mu\u0161karci",medal:"bronza",year:1984, city:"Los An\u0111eles",era:"yu", ekipno:true, season:"letnje",
    desc:"Bronza u ko\u0161arci u LA, uprkos odsutnosti SSSR-a."},
 
   // INDIVIDUALNA — JUGOSLAVIJA
-  {name:"Milena Ruši\u010d",          sport:"Plivanje",                        medal:"zlato", year:1952, city:"Helsinki",      era:"yu", ekipno:false,
-   desc:"Jugoslovenska plivačica, bronzana. Pionirka jugoslovenskog olimpijskog uspeha."},
-  {name:"Dragutin Topi\u0107",        sport:"Strelja\u0161tvo",               medal:"zlato", year:1988, city:"Seul",           era:"yu", ekipno:false,
-   desc:"Zlato u strelja\u0161tvu na OI u Seulu. Jedan od retkih individualnih zlatnih medaljista Jugoslavije."},
-  {name:"Jasna \u0160ekari\u0107",    sport:"Strelja\u0161tvo \u2014 pi\u0161tolj",medal:"srebro",year:1988,city:"Seul",       era:"yu", ekipno:false,
-   desc:"Legenda svetskog strelja\u0161tva. 7 olimpijskih nastupa (1988\u20132016), vi\u0161e medalja. Srebro u Seulu kao po\u010detak karijere."},
-  {name:"Jasna \u0160ekari\u0107",    sport:"Strelja\u0161tvo \u2014 pi\u0161tolj",medal:"srebro",year:2000,city:"Sidnej",     era:"yu", ekipno:false,
-   desc:"Nastavak izuzetne karijere — srebro u Sidneju. Rekordnih 7 olimpijada."},
+  {name:"Dragutin Topi\u0107",        sport:"Streljač tvo",                    medal:"zlato",  year:1988, city:"Seul",          era:"yu", ekipno:false, season:"letnje",
+   desc:"Zlato u streljač tvu na OI u Seulu. Jedan od retkih individualnih zlatnih medaljista Jugoslavije."},
+  {name:"Jasna \u0160ekari\u0107",    sport:"Streljač tvo \u2014 pi\u0161tolj", medal:"srebro", year:1988, city:"Seul",          era:"yu", ekipno:false, season:"letnje",
+   desc:"Legenda svetskog streljač tva. 7 olimpijskih nastupa (1988\u20132016), vi\u0161e medalja. Srebro u Seulu kao po\u010detak karijere."},
+  {name:"Jasna \u0160ekari\u0107",    sport:"Streljač tvo \u2014 pi\u0161tolj", medal:"srebro", year:2000, city:"Sidnej",        era:"yu", ekipno:false, season:"letnje",
+   desc:"Nastavak izuzetne karijere \u2014 srebro u Sidneju. Rekordnih 7 olimpijada."},
 
   // SRBIJA — ZLATA
-  {name:"Milica Mandi\u0107",         sport:"Taekwondo \u2014 +67kg",          medal:"zlato", year:2012, city:"London",        era:"srb", ekipno:false,
+  {name:"Milica Mandi\u0107",         sport:"Taekwondo \u2014 +67kg",          medal:"zlato",  year:2012, city:"London",         era:"srb", ekipno:false, season:"letnje",
    desc:"Prvo individualno olimpijsko zlato Srbije! Pobedila u te\u0161koj kategoriji. Imala je 19 godina."},
-  {name:"Jovana Prekovi\u0107",       sport:"Karate \u2014 kumite do 61kg",    medal:"zlato", year:2020, city:"Tokio",         era:"srb", ekipno:false,
+  {name:"Jovana Prekovi\u0107",       sport:"Karate \u2014 kumite do 61kg",    medal:"zlato",  year:2020, city:"Tokio",          era:"srb", ekipno:false, season:"letnje",
    desc:"Zlato u karateu u Tokiju \u2014 jedine OI na kojima je sport bio. Vi\u0161estruka svetska prvakinja."},
-  {name:"Novak \u0110okovi\u0107",    sport:"Tenis \u2014 singl",              medal:"zlato", year:2024, city:"Pariz",          era:"srb", ekipno:false,
+  {name:"Novak \u0110okovi\u0107",    sport:"Tenis \u2014 singl",              medal:"zlato",  year:2024, city:"Pariz",           era:"srb", ekipno:false, season:"letnje",
    desc:"Poslednja trofeja u karijeri \u2014 jedino olimpijsko zlato. 'Jedino \u0161to mi je nedostajalo.' Pobedio Alcaraza u finalu."},
-  {name:"Jovana Prekovi\u0107",       sport:"Taekwondo \u2014 do 67kg",        medal:"zlato", year:2024, city:"Pariz",          era:"srb", ekipno:false,
+  {name:"Jovana Prekovi\u0107",       sport:"Taekwondo \u2014 do 67kg",        medal:"zlato",  year:2024, city:"Pariz",           era:"srb", ekipno:false, season:"letnje",
    desc:"Posle zlatnog karatea u Tokiju, prelazi na taekwondo i osvaja zlato i u Parizu. Jedinstven podvig."},
+  {name:"Odbojka\u0161ka reprezentacija",sport:"Odbojka \u2014 \u017eene",     medal:"zlato",  year:2020, city:"Tokio",          era:"srb", ekipno:true, season:"letnje",
+   desc:"Najve\u0107i uspeh srpske odbojke! Zlatna generacija predvo\u0111ena Tijjanom Bo\u0161kovi\u0107 pobedila u finaluet 3:2."},
 
   // SRBIJA — OSTALE MEDALJE
-  {name:"Novak \u0110okovi\u0107",    sport:"Tenis \u2014 singl",              medal:"bronza", year:2012, city:"London",        era:"srb", ekipno:false,
+  {name:"Novak \u0110okovi\u0107",    sport:"Tenis \u2014 singl",              medal:"bronza", year:2012, city:"London",         era:"srb", ekipno:false, season:"letnje",
    desc:"Bronzana medalja na prvim OI za Srbiju \u2014 najava onoga \u0161to \u0107e do\u0107i 12 godina kasnije."},
-  {name:"Aleksandar Kova\u010devi\u0107",sport:"Strelja\u0161tvo",            medal:"srebro", year:2008, city:"Peking",         era:"srb", ekipno:false,
-   desc:"Srebro u strelja\u0161tvu, nastavljaju\u0107i tradiciju jugoslovenskih strelja\u010da."},
-  {name:"Ivana \u0160pani\u0107",     sport:"Ko\u0161arka \u2014 \u017eene",   medal:"srebro", year:2016, city:"Rio",           era:"srb", ekipno:true,
+  {name:"Aleksandar Kova\u010devi\u0107",sport:"Streljač tvo",                 medal:"srebro", year:2008, city:"Peking",          era:"srb", ekipno:false, season:"letnje",
+   desc:"Srebro u streljač tvu, nastavljaju\u0107i tradiciju jugoslovenskih strelja\u010da."},
+  {name:"Ivana \u0160pani\u0107",     sport:"Ko\u0161arka \u2014 \u017eene",   medal:"srebro", year:2016, city:"Rio",            era:"srb", ekipno:true, season:"letnje",
    desc:"Srpska \u017eenska ko\u0161arka\u0161ka reprezentacija do finala u Riju! Srebro iza SAD."},
-  {name:"Odbojka\u0161ka reprezentacija",sport:"Odbojka \u2014 \u017eene",     medal:"zlato",  year:2020, city:"Tokio",         era:"srb", ekipno:true,
-   desc:"Najve\u0107i uspeh srpske odbojke! Zlatna generacija predvo\u0111ena Tijjanom Bo\u0161kovi\u0107 pobedila Srbija KOC? Ne, Srbija 3:2 u finalu."},
 ];
 
-var state = { med: "all", era: "all", search: "" };
+var ZIMSKE = [
+  {name:"Jure Franko",   sport:"Alpsko skijanje \u2014 veleslalom",   medal:"srebro", year:1984, city:"Sarajevo", era:"yu", ekipno:false, season:"zimske",
+   desc:"Jedina jugoslovenska zimska olimpijska medalja! Slovenačko-jugoslovenski skijaš Jure Franko zauzeo 2. mesto u veleslalomu na domaćim ZOI u Sarajevu. Istorijski trenutak pred jugoslovenskom publikom."},
+];
+
+var state = { season: "all", med: "all", era: "all", search: "" };
+
+function getData() {
+  if (state.season === "letnje") return LETNJE;
+  if (state.season === "zimske") return ZIMSKE;
+  return LETNJE.concat(ZIMSKE);
+}
 
 function getItems() {
-  var items = DATA.slice();
+  var items = getData().slice();
   if (state.med !== "all") items = items.filter(function(d){ return d.medal === state.med; });
   if (state.era !== "all") items = items.filter(function(d){ return d.era === state.era; });
   if (state.search) {
@@ -192,7 +210,7 @@ function getItems() {
   return items;
 }
 
-var MEDAL_EMOJI = {zlato:"🥇", srebro:"🥈", bronza:"🥉"};
+var MEDAL_EMOJI = {zlato:"\ud83e\udd47", srebro:"\ud83e\udd48", bronza:"\ud83e\udd49"};
 
 function render() {
   var items = getItems();
@@ -202,13 +220,19 @@ function render() {
   var html = "";
   for (var i = 0; i < items.length; i++) {
     var d = items[i];
+    var isZimska = d.season === "zimske";
     var eraTag = d.era === "yu"
       ? "<span class=\"era-tag era-yu\">\ud83c\uddfe\ud83c\uddfa Jugoslavija</span>"
       : "<span class=\"era-tag era-srb\">\ud83c\uddf7\ud83c\uddf8 Srbija</span>";
-    html += "<div class=\"ath-card " + d.medal + (d.ekipno ? " ekipno" : "") + "\">";
+    var seasonTag = state.season === "all"
+      ? (isZimska
+          ? "<span class=\"season-tag tag-zim\">\u2744\ufe0f Zimske</span>"
+          : "<span class=\"season-tag tag-let\">\u2600\ufe0f Letnje</span>")
+      : "";
+    html += "<div class=\"ath-card " + d.medal + (d.ekipno ? " ekipno" : "") + (isZimska ? " zimska" : "") + "\">";
     html += "<div class=\"ath-medal\">" + MEDAL_EMOJI[d.medal] + "</div>";
     html += "<div class=\"ath-info\">";
-    html += "<div class=\"ath-name\">" + d.name + eraTag + "</div>";
+    html += "<div class=\"ath-name\">" + d.name + eraTag + seasonTag + "</div>";
     html += "<div class=\"ath-sport\">" + d.sport + "</div>";
     html += "<div class=\"ath-desc\">" + d.desc + "</div>";
     html += "</div>";
@@ -222,6 +246,14 @@ function render() {
 }
 
 document.getElementById("searchBox").addEventListener("input", function(){ state.search = this.value.trim(); render(); });
+
+document.querySelectorAll("[data-season]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.season = this.getAttribute("data-season");
+    document.querySelectorAll("[data-season]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
 document.querySelectorAll("[data-med]").forEach(function(btn){
   btn.addEventListener("click", function(){
     state.med = this.getAttribute("data-med");

@@ -45,19 +45,27 @@ header { background: var(--surface); border-bottom: 2px solid var(--gold); paddi
 .sport-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
 .sport-card:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(201,162,39,0.15); }
 .sport-card.open { border-color: var(--gold); }
+.sport-card.zimski { background: #050e18; border-color: #1a3050; }
+.sport-card.zimski:hover { border-color: #4090c0; box-shadow: 0 2px 12px rgba(64,144,192,0.2); }
+.sport-card.zimski.open { border-color: #4090c0; }
 
 .card-head { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
 .card-emoji { font-size: 28px; width: 44px; text-align: center; flex-shrink: 0; }
 .card-info { flex: 1; }
 .card-name { font-size: 16px; color: var(--gold2); font-weight: bold; }
+.sport-card.zimski .card-name { color: #80c8f0; }
 .card-since { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.card-tags-row { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 .card-status {
   font-size: 10px; padding: 3px 8px; border-radius: 3px;
-  text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0;
+  text-transform: uppercase; letter-spacing: 0.5px;
 }
 .st-aktivan   { background: #0a2010; color: #70c070; border: 1px solid #1a4020; }
 .st-uklonjen  { background: #200a0a; color: #c07070; border: 1px solid #401010; }
 .st-privremen { background: #1a1600; color: #c0a030; border: 1px solid #3a3000; }
+.tag-season { font-size: 10px; padding: 2px 7px; border-radius: 3px; }
+.tag-let { background: #201408; color: #e08848; border: 1px solid #402010; }
+.tag-zim { background: #04121e; color: #60b0e0; border: 1px solid #103050; }
 .arrow-toggle { color: var(--text2); font-size: 14px; transition: transform 0.3s; margin-left: 6px; }
 .sport-card.open .arrow-toggle { transform: rotate(180deg); }
 
@@ -94,13 +102,19 @@ header { background: var(--surface); border-bottom: 2px solid var(--gold); paddi
   <a href="../../index.html" class="header-back">&larr; Pub Quiz</a>
   <div class="header-title">
     <h1>&#127939; OLIMPIJSKI SPORTOVI</h1>
-    <p>Svi sportovi koji su bili ili jesu na Letnjim OI</p>
+    <p id="subtitle">Svi sportovi koji su bili ili jesu na Letnjim i Zimskim OI</p>
   </div>
   <span style="font-size:28px">&#127941;</span>
 </header>
 
 <div class="controls">
   <input type="text" class="search-box" id="searchBox" placeholder="Pretra&#382;i sport...">
+  <div class="filter-group">
+    <span class="filter-label">Sezona:</span>
+    <button class="filter-btn active" data-season="all">Sve</button>
+    <button class="filter-btn" data-season="letnje">&#9728;&#65039; Letnji</button>
+    <button class="filter-btn" data-season="zimske">&#10052;&#65039; Zimski</button>
+  </div>
   <div class="filter-group">
     <span class="filter-label">Status:</span>
     <button class="filter-btn active" data-st="all">Svi</button>
@@ -125,106 +139,154 @@ header { background: var(--surface); border-bottom: 2px solid var(--gold); paddi
 </div>
 
 <script>
-var DATA = [
-  {name:"Atletika", emoji:"🏃", cat:"atletika", status:"aktivan", od:1896, do_:null,
-   desc:"Osnova olimpijskog pokreta — trke, skokovi, bacanja i višeboj. Najmedaljovaniji sport na OI.",
-   facts:[{l:"Na OI od",v:"1896."},{l:"Disciplina",v:"48 (trke, skokovi, bacanja, višeboj)"},{l:"Rekorderi",v:"USA u sprintovima, Etiopija/Kenija na du\u017einama"}]},
-  {name:"Plivanje", emoji:"🏊", cat:"vodeni", status:"aktivan", od:1896, do_:null,
-   desc:"Jedan od najprestižnijih olimpijskih sportova. Michael Phelps drži rekord sa 23 zlatne medalje.",
-   facts:[{l:"Na OI od",v:"1896."},{l:"Discipline",v:"35 (slobodno, le\u0111a, prsa, leptir, me\u0161ovito, stafete)"},{l:"Rekord",v:"Michael Phelps — 28 ukupno (23 zlata)"}]},
-  {name:"Gimnastika", emoji:"🤸", cat:"atletika", status:"aktivan", od:1896, do_:null,
-   desc:"Artistička, ritmička i trampolinom — tri discipline. Nadia Comaneci 1976. postigla prvu desetku.",
+var LETNJE = [
+  {name:"Atletika", emoji:"\ud83c\udfc3", cat:"atletika", status:"aktivan", od:1896, do_:null, season:"letnje",
+   desc:"Osnova olimpijskog pokreta — trke, skokovi, bacanja i vi\u0161eboj. Najmedaljovaniji sport na OI.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Disciplina",v:"48 (trke, skokovi, bacanja, vi\u0161eboj)"},{l:"Rekorderi",v:"USA u sprintovima, Etiopija/Kenija na du\u017einama"}]},
+  {name:"Plivanje", emoji:"\ud83c\udfc4", cat:"vodeni", status:"aktivan", od:1896, do_:null, season:"letnje",
+   desc:"Jedan od najpre\u0161ti\u017enijih olimpijskih sportova. Michael Phelps dr\u017ei rekord sa 23 zlatne medalje.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Discipline",v:"35 (slobodno, le\u0111a, prsa, leptir, me\u0161ovito, stafete)"},{l:"Rekord",v:"Michael Phelps \u2014 28 ukupno (23 zlata)"}]},
+  {name:"Gimnastika", emoji:"\ud83e\udd38", cat:"atletika", status:"aktivan", od:1896, do_:null, season:"letnje",
+   desc:"Artisti\u010dka, ritmi\u010dka i trampolinom \u2014 tri discipline. Nadia Comaneci 1976. postigla prvu desetku.",
    facts:[{l:"Na OI od",v:"1896."},{l:"Tri grane",v:"Artisti\u010dka, ritmi\u010dka (od 1984), trampolinom (od 2000)"},{l:"Ikona",v:"Nadia Comaneci, Simone Biles"}]},
-  {name:"Ma\u010devanje", emoji:"⚔️", cat:"borba", status:"aktivan", od:1896, do_:null,
-   desc:"Jedan od retkih sportova prisutnih na svim modernim OI. Tri oružja: floret, mač, sablja.",
-   facts:[{l:"Na OI od",v:"1896."},{l:"Oružja",v:"Floret, ma\u010d, sablja"},{l:"Dominacija",v:"Ma\u0111arska, Francuska, Italija"}]},
-  {name:"Bacanje diska", emoji:"🥏", cat:"atletika", status:"aktivan", od:1896, do_:null,
-   desc:"Simbol antičkih OI. Diskobol je jedan od najpoznatijih skulptorskih motiva antike.",
-   facts:[{l:"Na OI od",v:"1896."},{l:"Rekord",v:"Jurgen Schult — 74,08m (1986)"},{l:"Zanimljivost",v:"Inspirisano anti\u010dkim OI"}]},
-  {name:"Veslanje", emoji:"🚣", cat:"vodeni", status:"aktivan", od:1896, do_:null,
-   desc:"Disciplina snage i izdržljivosti. Razlikuju se kajak/kanu od klasičnog veslanja.",
+  {name:"Ma\u010devanje", emoji:"\u2694\ufe0f", cat:"borba", status:"aktivan", od:1896, do_:null, season:"letnje",
+   desc:"Jedan od retkih sportova prisutnih na svim modernim OI. Tri oru\u017eija: floret, ma\u010d, sablja.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Oru\u017eija",v:"Floret, ma\u010d, sablja"},{l:"Dominacija",v:"Ma\u0111arska, Francuska, Italija"}]},
+  {name:"Veslanje", emoji:"\ud83d\udea3", cat:"vodeni", status:"aktivan", od:1896, do_:null, season:"letnje",
+   desc:"Disciplina snage i izdr\u017eljivosti. Razlikuju se kajak/kanu od klasi\u010dnog veslanja.",
    facts:[{l:"Na OI od",v:"1896. (1900 prvi put odr\u017eano)"},{l:"Discipline",v:"14 disciplina"},{l:"Dominacija",v:"Nema\u010dka, Rumunija, SSSR"}]},
-  {name:"Biciklizam", emoji:"🚴", cat:"tehnika", status:"aktivan", od:1896, do_:null,
-   desc:"Drumske trke, vožnja na stazi (velodromu), MTB, BMX i biciklistički krostrening.",
+  {name:"Biciklizam", emoji:"\ud83d\udeb4", cat:"tehnika", status:"aktivan", od:1896, do_:null, season:"letnje",
+   desc:"Drumske trke, vo\u017enja na stazi (velodromu), MTB, BMX i biciklisti\u010dki krostrening.",
    facts:[{l:"Na OI od",v:"1896."},{l:"Grane",v:"Drum, staza, BMX (2008), MTB (1996)"},{l:"Rekorderi",v:"Francuska, Britanija, Australija na stazi"}]},
-  {name:"Jedrenje", emoji:"⛵", cat:"tehnika", status:"aktivan", od:1896, do_:null,
-   desc:"Takmičenje u različitim klasama jedrilica. Zavisi od vetra i taktike.",
+  {name:"Jedriličarstvo", emoji:"\u26f5", cat:"tehnika", status:"aktivan", od:1896, do_:null, season:"letnje",
+   desc:"Takmi\u010denje u razli\u010ditim klasama jedrilica. Zavisi od vetra i taktike.",
    facts:[{l:"Na OI od",v:"1896. (1900. prvi put odr\u017eano)"},{l:"Klase",v:"Vi\u0161e klasa jedrilica i dasaka"},{l:"Dominacija",v:"Britanija, SAD, Norve\u0161ka"}]},
-  {name:"Strelja\u0161tvo", emoji:"🎯", cat:"tehnika", status:"aktivan", od:1896, do_:null,
-   desc:"Pištolj, puška i luk — tri discipline. Jasna Šekarić višestruka olimpijska medalistinja.",
-   facts:[{l:"Na OI od",v:"1896."},{l:"Discipline",v:"Pi\u0161tolj, pu\u0161ka, luk (strelica\u0161tvo od 1900)"},{l:"Na\u0161a zvezda",v:"Jasna \u0160ekari\u0107 — 7 olimpijskih nastupa"}]},
-  {name:"Di\u017eanje tegova", emoji:"🏋️", cat:"borba", status:"aktivan", od:1896, do_:null,
-   desc:"Istrgnuće i nabačaj. Dominiraju male, snažne nacije.",
+  {name:"Streljačtvo", emoji:"\ud83c\udfaf", cat:"tehnika", status:"aktivan", od:1896, do_:null, season:"letnje",
+   desc:"Pi\u0161tolj, pu\u0161ka i luk \u2014 tri discipline. Jasna \u0160ekari\u0107 vi\u0161estruka olimpijska medalistinja.",
+   facts:[{l:"Na OI od",v:"1896."},{l:"Discipline",v:"Pi\u0161tolj, pu\u0161ka, luk (streli\u010da\u0161tvo od 1900)"},{l:"Na\u0161a zvezda",v:"Jasna \u0160ekari\u0107 \u2014 7 olimpijskih nastupa"}]},
+  {name:"Di\u017eanje tegova", emoji:"\ud83c\udfcb\ufe0f", cat:"borba", status:"aktivan", od:1896, do_:null, season:"letnje",
+   desc:"Istrgnu\u0107e i naba\u010daj. Dominiraju male, sna\u017ene nacije.",
    facts:[{l:"Na OI od",v:"1896."},{l:"Discipline",v:"Istrgnu\u0107e + naba\u010daj"},{l:"Dominacija",v:"Kina, SSSR, Bugarska"}]},
-  {name:"Rvanje", emoji:"🤼", cat:"borba", status:"aktivan", od:1896, do_:null,
-   desc:"Slobodni i grčko-rimski stil. Jedan od najstarijih sportova u istoriji čovečanstva.",
+  {name:"Rvanje", emoji:"\ud83e\udd3c", cat:"borba", status:"aktivan", od:1896, do_:null, season:"letnje",
+   desc:"Slobodni i gr\u010dko-rimski stil. Jedan od najstarijih sportova u istoriji \u010dove\u010danstva.",
    facts:[{l:"Na OI od",v:"1896."},{l:"Stilovi",v:"Slobodni + gr\u010dko-rimski"},{l:"Dominacija",v:"SSSR, SAD, Turska, Iran"}]},
-  {name:"Boks", emoji:"🥊", cat:"borba", status:"aktivan", od:1904, do_:null,
-   desc:"Olympian of olympians — Cassius Clay (Muhammad Ali) zlatom 1960. zacementirao legendu.",
-   facts:[{l:"Na OI od",v:"1904."},{l:"Legenda",v:"Muhammad Ali — zlato 1960."},{l:"Dominacija",v:"SAD, Kuba, SSSR"}]},
-  {name:"Vaterpolo", emoji:"🤽", cat:"vodeni", status:"aktivan", od:1900, do_:null,
-   desc:"Ekipni vodeni sport. Jugoslavija trostruki olimpijski šampion!",
+  {name:"Boks", emoji:"\ud83e\udd4a", cat:"borba", status:"aktivan", od:1904, do_:null, season:"letnje",
+   desc:"Cassius Clay (Muhammad Ali) zlatom 1960. zacementirao legendu. Kuba decenijama dominirala.",
+   facts:[{l:"Na OI od",v:"1904."},{l:"Legenda",v:"Muhammad Ali \u2014 zlato 1960."},{l:"Dominacija",v:"SAD, Kuba, SSSR"}]},
+  {name:"Vaterpolo", emoji:"\ud83e\udd3d", cat:"vodeni", status:"aktivan", od:1900, do_:null, season:"letnje",
+   desc:"Ekipni vodeni sport. Jugoslavija trostruki olimpijski \u0161ampion!",
    facts:[{l:"Na OI od",v:"1900."},{l:"SFRJ/Jug.",v:"Zlato 1968, 1984, 1988"},{l:"Dominacija",v:"Ma\u0111arska, Italija, Jugoslavija"}]},
-  {name:"Ko\u0161arka", emoji:"🏀", cat:"ekipni", status:"aktivan", od:1936, do_:null,
+  {name:"Ko\u0161arka", emoji:"\ud83c\udfc0", cat:"ekipni", status:"aktivan", od:1936, do_:null, season:"letnje",
    desc:"USA je dominirala sve do pojave Dream Teama. Jugoslavija je zlatna 1980.",
-   facts:[{l:"Na OI od",v:"1936."},{l:"SFRJ",v:"Zlato 1980, vi\u0161e srebra"},{l:"Dream Team",v:"SAD 1992 — \"Nepobedivi\""}]},
-  {name:"Odbojka", emoji:"🏐", cat:"ekipni", status:"aktivan", od:1964, do_:null,
-   desc:"Uveden na Tokio 1964. Srbija višestruka medalja!",
-   facts:[{l:"Na OI od",v:"1964."},{l:"Srbija",v:"Zlato (mu\u0161karci 2000. kao Jug., \u017eene 2020.)"},{l:"Dominacija",v:"Brazil, SAD, Rusija, Kuba"}]},
-  {name:"Rukomet", emoji:"🤾", cat:"ekipni", status:"aktivan", od:1936, do_:null,
+   facts:[{l:"Na OI od",v:"1936."},{l:"SFRJ",v:"Zlato 1980, vi\u0161e srebra"},{l:"Dream Team",v:"SAD 1992 \u2014 \"Nepobedivi\""}]},
+  {name:"Odbojka", emoji:"\ud83c\udfd0", cat:"ekipni", status:"aktivan", od:1964, do_:null, season:"letnje",
+   desc:"Uvedena na Tokio 1964. Srbija vi\u0161estruka medalja!",
+   facts:[{l:"Na OI od",v:"1964."},{l:"Srbija",v:"Zlato (\u017eene 2020), zlato (mu\u0161karci 2000. kao Jug.)"},{l:"Dominacija",v:"Brazil, SAD, Rusija, Kuba"}]},
+  {name:"Rukomet", emoji:"\ud83e\udd3e", cat:"ekipni", status:"aktivan", od:1936, do_:null, season:"letnje",
    desc:"Popularan u Evropi. Jugoslavija zlatna 1972. u Minhenu.",
    facts:[{l:"Na OI od",v:"1936. (terenska), 1972. (sala)"},{l:"Jug. zlato",v:"1972. Minhen (mu\u0161karci)"},{l:"Dominacija",v:"Francuska, Danska, SSSR"}]},
-  {name:"D\u017eudo", emoji:"🥋", cat:"borba", status:"aktivan", od:1964, do_:null,
-   desc:"Japanski borilački sport, uveden na domaćim igrama 1964. Teddy Riner — legenda.",
-   facts:[{l:"Na OI od",v:"1964."},{l:"Legenda",v:"Teddy Riner — 3 olimpijska zlata"},{l:"Osniva\u010d",v:"Jigoro Kano, Japan"}]},
-  {name:"Taekwondo", emoji:"🦵", cat:"borba", status:"aktivan", od:2000, do_:null,
-   desc:"Korejski borilački sport. Srbija zlato — Milica Mandić 2012, Jovana Preković 2024.",
+  {name:"D\u017eudo", emoji:"\ud83e\udd4b", cat:"borba", status:"aktivan", od:1964, do_:null, season:"letnje",
+   desc:"Japanski borila\u010dki sport, uveden na doma\u0107im igrama 1964. Teddy Riner \u2014 legenda.",
+   facts:[{l:"Na OI od",v:"1964."},{l:"Legenda",v:"Teddy Riner \u2014 3 olimpijska zlata"},{l:"Osniva\u010d",v:"Jigoro Kano, Japan"}]},
+  {name:"Taekwondo", emoji:"\ud83e\uddb5", cat:"borba", status:"aktivan", od:2000, do_:null, season:"letnje",
+   desc:"Korejski borila\u010dki sport. Srbija zlato \u2014 Milica Mandi\u0107 2012, Jovana Prekovi\u0107 2024.",
    facts:[{l:"Na OI od",v:"2000."},{l:"Srbija",v:"Milica Mandi\u0107 2012, Jovana Prekovi\u0107 2024"},{l:"Osniva\u010d",v:"Koreja"}]},
-  {name:"Ragbi 7", emoji:"🏉", cat:"ekipni", status:"aktivan", od:2016, do_:null,
-   desc:"Kratki format ragbija — 7 igrača, 7 minuta poluvrijeme. Fiji zlato 2016. i 2020.",
+  {name:"Ragbi 7", emoji:"\ud83c\udfc9", cat:"ekipni", status:"aktivan", od:2016, do_:null, season:"letnje",
+   desc:"Kratki format ragbija \u2014 7 igra\u010da, 7 minuta poluvrijeme. Fiji zlato 2016. i 2020.",
    facts:[{l:"Na OI od",v:"2016."},{l:"Zlato",v:"Fiji 2016. i 2020. (mu\u0161karci)"},{l:"Format",v:"7 igra\u010da, 14 minuta"}]},
-  {name:"Golf", emoji:"⛳", cat:"tehnika", status:"aktivan", od:2016, do_:null,
-   desc:"Vraćen na OI nakon 112 godina pauze (bio 1900. i 1904.).",
+  {name:"Golf", emoji:"\u26f3", cat:"tehnika", status:"aktivan", od:2016, do_:null, season:"letnje",
+   desc:"Vra\u0107en na OI nakon 112 godina pauze (bio 1900. i 1904.).",
    facts:[{l:"Na OI od",v:"2016. (povratak)"},{l:"Pauza",v:"112 godina bez golfa na OI"},{l:"Format",v:"72 rupe, 4 runde"}]},
-  {name:"Skejtbording", emoji:"🛹", cat:"atletika", status:"aktivan", od:2020, do_:null,
+  {name:"Skejtbording", emoji:"\ud83d\udef9", cat:"atletika", status:"aktivan", od:2020, do_:null, season:"letnje",
    desc:"Uveden u Tokiju 2021. Najmlađi olimpijci u istoriji.",
    facts:[{l:"Na OI od",v:"2021. (Tokio)"},{l:"Zanimljivost",v:"Neki takmi\u010dari imali 13 godina"},{l:"Discipline",v:"Street + Park"}]},
-  {name:"Surfanje", emoji:"🏄", cat:"vodeni", status:"aktivan", od:2020, do_:null,
-   desc:"Takmičenje u oceanu, ne na bazenu. Taheaiti — najteže olimpijsko takmičilište ikad.",
-   facts:[{l:"Na OI od",v:"2021. (Tokio)"},{l:"Lokacija",v:"Tahi\u0107i (Pariz 2024) — 15.000km od Pariza"},{l:"Talasi",v:"Do 5 metara visoki"}]},
-  {name:"Sport penjanje", emoji:"🧗", cat:"atletika", status:"aktivan", od:2020, do_:null,
-   desc:"Brzina, bouldering i lead climbing. Mlad i dinamičan sport.",
+  {name:"Surfanje", emoji:"\ud83c\udfc4", cat:"vodeni", status:"aktivan", od:2020, do_:null, season:"letnje",
+   desc:"Takmi\u010denje u okeanu, ne na bazenu. Tahiti \u2014 najte\u017ee olimpijsko takmi\u010dili\u0161te ikad.",
+   facts:[{l:"Na OI od",v:"2021. (Tokio)"},{l:"Lokacija",v:"Tahiti (Pariz 2024) \u2014 15.000km od Pariza"},{l:"Talasi",v:"Do 5 metara visoki"}]},
+  {name:"Sport penjanje", emoji:"\ud83e\uddd7", cat:"atletika", status:"aktivan", od:2020, do_:null, season:"letnje",
+   desc:"Brzina, bouldering i lead climbing. Mlad i dinami\u010dan sport.",
    facts:[{l:"Na OI od",v:"2021. (Tokio)"},{l:"Discipline",v:"Brzina, Bouldering, Lead"},{l:"Format",v:"U Parizu razdvojeno u 2 discipline"}]},
-  {name:"Baseball/Softball", emoji:"⚾", cat:"ekipni", status:"privremen", od:1992, do_:2008,
-   desc:"Uveden 1992, uklonjen 2008 (mlaka podrška izvan SAD). Vraćen samo za Tokio 2020.",
-   facts:[{l:"Na OI",v:"1992–2008, pa Tokio 2020. samo"},{l:"Razlog uklanjanja",v:"MLB nije slao igra\u010de, slaba publika"},{l:"Zlato",v:"SAD (baseball), SAD/Japonija (softball)"}]},
-  {name:"Polo", emoji:"🐎", cat:"tehnika", status:"uklonjen", od:1900, do_:1936,
-   desc:"Konjički sport za elitu. Uklonjen 1936. kao preskup i nedovoljno međunarodni.",
-   facts:[{l:"Na OI",v:"1900–1936."},{l:"Razlog",v:"Preskup, mali broj zemalja"},{l:"Zlato",v:"Uglavnom Britanija i Argentina"}]},
-  {name:"Natezanje konopca", emoji:"🪢", cat:"borba", status:"uklonjen", od:1900, do_:1920,
+  {name:"Baseball/Softball", emoji:"\u26be", cat:"ekipni", status:"privremen", od:1992, do_:2008, season:"letnje",
+   desc:"Uveden 1992, uklonjen 2008 (mlaka podr\u0161ka izvan SAD). Vra\u0107en samo za Tokio 2020.",
+   facts:[{l:"Na OI",v:"1992\u20132008, pa Tokio 2020. samo"},{l:"Razlog uklanjanja",v:"MLB nije slao igra\u010de, slaba publika"},{l:"Zlato",v:"SAD (baseball), SAD/Japonija (softball)"}]},
+  {name:"Polo", emoji:"\ud83d\udc0e", cat:"tehnika", status:"uklonjen", od:1900, do_:1936, season:"letnje",
+   desc:"Konji\u010dki sport za elitu. Uklonjen 1936. kao preskup i nedovoljno me\u0111unarodni.",
+   facts:[{l:"Na OI",v:"1900\u20131936."},{l:"Razlog",v:"Preskup, mali broj zemalja"},{l:"Zlato",v:"Uglavnom Britanija i Argentina"}]},
+  {name:"Natezanje konopca", emoji:"\ud83e\udea2", cat:"borba", status:"uklonjen", od:1900, do_:1920, season:"letnje",
    desc:"Timski sport snage. Uklonjen nakon 1920, ali ostaje omiljena pub trivia!",
-   facts:[{l:"Na OI",v:"1900–1920."},{l:"Zanimljivost",v:"Svaka ekipa 8 igra\u010da"},{l:"Zlato",v:"UK, SAD, \u0160vedska"}]},
-  {name:"Kroket", emoji:"🔨", cat:"tehnika", status:"uklonjen", od:1900, do_:1900,
-   desc:"Bio samo 1900. u Parizu. Jedine OI na kojima je bio.",
-   facts:[{l:"Na OI",v:"Samo 1900."},{l:"Zanimljivost",v:"Sve medalje dodale Francuskinja"},{l:"Status",v:"Jedini nastup u istoriji"}]},
-  {name:"Karate", emoji:"🥋", cat:"borba", status:"privremen", od:2020, do_:2020,
-   desc:"Uveden samo za Tokio 2021. Jovana Preković zlatna — ali sport uklonjen za Pariz!",
-   facts:[{l:"Na OI",v:"Samo 2021. (Tokio)"},{l:"Na\u0161a zvezda",v:"Jovana Prekovi\u0107 — zlato u kumite"},{l:"Razlog",v:"Nije uvr\u0161ten za Pariz 2024"}]},
-  {name:"Tenis", emoji:"🎾", cat:"tehnika", status:"aktivan", od:1896, do_:null,
-   desc:"Bio od 1896–1924, pa dugačka pauza do 1988. Đoković zlatni 2024!",
-   facts:[{l:"Na OI od",v:"1988. (povratak, bio 1896–1924)"},{l:"Srbija",v:"Novak \u0110okovi\u0107 — zlato Pariz 2024"},{l:"Legenda",v:"Federer, Nadal (zlato 2008)"}]},
-  {name:"Stoni tenis", emoji:"🏓", cat:"tehnika", status:"aktivan", od:1988, do_:null,
+   facts:[{l:"Na OI",v:"1900\u20131920."},{l:"Zanimljivost",v:"Svaka ekipa 8 igra\u010da"},{l:"Zlato",v:"UK, SAD, \u0160vedska"}]},
+  {name:"Karate", emoji:"\ud83e\udd4b", cat:"borba", status:"privremen", od:2020, do_:2020, season:"letnje",
+   desc:"Uveden samo za Tokio 2021. Jovana Prekovi\u0107 zlatna \u2014 ali sport uklonjen za Pariz!",
+   facts:[{l:"Na OI",v:"Samo 2021. (Tokio)"},{l:"Na\u0161a zvezda",v:"Jovana Prekovi\u0107 \u2014 zlato u kumite"},{l:"Razlog",v:"Nije uvr\u0161ten za Pariz 2024"}]},
+  {name:"Tenis", emoji:"\ud83c\udfbe", cat:"tehnika", status:"aktivan", od:1896, do_:null, season:"letnje",
+   desc:"Bio od 1896\u20131924, pa duga\u010dka pauza do 1988. \u0110okovi\u0107 zlatni 2024!",
+   facts:[{l:"Na OI od",v:"1988. (povratak, bio 1896\u20131924)"},{l:"Srbija",v:"Novak \u0110okovi\u0107 \u2014 zlato Pariz 2024"},{l:"Legenda",v:"Federer, Nadal (zlato 2008)"}]},
+  {name:"Stoni tenis", emoji:"\ud83c\udfd3", cat:"tehnika", status:"aktivan", od:1988, do_:null, season:"letnje",
    desc:"Azijski sport broj 1 na OI. Kina dominira apsolutno.",
-   facts:[{l:"Na OI od",v:"1988."},{l:"Dominacija",v:"Kina osvaja gotovo sve zlatne"},{l:"Rekord",v:"Ma Long — vi\u0161estruki olimpijski \u0161ampion"}]},
-  {name:"Badminton", emoji:"🏸", cat:"tehnika", status:"aktivan", od:1992, do_:null,
-   desc:"Uveden u Barceloni. Azijska dominacija posebno izražena.",
+   facts:[{l:"Na OI od",v:"1988."},{l:"Dominacija",v:"Kina osvaja gotovo sve zlatne"},{l:"Rekord",v:"Ma Long \u2014 vi\u0161estruki olimpijski \u0161ampion"}]},
+  {name:"Badminton", emoji:"\ud83c\udff8", cat:"tehnika", status:"aktivan", od:1992, do_:null, season:"letnje",
+   desc:"Uveden u Barceloni. Azijska dominacija posebno izra\u017eena.",
    facts:[{l:"Na OI od",v:"1992."},{l:"Dominacija",v:"Kina, Indonezija, Malezija, Koreja"},{l:"Brzina",v:"Perje do 400 km/h"}]},
 ];
 
-var state = { st: "all", cat: "all", search: "" };
+var ZIMSKE = [
+  {name:"Alpsko skijanje", emoji:"\u26f7\ufe0f", cat:"tehnika", status:"aktivan", od:1936, do_:null, season:"zimske",
+   desc:"Spust, slalom, veleslalom, super-G, alpska kombinacija \u2014 sport brzine i tehnike. Najgledaniji zimski sport.",
+   facts:[{l:"Na ZOI od",v:"1936."},{l:"Discipline",v:"Spust, slalom, veleslalom, super-G, alpska kombinacija"},{l:"Legenda",v:"Jean-Claude Killy 3 zlata 1968; Ingemar Stenmark"}]},
+  {name:"Nordijsko skijanje", emoji:"\ud83c\udff3\ufe0f", cat:"atletika", status:"aktivan", od:1924, do_:null, season:"zimske",
+   desc:"Skijaško trčanje na dugim stazama \u2014 izdr\u017eljivost i tehnika. Norveška i Finska dominiraju decenijama.",
+   facts:[{l:"Na ZOI od",v:"1924."},{l:"Dominacija",v:"Norve\u0161ka, Finska, Rusija/SSSR"},{l:"Legenda",v:"Marit Bj\u00f8rgen \u2014 8 zlatnih medalja"}]},
+  {name:"Ski skokovi", emoji:"\ud83c\udfd4\ufe0f", cat:"atletika", status:"aktivan", od:1924, do_:null, season:"zimske",
+   desc:"Skokovi sa trampolina na snegu \u2014 do 130m daleko! Japan \u0161okirao svet 1972. u Saporu.",
+   facts:[{l:"Na ZOI od",v:"1924."},{l:"Senzacija",v:"Japan osv. zlato 1972. u Saporu pred doma\u0107om publikom"},{l:"Rekord",v:"Stefan Kraft \u2014 253,5m u ski letovima"}]},
+  {name:"Nordijska kombinacija", emoji:"\ud83c\udfc5", cat:"atletika", status:"aktivan", od:1924, do_:null, season:"zimske",
+   desc:"Ski skokovi + nordijsko tr\u010danje \u2014 'kralj zimskih sportova'. Norve\u0161ka apsolutno dominira.",
+   facts:[{l:"Na ZOI od",v:"1924."},{l:"Dominacija",v:"Norve\u0161ka u svim epohama"},{l:"Format",v:"Bolji u skokovima kre\u0107e zadnji u trci (Gundersen metod)"}]},
+  {name:"Biatljon", emoji:"\ud83c\udfaf", cat:"atletika", status:"aktivan", od:1960, do_:null, season:"zimske",
+   desc:"Nordijsko tr\u010danje + ga\u0111anje iz pu\u0161ke. Izuzetno popularan u Evropi \u2014 norve\u0161ka opsesija!",
+   facts:[{l:"Na ZOI od",v:"1960."},{l:"Legenda",v:"Ole Einar Bj\u00f8rndalen \u2014 8 zlatnih"},{l:"Pravilo",v:"Svaki proma\u0161aj = 1 minut ka\u017enjavanja ili kaznena petlja"}]},
+  {name:"Bobin", emoji:"\ud83d\udef7", cat:"tehnika", status:"aktivan", od:1924, do_:null, season:"zimske",
+   desc:"2 ili 4 \u010dlana u \u010deličnim sanama niz ledeni kanal. Brzine do 154 km/h. Jamajka 1988 \u2014 ve\u010dna legenda!",
+   facts:[{l:"Na ZOI od",v:"1924."},{l:"Rekord brzine",v:"Do 154 km/h"},{l:"Legenda",v:"Jamaj\u010danska ekipa 1988 \u2014 inspirisala film 'Cool Runnings'"}]},
+  {name:"Saonice (Luge)", emoji:"\ud83d\udef7", cat:"tehnika", status:"aktivan", od:1964, do_:null, season:"zimske",
+   desc:"Vo\u017enja le\u0111ima niz ledeni kanal. Nema\u010dka apsolutno dominira. Brzine do 140 km/h.",
+   facts:[{l:"Na ZOI od",v:"1964."},{l:"Dominacija",v:"Nema\u010dka u svim disciplinama"},{l:"Razlika od skeletona",v:"Vo\u017ei se le\u0111ima, noge napred"}]},
+  {name:"Skeleton", emoji:"\ud83d\udef7", cat:"tehnika", status:"privremen", od:1928, do_:null, season:"zimske",
+   desc:"Vo\u017enja licem prema dole niz isti kanal kao bobin i saonice. Uklonjen pa vra\u0107en 2002.",
+   facts:[{l:"Na ZOI",v:"1928\u20131948, 2002\u2013danas"},{l:"Razlika od saonice",v:"Licem prema dole, glava napred"},{l:"Brzina",v:"Do 130 km/h"}]},
+  {name:"Umetni\u010dko klizanje", emoji:"\u26f8\ufe0f", cat:"atletika", status:"aktivan", od:1924, do_:null, season:"zimske",
+   desc:"Najgledaniji zimski sport u Americi. Bio na letnjem programu 1908\u20131920, pa pre\u0161ao na zimske OI.",
+   facts:[{l:"Na ZOI od",v:"1924. (bio letnji 1908\u20131920)"},{l:"Legenda",v:"Sonja Henie 3 zlata; skandal sudija 2002. Solt Lejk"},{l:"Discipline",v:"Singl, parovi, ples na ledu"}]},
+  {name:"Brzinsko klizanje", emoji:"\u26f8\ufe0f", cat:"atletika", status:"aktivan", od:1924, do_:null, season:"zimske",
+   desc:"Trke na ledu 500m\u201310000m. Eric Heiden \u2014 5 zlatnih na jednim igrama 1980!",
+   facts:[{l:"Na ZOI od",v:"1924."},{l:"Rekord",v:"Eric Heiden \u2014 5 zlatnih 1980. Lake Placid"},{l:"Dominacija",v:"Holandija u dugim distancama"}]},
+  {name:"Kratka staza (Short track)", emoji:"\u26f8\ufe0f", cat:"atletika", status:"aktivan", od:1992, do_:null, season:"zimske",
+   desc:"Brze, kontaktne trke na maloj stazi (111m krug). Azija dominira \u2014 Koreja posebno.",
+   facts:[{l:"Na ZOI od",v:"1992."},{l:"Dominacija",v:"Ju\u017ena Koreja, Kina"},{l:"Staza",v:"Samo 111 metara u krug \u2014 4x kra\u0107a od olimpijskog bazena"}]},
+  {name:"Hokej na ledu", emoji:"\ud83c\udfd2", cat:"ekipni", status:"aktivan", od:1924, do_:null, season:"zimske",
+   desc:"Najpre\u0161ti\u017eniji timski zimski sport. SSSR vs. Kanada \u2014 decenijska dominacija. '\u010cudo na ledu' 1980.",
+   facts:[{l:"Na ZOI od",v:"1924."},{l:"\u010cudo na ledu",v:"SAD pobedio SSSR 4:3 \u2014 1980. Lake Placid"},{l:"Dominacija",v:"Kanada, SSSR/Rusija, SAD, \u010ce\u0161ka"}]},
+  {name:"Curling", emoji:"\ud83e\udd4c", cat:"ekipni", status:"privremen", od:1924, do_:null, season:"zimske",
+   desc:"Kamenje po ledu \u2014 '\u0161ah na ledu'. Bio od 1924\u20131936, zatim demonstracioni, vra\u0107en na program 1998.",
+   facts:[{l:"Na ZOI",v:"1924\u20131936, demonstracioni, 1998\u2013danas"},{l:"Dominacija",v:"Kanada, Norve\u0161ka, Velika Britanija"},{l:"Rast",v:"Jedan od najbrže rastućih sportova na svetu"}]},
+  {name:"Snowboard", emoji:"\ud83c\udfc2", cat:"atletika", status:"aktivan", od:1998, do_:null, season:"zimske",
+   desc:"Uveden u Naganu 1998. Halfpipe, slopestyle, big air. Shaun White \u2014 3 zlatne u halfpipeu.",
+   facts:[{l:"Na ZOI od",v:"1998."},{l:"Legenda",v:"Shaun White \u2014 3 zlatne u halfpipeu (2006, 2010, 2018)"},{l:"Discipline",v:"Halfpipe, Slopestyle, Big Air, Paralelni slalom"}]},
+  {name:"Freestyle skijanje", emoji:"\u26f7\ufe0f", cat:"atletika", status:"aktivan", od:1992, do_:null, season:"zimske",
+   desc:"Akrobatsko skijanje \u2014 moguli, skokovi, halfpipe, slopestyle, big air. Spektakularno za publiku.",
+   facts:[{l:"Na ZOI od",v:"1992."},{l:"Discipline",v:"Moguli, akrobatika, halfpipe, slopestyle, big air"},{l:"Dominacija",v:"Kanada, SAD, Australija, Kina"}]},
+];
+
+var state = { season: "all", st: "all", cat: "all", search: "" };
+
+function getData() {
+  if (state.season === "letnje") return LETNJE;
+  if (state.season === "zimske") return ZIMSKE;
+  return LETNJE.concat(ZIMSKE);
+}
 
 function getItems() {
-  var items = DATA.slice();
+  var items = getData().slice();
   if (state.st !== "all") items = items.filter(function(d){ return d.status === state.st; });
   if (state.cat !== "all") items = items.filter(function(d){ return d.cat === state.cat; });
   if (state.search) {
@@ -236,10 +298,17 @@ function getItems() {
   return items;
 }
 
+var SUBTITLES = {
+  all:    "Svi sportovi koji su bili ili jesu na Letnjim i Zimskim OI",
+  letnje: "Svi sportovi koji su bili ili jesu na Letnjim olimpijskim igrama",
+  zimske: "Svi sportovi koji su bili ili jesu na Zimskim olimpijskim igrama"
+};
+
 var ST_CLS = {aktivan:"st-aktivan", uklonjen:"st-uklonjen", privremen:"st-privremen"};
 var ST_LBL = {aktivan:"Aktivan", uklonjen:"Uklonjen", privremen:"Privremen"};
 
 function render() {
+  document.getElementById("subtitle").textContent = SUBTITLES[state.season] || SUBTITLES.all;
   var items = getItems();
   document.getElementById("resultsCount").textContent = items.length + " sporta";
   var grid = document.getElementById("grid");
@@ -247,16 +316,25 @@ function render() {
   var html = "";
   for (var i = 0; i < items.length; i++) {
     var d = items[i];
+    var isZimski = d.season === "zimske";
     var sc = ST_CLS[d.status] || "";
     var sl = ST_LBL[d.status] || "";
-    html += "<div class=\"sport-card\" onclick=\"toggle(this)\">";
+    html += "<div class=\"sport-card" + (isZimski ? " zimski" : "") + "\" onclick=\"toggle(this)\">";
     html += "<div class=\"card-head\">";
     html += "<div class=\"card-emoji\">" + d.emoji + "</div>";
     html += "<div class=\"card-info\">";
     html += "<div class=\"card-name\">" + d.name + "</div>";
-    html += "<div class=\"card-since\">Na OI od " + d.od + (d.do_ ? " \u2013 " + d.do_ : "") + "</div>";
+    var odLabel = isZimski ? "Na ZOI od " : "Na OI od ";
+    html += "<div class=\"card-since\">" + odLabel + d.od + (d.do_ ? " \u2013 " + d.do_ : "") + "</div>";
     html += "</div>";
+    html += "<div class=\"card-tags-row\">";
+    if (state.season === "all") {
+      html += isZimski
+        ? "<span class=\"tag-season tag-zim\">\u2744\ufe0f Zimski</span>"
+        : "<span class=\"tag-season tag-let\">\u2600\ufe0f Letnji</span>";
+    }
     html += "<span class=\"card-status " + sc + "\">" + sl + "</span>";
+    html += "</div>";
     html += "<span class=\"arrow-toggle\">&#9660;</span>";
     html += "</div>";
     html += "<div class=\"card-expand\"><div class=\"card-body\">";
@@ -273,6 +351,14 @@ function render() {
 function toggle(card) { card.classList.toggle("open"); }
 
 document.getElementById("searchBox").addEventListener("input", function(){ state.search = this.value.trim(); render(); });
+
+document.querySelectorAll("[data-season]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    state.season = this.getAttribute("data-season");
+    document.querySelectorAll("[data-season]").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active"); render();
+  });
+});
 document.querySelectorAll("[data-st]").forEach(function(btn){
   btn.addEventListener("click", function(){
     state.st = this.getAttribute("data-st");
