@@ -209,12 +209,48 @@
   .r-as { background: #503020; color: #cb9; }
   .r-af { background: #402030; color: #b99; }
 
+  /* ── MOBILNI PRIKAZ ─────────────────────────────────── */
+  .card-list { display: none; flex-direction: column; gap: 10px; }
+  .nob-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .nob-card-top {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .nob-card-year {
+    font-size: 17px;
+    font-weight: bold;
+    color: var(--gold2);
+    white-space: nowrap;
+  }
+  .nob-card-winner {
+    font-size: 15px;
+    color: var(--text);
+    font-weight: bold;
+  }
+  .nob-card-delo {
+    font-size: 13px;
+    color: var(--text2);
+    font-style: italic;
+    margin-bottom: 4px;
+  }
+  .nob-card-meta {
+    font-size: 12px;
+    color: var(--text2);
+  }
+
   @media (max-width: 700px) {
     .controls { padding: 10px 14px; }
     .main { padding: 14px; }
-    th, td { padding: 8px 10px; }
     .header-title h1 { font-size: 18px; }
-    td.notes { display: none; }
+    table { display: none; }
+    .card-list { display: flex; }
   }
 </style>
 </head>
@@ -253,6 +289,7 @@
 <div class="main">
   <div class="results-count" id="resultsCount"></div>
   <div id="tableContainer"></div>
+  <div class="card-list" id="cardList"></div>
 </div>
 
 <script>
@@ -378,6 +415,24 @@ function renderTable() {
   }
   html += "</tbody></table>";
   document.getElementById("tableContainer").innerHTML = html;
+
+  // Mobilni prikaz — kartice
+  var cards = "";
+  for (var ci = 0; ci < rows.length; ci++) {
+    var r = rows[ci];
+    var rc = REGION_CLASS[r.region] || "";
+    var rl = REGION_LABEL[r.region] || "";
+    cards += "<div class=\"nob-card\">";
+    cards += "<div class=\"nob-card-top\"><span class=\"nob-card-year\">" + r.year + "</span><span class=\"nob-card-winner\">" + r.winner + "</span>";
+    if (rl) cards += "<span class=\"region-tag " + rc + "\">" + rl + "</span>";
+    cards += "</div>";
+    if (r.delo) cards += "<div class=\"nob-card-delo\">" + r.delo + "</div>";
+    cards += "<div class=\"nob-card-meta\">" + r.country + " &mdash; " + r.lang;
+    if (r.notes) cards += " &mdash; " + r.notes;
+    cards += "</div>";
+    cards += "</div>";
+  }
+  document.getElementById("cardList").innerHTML = cards;
   loadPhotos();
 
   var ths = document.querySelectorAll("thead th[data-col]");

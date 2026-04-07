@@ -166,11 +166,49 @@
   .cat-director .oscar-star { color: #98e87e; }
   .cat-intl .oscar-star { color: #e8a87e; }
 
+  /* ── MOBILNI PRIKAZ ─────────────────────────────────── */
+  .card-list { display: none; flex-direction: column; gap: 10px; }
+  .osk-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .osk-card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .osk-card-year {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--gold2);
+    white-space: nowrap;
+  }
+  .osk-card-winner {
+    font-size: 15px;
+    color: var(--text);
+    font-weight: bold;
+    flex: 1;
+  }
+  .osk-card-film {
+    font-size: 13px;
+    color: var(--text2);
+    font-style: italic;
+    margin-bottom: 4px;
+  }
+  .osk-card-meta {
+    font-size: 12px;
+    color: var(--text2);
+  }
+
   @media (max-width: 700px) {
     .controls { padding: 10px 14px; }
     .main { padding: 14px; }
-    th, td { padding: 8px 10px; }
     .header-title h1 { font-size: 18px; }
+    table { display: none; }
+    .card-list { display: flex; }
   }
 </style>
 </head>
@@ -208,6 +246,7 @@
 <div class="main">
   <div class="results-count" id="resultsCount"></div>
   <div id="tableContainer"></div>
+  <div class="card-list" id="cardList"></div>
 </div>
 
 <script>
@@ -548,6 +587,21 @@ function renderTable() {
   }
   html += "</tbody></table>";
   document.getElementById("tableContainer").innerHTML = html;
+
+  // Mobilni prikaz — kartice
+  var cards = "";
+  for (var ci = 0; ci < rows.length; ci++) {
+    var r = rows[ci];
+    var sub = "";
+    if (cat === "actor" || cat === "actress" || cat === "director") sub = r.film ? "<div class=\"osk-card-film\">" + r.film + "</div>" : "";
+    else if (cat === "intl") sub = r.film ? "<div class=\"osk-card-film\">" + r.film + "</div>" : "";
+    cards += "<div class=\"osk-card\">";
+    cards += "<div class=\"osk-card-top\"><span class=\"osk-card-year\">" + r.year + "</span><span class=\"osk-card-winner\">" + r.winner + "</span></div>";
+    if (sub) cards += sub;
+    cards += "<div class=\"osk-card-meta\">" + r.country + (r.notes ? " &mdash; " + r.notes : "") + "</div>";
+    cards += "</div>";
+  }
+  document.getElementById("cardList").innerHTML = cards;
   loadPhotos();
 
   var ths = document.querySelectorAll("thead th[data-col]");
