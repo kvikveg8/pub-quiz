@@ -329,6 +329,103 @@ body {
 .search-input:focus { border-color: var(--gold-dim); }
 .detail-flag-banner h2 { font-size: 18px; font-weight: normal; color: var(--gold2); }
 
+/* ZOOM OVERLAY */
+.zoom-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(10,6,2,0.92);
+  backdrop-filter: blur(6px);
+  overflow-y: auto;
+  padding: 24px 20px 40px;
+}
+.zoom-overlay.visible { display: block; }
+
+.zoom-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.zoom-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+}
+.zoom-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.zoom-close {
+  margin-left: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: Georgia, serif;
+  transition: all 0.2s;
+}
+.zoom-close:hover { color: var(--text); border-color: var(--gold-dim); }
+
+.zoom-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-start;
+}
+.zoom-flag-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 10px 10px;
+  width: 90px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.zoom-flag-item:hover {
+  border-color: var(--accent-color, var(--gold));
+  background: var(--surface2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+.zoom-flag-item.active {
+  border-color: var(--accent-color, var(--gold));
+  box-shadow: 0 0 0 2px var(--accent-color, var(--gold));
+}
+.zoom-flag-emoji { font-size: 40px; line-height: 1; }
+.zoom-flag-name {
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.zoom-btn {
+  margin-left: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1.4;
+}
+.zoom-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+
 /* SCROLLBAR */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
@@ -391,6 +488,17 @@ body {
         <div class="detail-row"><label>Valuta</label><span id="detailCurrency"></span></div>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="zoom-overlay" id="zoomOverlay">
+  <div class="zoom-inner">
+    <div class="zoom-header">
+      <div class="continent-dot" id="zoomDot" style="width:14px;height:14px;border-radius:50%;flex-shrink:0"></div>
+      <span class="zoom-title" id="zoomTitle"></span>
+      <button class="zoom-close" onclick="closeZoom()">✕ Zatvori</button>
+    </div>
+    <div class="zoom-grid" id="zoomGrid"></div>
   </div>
 </div>
 
@@ -689,10 +797,16 @@ function buildContinents() {
     header.innerHTML =
       '<div class="continent-dot" style="background:' + c.color + '"></div>' +
       '<span class="continent-name" style="color:' + c.color + '">' + c.name + '</span>' +
-      '<span class="continent-count">' + c.countries.length + ' drzava</span>' +
+      '<span class="continent-count">' + c.countries.length + ' država</span>' +
+      '<button class="zoom-btn" title="Uvećaj zastave">⛶</button>' +
       '<span class="continent-toggle">&#9660;</span>';
-    header.addEventListener('click', function() {
+    header.addEventListener('click', function(e) {
+      if (e.target.classList.contains('zoom-btn')) return;
       section.classList.toggle('collapsed');
+    });
+    header.querySelector('.zoom-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      openZoom(c);
     });
 
     var grid = document.createElement('div');
@@ -780,6 +894,55 @@ function closeDetail() {
   document.getElementById('detailContent').classList.remove('visible');
   if (activeFlag) { activeFlag.classList.remove('active'); activeFlag = null; }
 }
+
+// ZOOM
+var zoomContinent = null;
+var zoomActiveFlag = null;
+
+function openZoom(c) {
+  zoomContinent = c;
+  zoomActiveFlag = null;
+  document.getElementById('zoomTitle').textContent = c.name;
+  document.getElementById('zoomTitle').style.color = c.color;
+  document.getElementById('zoomDot').style.background = c.color;
+
+  var grid = document.getElementById('zoomGrid');
+  grid.style.setProperty('--accent-color', c.color);
+  grid.innerHTML = '';
+
+  c.countries.forEach(function(country) {
+    var item = document.createElement('div');
+    item.className = 'zoom-flag-item';
+    item.innerHTML =
+      '<span class="zoom-flag-emoji">' + country.flag + '</span>' +
+      '<span class="zoom-flag-name">' + country.name + '</span>';
+    item.addEventListener('click', function() {
+      if (zoomActiveFlag) zoomActiveFlag.classList.remove('active');
+      item.classList.add('active');
+      zoomActiveFlag = item;
+      showDetail(country, c);
+    });
+    grid.appendChild(item);
+  });
+
+  document.getElementById('zoomOverlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeZoom() {
+  document.getElementById('zoomOverlay').classList.remove('visible');
+  document.body.style.overflow = '';
+  zoomContinent = null;
+  zoomActiveFlag = null;
+}
+
+document.getElementById('zoomOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeZoom();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeZoom();
+});
 
 // SEARCH
 document.getElementById('searchInput').addEventListener('input', function() {
