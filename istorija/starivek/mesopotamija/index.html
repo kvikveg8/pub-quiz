@@ -135,15 +135,29 @@ header {
 .event-head {
   padding: 12px 16px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
 }
+.event-thumb-wrap {
+  flex-shrink: 0;
+  width: 64px;
+  height: 52px;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid var(--border2);
+}
+.event-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.event-date-col { flex-shrink: 0; }
 .event-date {
   font-size: 10px;
   color: var(--gold-dim);
   white-space: nowrap;
-  min-width: 108px;
-  padding-top: 3px;
+  min-width: 90px;
   font-style: italic;
   line-height: 1.4;
 }
@@ -226,6 +240,34 @@ header {
 }
 .event-fact::before { content: '\2605\00A0\00A0'; color: var(--era-color); }
 
+/* MAPA */
+.map-wrap {
+  max-width: 860px;
+  margin: 20px auto 0;
+  padding: 0 20px;
+}
+.map-box {
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.map-box img {
+  width: 100%;
+  max-height: 340px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.map-caption {
+  padding: 8px 14px;
+  font-size: 11px;
+  color: var(--gold-dim);
+  font-style: italic;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
 /* FOOTER */
 footer {
   text-align: center;
@@ -262,6 +304,15 @@ footer {
   <p class="intro-text">Sve što smatramo civilizacijom — pismo, zakoni, škole, porezi, čak i pivo — neko je to prvi put izmislio između dve reke u današnjem Iraku. Sumerani su pre 5000 godina rešavali iste probleme kao mi: kako organizovati društvo, kako čuvati informacije, šta uraditi kad neko prekrši pravila. Samo bez struje.</p>
 </div>
 
+<div class="map-wrap">
+  <div class="map-box">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mesopotamia_in_the_Achaemenid_Empire.jpg/1200px-Mesopotamia_in_the_Achaemenid_Empire.jpg"
+         alt="Mapa Mesopotamije — Tigris i Eufrat, glavni gradovi"
+         onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Mesopotamia_blank.png/1200px-Mesopotamia_blank.png'">
+    <p class="map-caption">Mesopotamija — zemlja izme&#273;u Tigrisa i Eufrata (dana&#353;nji Irak). Klju&#269;ni gradovi: Ur, Uruk, Vavilon, Niniva, Asur &#8226; Wikimedia Commons</p>
+  </div>
+</div>
+
 <div class="stats-bar">
   <div class="stats-count"><span id="eventCount">7</span> klju&#269;nih doga&#273;aja</div>
 </div>
@@ -277,8 +328,8 @@ var EVENTS = [
   {
     displayYear: '~3200 p.n.e.',
     title: 'Izum klinastog pisma',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Babylonian_-_Cuneiform_Tablet_with_the_Gilgamesh_Flood_Myth_-_Walters_42182_-_Back.jpg/640px-Babylonian_-_Cuneiform_Tablet_with_the_Gilgamesh_Flood_Myth_-_Walters_42182_-_Back.jpg',
-    imgCaption: 'Glinena plo\u010dica sa klinastim pismom, Vavilon (Walters Art Museum)',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Sumerian_MS2272_2400BCE.jpg/640px-Sumerian_MS2272_2400BCE.jpg',
+    imgCaption: 'Sumerska glinena plo\u010dica sa klinastim pismom, ~2400 p.n.e. (Schøyen kolekcija)',
     desc: 'Sumerani su imali problem koji ima svako veliko preduze\u0107e: previ\u0161e informacija, premalo memorije. Re\u0161enje? Uzeli su \u0161tapove\u010di\u0107e i po\u010deli da ure\u017eu znakove u meku glinu, koja bi se zatim pe\u010dlila. Ono \u0161to je po\u010delo kao sistem za bele\u017eenje zaliha p\u0161enice i stoke, postalo je prvo pismo na svetu. Za nekoliko vekova, tim istim znakovma pisali su poeziju, zakone i astronomske prora\u010dune.',
     place: 'Uruk, dana\u0161nji Irak',
     figures: 'Sumerani',
@@ -295,8 +346,8 @@ var EVENTS = [
   {
     displayYear: '~2100 p.n.e.',
     title: 'Ep o Gilgame\u0161u \u2014 prva pri\u010da na svetu',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Tablet_V_of_the_Epic_of_Gilgamesh.jpg/480px-Tablet_V_of_the_Epic_of_Gilgamesh.jpg',
-    imgCaption: 'Plo\u010dica V Epa o Gilgame\u0161u, Sulajmanija muzej, Irak',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Tablet_V_of_the_Epic_of_Gilgamesh.jpg/640px-Tablet_V_of_the_Epic_of_Gilgamesh.jpg',
+    imgCaption: 'Plo\u010dica V Epa o Gilgame\u0161u (~7. vek p.n.e.), Sulajmanija muzej, Irak',
     desc: 'Pre Ilijade, pre Biblije, pre svega \u2014 postojao je Gilgame\u0161. Ep o polubogom kralju Uruka koji tra\u017ei besmrtnost po\u0161to mu umre najbli\u017ei prijatelj Enkidu, zapisan je na 12 glinenih plo\u010dica pre skoro 4000 godina. Ima akcije, prijateljstva, guba, potrage i kona\u010dnog mira sa smr\u0107u. Jedna od plo\u010dica opisuje Potop koji je o\u010digledno inspirisao biblijsku pri\u010du o Noju \u2014 samo je napisana vekovima ranije.',
     place: 'Mesopotamija',
     figures: 'Gilgame\u0161, Enkidu, Uta-napišti',
@@ -305,8 +356,8 @@ var EVENTS = [
   {
     displayYear: '~1754 p.n.e.',
     title: 'Hamurabijev zakonik',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Milkau_Oberer_Teil_der_Stele_mit_dem_Codex_Hammurapi_369-2.jpg/320px-Milkau_Oberer_Teil_der_Stele_mit_dem_Codex_Hammurapi_369-2.jpg',
-    imgCaption: 'Gornji deo stele sa Hamurabijevim zakonikom, Louvre, Pariz',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Milkau_Oberer_Teil_der_Stele_mit_dem_Codex_Hammurapi_369-2.jpg/640px-Milkau_Oberer_Teil_der_Stele_mit_dem_Codex_Hammurapi_369-2.jpg',
+    imgCaption: 'Gornji deo stele sa Hamurabijevim zakonikom (~1754 p.n.e.), Louvre, Pariz',
     desc: 'Hamurabi je shvatio da carevina bez pravila nije carevina \u2014 to je samo puno naoru\u017eanih ljudi koji se sva\u0111aju. Pa je usekao 282 zakona u bazaltnu stelu visoku skoro 2 metra i postavio je na trgu: nema izgovora da nisi znao. Sistem je bio brutalno jasan \u2014 zakon broj 229 ka\u017ee da ako graditelj napravi ku\u0107u koja se sru\u0161i i ubije vlasnika, graditelja pogube. Ali i bogati i siromašni su bili podjednako odgovorni pred istim zakonom \u2014 \u0161to je za 1754. p.n.e. bila revolucionarna ideja.',
     place: 'Vavilon, dana\u0161nji Irak',
     figures: 'Hamurabi, kralj Vavilona',
@@ -315,8 +366,8 @@ var EVENTS = [
   {
     displayYear: '~900\u2013612 p.n.e.',
     title: 'Asirsko carstvo \u2014 prva supersila terora',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Lion_hunt_of_Ashurbanipal.jpg/640px-Lion_hunt_of_Ashurbanipal.jpg',
-    imgCaption: 'Lov na lavove, reljef Asurbanipala, Britanski muzej',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Lion_hunt_of_Ashurbanipal.jpg/800px-Lion_hunt_of_Ashurbanipal.jpg',
+    imgCaption: 'Asirski reljef — Lov na lavove, Asurbanipal (~645 p.n.e.), Britanski muzej, London',
     desc: 'Asirci su bili ono \u0161to biste dobili kada bi vojska bila dr\u017eava. Imali su prvu pravu vojnu mašinu u istoriji: kova\u010dum gvo\u017e\u0111a za oru\u017eje, in\u017eenjerske jedinice za opsade, obave\u0161tajnu mre\u017eu i \u2014 namerno \u2014 politiku masovnog terora prema pokorenim narodima. Deportacije \u010ditavih populacija bile su standardna praksa: razbiti zajednicu, rasipati je po carstvu, spre\u010diti pobune. Asurbamipal je izgradio i prvu sistemski prikupljenu biblioteku \u2014 30.000 plo\u010dica u Ninivi.',
     place: 'Niniva (danas Mosul, Irak)',
     figures: 'Tiglatpileser III, Asarhadon, Asurbanipal',
@@ -333,8 +384,8 @@ var EVENTS = [
   {
     displayYear: '539 p.n.e.',
     title: 'Kir Veliki osvaja Vavilon \u2014 kraj Mesopotamije',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Cyrus_cylinder.jpg/640px-Cyrus_cylinder.jpg',
-    imgCaption: 'Kirov cilindar, Britanski muzej — prvi dokument o ljudskim pravima',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Cyrus_cylinder.jpg/800px-Cyrus_cylinder.jpg',
+    imgCaption: 'Kirov cilindar (539 p.n.e.) — glineni proglasi o verskoj toleranciji, Britanski muzej, London',
     desc: 'Persijski kralj Kir II u\u0161ao je u Vavilon 539. p.n.e. skoro bez borbe \u2014 grad mu je otvorio kapije. Babilonci su bili iscrpljeni lo\u0161im vladanjem poslednjeg kralja Nabonida, koji je vi\u0161e voleo arheologiju nego upravljanje. Ono \u0161to je Kir uradio posle osvajanja bilo je nesvakida\u0161nje: umesto robova i deportacija, objavio je versku toleranciju i dozvolio jevrejskom narodu da se vrati iz vavilonskog su\u017eanstva u Jerusalim.',
     place: 'Vavilon',
     figures: 'Kir II Veliki, Nabonid',
@@ -343,15 +394,24 @@ var EVENTS = [
 ];
 
 function buildEvent(e, uid) {
-  var imgHtml = '';
-  if (e.img) {
-    imgHtml = '<img src="' + e.img + '" alt="' + e.title + '" class="event-img" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'none\'">' +
-              '<p class="event-img-caption">' + (e.imgCaption || '') + '</p>';
-  }
+  // Thumbnail u zaglavlju (uvek vidljiv ako postoji slika)
+  var thumbHtml = e.img
+    ? '<img src="' + e.img + '" alt="" class="event-thumb" loading="lazy" onerror="this.style.display=\'none\'">'
+    : '';
+
+  // Puna slika unutar expanded body-ja
+  var imgHtml = e.img
+    ? '<img src="' + e.img + '" alt="' + e.title + '" class="event-img" loading="lazy" onerror="this.style.display=\'none\';var c=this.nextElementSibling;if(c)c.style.display=\'none\'">' +
+      '<p class="event-img-caption">' + (e.imgCaption || '') + '</p>'
+    : '';
+
   return '<div class="event" id="' + uid + '" onclick="toggleEvent(\'' + uid + '\')">' +
     '<div class="event-card">' +
       '<div class="event-head">' +
-        '<div class="event-date">' + e.displayYear + '</div>' +
+        (thumbHtml ? '<div class="event-thumb-wrap">' + thumbHtml + '</div>' : '') +
+        '<div class="event-date-col">' +
+          '<div class="event-date">' + e.displayYear + '</div>' +
+        '</div>' +
         '<div class="event-main"><div class="event-title">' + e.title + '</div></div>' +
         '<div class="event-arrow">&#9658;</div>' +
       '</div>' +
