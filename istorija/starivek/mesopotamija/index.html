@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mesopotamija — Stari vek — Pub Quiz</title>
+<link rel="manifest" href="../../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e0c04;
+  --surface: #1c1808;
+  --surface2: #26220a;
+  --surface3: #30280c;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #7a6015;
+  --text: #f0e6d0;
+  --muted: #9a8060;
+  --border: #2e2808;
+  --border2: #3e380c;
+  --era-color: #c8a832;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(140,110,10,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(100,80,10,0.15) 0%, transparent 60%);
+}
+
+/* HEADER */
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back {
+  color: var(--gold-dim);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.header-back:hover { color: var(--gold); border-color: var(--gold-dim); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 20px; color: var(--gold2); font-weight: normal; letter-spacing: 3px; }
+.header-title p { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 2px; }
+.header-spacer { width: 80px; }
+
+/* INTRO */
+.intro-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 20px 0;
+}
+.intro-text {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.75;
+  font-style: italic;
+  border-left: 3px solid var(--era-color);
+  padding-left: 16px;
+  margin-bottom: 6px;
+}
+
+/* STATS */
+.stats-bar {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 14px 20px 0;
+}
+.stats-count { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.stats-count span { color: var(--era-color); }
+
+/* MAIN */
+.main-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 16px 20px 60px;
+}
+
+/* TIMELINE */
+.timeline { position: relative; padding-left: 28px; margin-top: 16px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border2);
+}
+
+/* EVENT */
+.event { position: relative; margin-bottom: 12px; cursor: pointer; }
+.event::before {
+  content: '';
+  position: absolute;
+  left: -24px; top: 18px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--era-color);
+  background: var(--bg);
+  transition: all 0.2s;
+  z-index: 1;
+}
+.event.open::before { background: var(--era-color); transform: scale(1.3); }
+
+.event-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--era-color);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.event:hover .event-card,
+.event.open .event-card { box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+
+.event-head {
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.event-date {
+  font-size: 10px;
+  color: var(--gold-dim);
+  white-space: nowrap;
+  min-width: 108px;
+  padding-top: 3px;
+  font-style: italic;
+  line-height: 1.4;
+}
+.event-main { flex: 1; }
+.event-title { font-size: 15px; color: var(--text); line-height: 1.35; }
+.event-arrow {
+  color: var(--muted);
+  font-size: 13px;
+  padding-top: 2px;
+  transition: transform 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.event.open .event-arrow { transform: rotate(90deg); color: var(--era-color); }
+
+/* EXPANDED BODY */
+.event-body {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+}
+.event.open .event-body { display: block; }
+
+/* Slika */
+.event-img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-top: 14px;
+  margin-bottom: 12px;
+  opacity: 0.88;
+}
+.event-img-caption {
+  font-size: 10px;
+  color: var(--gold-dim);
+  text-align: center;
+  margin-top: -8px;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.event-desc {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.75;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.event-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.event-meta-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+.event-meta-label {
+  font-size: 10px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.event-meta-val { font-size: 12px; color: var(--text); line-height: 1.5; }
+
+.event-fact {
+  margin-top: 4px;
+  padding: 10px 14px;
+  background: rgba(200,168,50,0.07);
+  border: 1px solid rgba(200,168,50,0.2);
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: #a08830;
+  font-style: italic;
+  line-height: 1.6;
+}
+.event-fact::before { content: '\2605\00A0\00A0'; color: var(--era-color); }
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 24px;
+  border-top: 1px solid var(--border2);
+  font-size: 12px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .header-title h1 { font-size: 15px; letter-spacing: 1px; }
+  .header-spacer { width: 50px; }
+  .event-date { min-width: 80px; font-size: 9px; }
+  .event-title { font-size: 14px; }
+  .event-meta-grid { grid-template-columns: 1fr; }
+  .event-img { max-height: 160px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../../index.html" class="header-back">&#8592; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#127994; MESOPOTAMIJA</h1>
+    <p>~3500 &#8211; 539 P.N.E. &nbsp;&#8226;&nbsp; KOLIJEVKA CIVILIZACIJE</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="intro-wrap">
+  <p class="intro-text">Sve što smatramo civilizacijom — pismo, zakoni, škole, porezi, čak i pivo — neko je to prvi put izmislio između dve reke u današnjem Iraku. Sumerani su pre 5000 godina rešavali iste probleme kao mi: kako organizovati društvo, kako čuvati informacije, šta uraditi kad neko prekrši pravila. Samo bez struje.</p>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-count"><span id="eventCount">7</span> klju&#269;nih doga&#273;aja</div>
+</div>
+
+<div class="main-wrap">
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<footer>&#9830; Mesopotamija &#9830; ~3500&#8211;539 p.n.e. &#9830;</footer>
+
+<script>
+var EVENTS = [
+  {
+    displayYear: '~3200 p.n.e.',
+    title: 'Izum klinastog pisma',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Babylonian_-_Cuneiform_Tablet_with_the_Gilgamesh_Flood_Myth_-_Walters_42182_-_Back.jpg/640px-Babylonian_-_Cuneiform_Tablet_with_the_Gilgamesh_Flood_Myth_-_Walters_42182_-_Back.jpg',
+    imgCaption: 'Glinena plo\u010dica sa klinastim pismom, Vavilon (Walters Art Museum)',
+    desc: 'Sumerani su imali problem koji ima svako veliko preduze\u0107e: previ\u0161e informacija, premalo memorije. Re\u0161enje? Uzeli su \u0161tapove\u010di\u0107e i po\u010deli da ure\u017eu znakove u meku glinu, koja bi se zatim pe\u010dlila. Ono \u0161to je po\u010delo kao sistem za bele\u017eenje zaliha p\u0161enice i stoke, postalo je prvo pismo na svetu. Za nekoliko vekova, tim istim znakovma pisali su poeziju, zakone i astronomske prora\u010dune.',
+    place: 'Uruk, dana\u0161nji Irak',
+    figures: 'Sumerani',
+    fact: 'Prve glinene plo\u010dice nisu zapisivale pesme ni molitve \u2014 to su ra\u010dunovodstveni dokumenti. Civilizacija je zapravo po\u010dela kao Excel tabela.'
+  },
+  {
+    displayYear: '~3000 p.n.e.',
+    title: 'Nastanak prvih gradova-dr\u017eava',
+    desc: 'Dok je ostatak sveta \u017eiveo u selima, u Mesopotamiji su nicali gradovi kakvi se nikad pre nisu videli. Ur, Uruk, Lagas \u2014 svi su imali hramove, tr\u017enice, zanatske radionice i \u010ditave ulice. Uruk je u svom vrhuncu imao mo\u017eda 80.000 stanovnika, \u0161to ga \u010dini prvim pravim gradom u istoriji. Svaki grad je imao svog boga za\u0161titnika, svog kralja i sopstvenu vojsku.',
+    place: 'Sumerska Mesopotamija (dana\u0161nji ju\u017eni Irak)',
+    figures: 'Sumerani, Akad\u017eani',
+    fact: 'Sumerani su imali i \u0161kole \u2014 zvali su ih "edubba" (ku\u0107a plo\u010dica). Prona\u0111eni su doma\u0107i zadaci starih u\u010denika, a neki su imali i \u017ealbe da u\u010ditelj udara pre\u010desto.'
+  },
+  {
+    displayYear: '~2100 p.n.e.',
+    title: 'Ep o Gilgame\u0161u \u2014 prva pri\u010da na svetu',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Tablet_V_of_the_Epic_of_Gilgamesh.jpg/480px-Tablet_V_of_the_Epic_of_Gilgamesh.jpg',
+    imgCaption: 'Plo\u010dica V Epa o Gilgame\u0161u, Sulajmanija muzej, Irak',
+    desc: 'Pre Ilijade, pre Biblije, pre svega \u2014 postojao je Gilgame\u0161. Ep o polubogom kralju Uruka koji tra\u017ei besmrtnost po\u0161to mu umre najbli\u017ei prijatelj Enkidu, zapisan je na 12 glinenih plo\u010dica pre skoro 4000 godina. Ima akcije, prijateljstva, guba, potrage i kona\u010dnog mira sa smr\u0107u. Jedna od plo\u010dica opisuje Potop koji je o\u010digledno inspirisao biblijsku pri\u010du o Noju \u2014 samo je napisana vekovima ranije.',
+    place: 'Mesopotamija',
+    figures: 'Gilgame\u0161, Enkidu, Uta-napišti',
+    fact: 'Ep o Gilgame\u0161u izgubljen je 2000 godina \u2014 sve dok ga engleski asiriolog George Smith nije prona\u0161ao 1872. u Britanskom muzeju me\u0111u hiljadama nekatalogizovanih plo\u010dica. Procitao je i bukvalno po\u010deo da ska\u010de po sobi od uzbu\u0111enja.'
+  },
+  {
+    displayYear: '~1754 p.n.e.',
+    title: 'Hamurabijev zakonik',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Milkau_Oberer_Teil_der_Stele_mit_dem_Codex_Hammurapi_369-2.jpg/320px-Milkau_Oberer_Teil_der_Stele_mit_dem_Codex_Hammurapi_369-2.jpg',
+    imgCaption: 'Gornji deo stele sa Hamurabijevim zakonikom, Louvre, Pariz',
+    desc: 'Hamurabi je shvatio da carevina bez pravila nije carevina \u2014 to je samo puno naoru\u017eanih ljudi koji se sva\u0111aju. Pa je usekao 282 zakona u bazaltnu stelu visoku skoro 2 metra i postavio je na trgu: nema izgovora da nisi znao. Sistem je bio brutalno jasan \u2014 zakon broj 229 ka\u017ee da ako graditelj napravi ku\u0107u koja se sru\u0161i i ubije vlasnika, graditelja pogube. Ali i bogati i siromašni su bili podjednako odgovorni pred istim zakonom \u2014 \u0161to je za 1754. p.n.e. bila revolucionarna ideja.',
+    place: 'Vavilon, dana\u0161nji Irak',
+    figures: 'Hamurabi, kralj Vavilona',
+    fact: 'Stela sa zakonima danas stoji u Luvru u Parizu. Prona\u0161li su je Francuzi 1901. u Iranu \u2014 Elamiti su je odavno odneli kao ratni trofej. 3800 godina putuju\u0107i zakonik.'
+  },
+  {
+    displayYear: '~900\u2013612 p.n.e.',
+    title: 'Asirsko carstvo \u2014 prva supersila terora',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Lion_hunt_of_Ashurbanipal.jpg/640px-Lion_hunt_of_Ashurbanipal.jpg',
+    imgCaption: 'Lov na lavove, reljef Asurbanipala, Britanski muzej',
+    desc: 'Asirci su bili ono \u0161to biste dobili kada bi vojska bila dr\u017eava. Imali su prvu pravu vojnu mašinu u istoriji: kova\u010dum gvo\u017e\u0111a za oru\u017eje, in\u017eenjerske jedinice za opsade, obave\u0161tajnu mre\u017eu i \u2014 namerno \u2014 politiku masovnog terora prema pokorenim narodima. Deportacije \u010ditavih populacija bile su standardna praksa: razbiti zajednicu, rasipati je po carstvu, spre\u010diti pobune. Asurbamipal je izgradio i prvu sistemski prikupljenu biblioteku \u2014 30.000 plo\u010dica u Ninivi.',
+    place: 'Niniva (danas Mosul, Irak)',
+    figures: 'Tiglatpileser III, Asarhadon, Asurbanipal',
+    fact: 'Asurbanipalova biblioteka u Ninivi bila je namerno uni\u0161tena kada su Vavilonci i Medijci sru\u0161ili grad 612. p.n.e. Arheolozi su prona\u0161li hiljade fragmenata ispr\u0161ljanih u pe\u0161\u010dani sloj \u2014 ali, ironijom, pe\u010denje gline je zapravo o\u010duval o tekstove koje vatra nije uništila.'
+  },
+  {
+    displayYear: '~600 p.n.e.',
+    title: 'Vise\u0107i vrtovi Vavilona',
+    desc: 'Nabukodonosor II je, po predanju, izgradio vise\u0107e vrtove za svoju suprugu Amitis koja je tu\u017eila za zelenilom rodnog Medijskog kraljevstva \u2014 dok je Vavilon bio ravna pe\u0161\u010dara. Konstrukcija je bila in\u017eenjersko \u010dudo: terasasti vrtovi na kamenim svodovima, sistem crpki koje su vode iz Eufrata di\u017eale gore, tro\u0161tovi koji su dr\u017eali korenje. Jedno od sedam \u010duda starog sveta \u2014 i jedino za koje nemamo definitivan arhelo\u0161ki dokaz da je stvarno postojalo.',
+    place: 'Vavilon, dana\u0161nji Irak',
+    figures: 'Nabukodonosor II',
+    fact: 'Postoji ozbiljna teorija da su Vise\u0107i vrtovi zapravo bili u Ninivi, a ne u Vavilonu \u2014 i da je Asurbanipal taj koji ih je napravio. Gre\u0161ka u anti\u010dkim izvorima, preno\u0161ena 2600 godina.'
+  },
+  {
+    displayYear: '539 p.n.e.',
+    title: 'Kir Veliki osvaja Vavilon \u2014 kraj Mesopotamije',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Cyrus_cylinder.jpg/640px-Cyrus_cylinder.jpg',
+    imgCaption: 'Kirov cilindar, Britanski muzej — prvi dokument o ljudskim pravima',
+    desc: 'Persijski kralj Kir II u\u0161ao je u Vavilon 539. p.n.e. skoro bez borbe \u2014 grad mu je otvorio kapije. Babilonci su bili iscrpljeni lo\u0161im vladanjem poslednjeg kralja Nabonida, koji je vi\u0161e voleo arheologiju nego upravljanje. Ono \u0161to je Kir uradio posle osvajanja bilo je nesvakida\u0161nje: umesto robova i deportacija, objavio je versku toleranciju i dozvolio jevrejskom narodu da se vrati iz vavilonskog su\u017eanstva u Jerusalim.',
+    place: 'Vavilon',
+    figures: 'Kir II Veliki, Nabonid',
+    fact: 'Kirov cilindar \u2014 glineni valjak sa proglasom o toleranciji \u2014 \u010desto se naziva prvom deklaracijom o ljudskim pravima u istoriji. Original je u Britanskom muzeju, a kopija stoji u sede\u017eištu UN u Njujorku.'
+  }
+];
+
+function buildEvent(e, uid) {
+  var imgHtml = '';
+  if (e.img) {
+    imgHtml = '<img src="' + e.img + '" alt="' + e.title + '" class="event-img" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'none\'">' +
+              '<p class="event-img-caption">' + (e.imgCaption || '') + '</p>';
+  }
+  return '<div class="event" id="' + uid + '" onclick="toggleEvent(\'' + uid + '\')">' +
+    '<div class="event-card">' +
+      '<div class="event-head">' +
+        '<div class="event-date">' + e.displayYear + '</div>' +
+        '<div class="event-main"><div class="event-title">' + e.title + '</div></div>' +
+        '<div class="event-arrow">&#9658;</div>' +
+      '</div>' +
+      '<div class="event-body">' +
+        imgHtml +
+        '<div class="event-desc">' + e.desc + '</div>' +
+        '<div class="event-meta-grid">' +
+          (e.place   ? '<div class="event-meta-item"><div class="event-meta-label">Lokacija</div><div class="event-meta-val">' + e.place + '</div></div>' : '') +
+          (e.figures ? '<div class="event-meta-item"><div class="event-meta-label">Klju\u010dne li\u010dnosti</div><div class="event-meta-val">' + e.figures + '</div></div>' : '') +
+        '</div>' +
+        (e.fact ? '<div class="event-fact">' + e.fact + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function toggleEvent(uid) {
+  var el = document.getElementById(uid);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.event.open').forEach(function(e) { e.classList.remove('open'); });
+  if (!isOpen) el.classList.add('open');
+}
+
+var tl = document.getElementById('timeline');
+var html = '';
+EVENTS.forEach(function(e, idx) { html += buildEvent(e, 'ev-' + idx); });
+tl.innerHTML = html;
+document.getElementById('eventCount').textContent = EVENTS.length;
+</script>
+</body>
+</html>
