@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**Pub Quiz** is a Serbian-language trivia quiz PWA (Progressive Web App). It covers 8 thematic rounds: Film, Geography, Literature, History, Sport, and more. The app is a **fully static site** — no server, no build tools, no package manager, no external dependencies.
+**Pub Quiz** is a Serbian-language trivia/reference PWA. It covers 8 thematic rounds: Film, Geography, Literature, History, Sport, and more. The app is a **fully static site** — no server, no build tools, no package manager, no external dependencies. Hosted on GitHub Pages at `https://kvikveg8.github.io/pub-quiz/`.
 
 ---
 
@@ -16,11 +16,9 @@
 | Offline | Service Worker (`sw.js`) |
 | PWA | `manifest.json` |
 | Build | **None** — edit files directly |
-| Tests | **None** |
-| CI/CD | **None** |
-| Language | Serbian (`lang="sr"`) |
+| Language | Serbian (`lang="sr"`, Latin script) |
 
-There is **no `package.json`**, no `node_modules`, no TypeScript, no linting config, no formatter config. Never introduce npm or a build step.
+There is **no `package.json`**, no `node_modules`, no TypeScript, no linting. Never introduce npm or a build step.
 
 ---
 
@@ -28,49 +26,56 @@ There is **no `package.json`**, no `node_modules`, no TypeScript, no linting con
 
 ```
 pub-quiz/
-├── index.html              # Home page — 8 rounds, all topic cards
-├── manifest.json           # PWA manifest
-├── sw.js                   # Service worker (offline caching)
-├── icon.svg                # App icon (gold/dark)
-├── CLAUDE.md               # This file
+├── index.html                    # Home page — 8 rounds, all topic cards
+├── manifest.json                 # PWA manifest
+├── sw.js                         # Service worker (offline caching)
+├── icon.svg                      # App icon (gold/dark)
+├── CLAUDE.md                     # This file
+│
+├── assets/
+│   └── img/
+│       └── mesopotamija/         # Locally hosted images (avoid Wikimedia hotlinking)
+│           ├── mapa.svg
+│           ├── klinasto.jpg
+│           ├── gilgames.jpg
+│           ├── hamurabi.jpg
+│           ├── asirci.jpg
+│           ├── gradovi.jpg
+│           ├── vrtovi.jpg
+│           └── kir.jpg
 │
 ├── kviz/
-│   └── index.html          # Interactive quiz game (timer, scoring, Q&A)
+│   └── index.html                # Interactive quiz game
 │
 ├── film/
-│   └── oskarovci/
-│       └── index.html      # Oscar winners reference table
+│   └── oskarovci/index.html      # Oscar winners reference table
 │
 ├── geografija/
-│   ├── zastave/
-│   │   └── index.html      # World flags by continent
-│   └── suncevSistem/
-│       └── index.html      # Solar system data
+│   ├── zastave/index.html        # World flags
+│   └── suncevSistem/index.html   # Solar system data
 │
 ├── knjizevnost/
-│   └── nobelovci/
-│       └── index.html      # Nobel literature prize winners
+│   └── nobelovci/index.html      # Nobel literature prize winners
 │
 ├── istorija/
-│   ├── nemanjici/
-│   │   ├── nemanjici.html  # Nemanjić dynasty interactive tree
-│   │   └── nemanjici.js    # Dynasty tree data (only standalone JS file)
-│   ├── praistorija/        # Prehistoric Serbia pages (5 sub-pages)
-│   ├── jugoslavija/        # Yugoslavia topic
-│   └── wwii/               # WWII topic
+│   ├── nemanjici/                # Nemanjić dynasty tree
+│   ├── praistorija/
+│   │   ├── paleolitik/index.html
+│   │   ├── mezolitik/index.html
+│   │   ├── neolitik/index.html
+│   │   └── bronzano/index.html
+│   └── starivek/
+│       ├── mesopotamija/index.html   ✅ implemented
+│       ├── egipat/index.html         🔜 pending
+│       ├── grcka/index.html          🔜 pending
+│       ├── rim/index.html            🔜 pending
+│       ├── kina/index.html           🔜 pending
+│       └── indija/index.html         🔜 pending
 │
 └── sport/
-    ├── nba/                # NBA records
-    ├── kosarkaske/         # Basketball legends
-    ├── fiba/               # FIBA topics
-    ├── nasi/               # Serbian athletes
-    ├── medalje/            # Olympic medals
-    ├── sportovi/           # Sports overview
-    ├── fudbalskelegende/   # Football legends
-    ├── ligasampiona/       # Champions League
-    ├── svetskikup/         # World Cup
-    ├── evropskelige/       # European leagues
-    └── domacini/           # Host cities
+    ├── nba/ kosarkaske/ fiba/ nasi/ medalje/
+    ├── sportovi/ fudbalskelegende/ ligasampiona/
+    ├── svetskikup/ evropskelige/ domacini/
 ```
 
 ---
@@ -79,218 +84,313 @@ pub-quiz/
 
 ### CSS Custom Properties
 
-All pages share this root color palette — always use variables, never hard-code hex values:
+All pages use this palette. Always use variables, never hardcode hex:
 
 ```css
 :root {
-  --bg: #1a0f05;        /* main dark brown background */
-  --surface: #241508;   /* card/panel surface */
-  --surface2: #2e1c0a;  /* slightly lighter surface */
-  --surface3: #3a2410;  /* even lighter surface */
+  --bg: #0e0a04;        /* very dark background */
+  --surface: #1c1408;   /* card surface */
+  --surface2: #261c0a;  /* slightly lighter surface */
   --gold: #c9a227;      /* primary accent */
-  --gold2: #e8c84a;     /* bright accent / headings */
-  --gold-dim: #7a6015;  /* muted gold / secondary text */
-  --text: #f5e8d0;      /* main text */
-  --muted: #9a8060;     /* secondary/helper text */
-  --border: #3a2a12;    /* subtle borders */
-  --border2: #4a3518;   /* stronger borders */
-  --wood: #5c3d1e;      /* wood-tone accents */
+  --gold2: #e8c84a;     /* bright gold / headings */
+  --gold-dim: #7a6015;  /* muted gold */
+  --text: #f0e6d0;      /* main body text */
+  --muted: #9a8060;     /* secondary text */
+  --border: #2a1e08;    /* subtle border */
+  --border2: #3a2a0c;   /* stronger border */
 }
 ```
 
-The quiz page (`kviz/index.html`) additionally defines:
-```css
---correct: #1a3d28;   --correct-b: #3a9d5f;
---wrong: #3d1a1a;     --wrong-b: #9d3a3a;
-```
+Each **era page** adds its own `--era-color` for accent theming:
+
+| Civilizacija | `--era-color` | Hex |
+|---|---|---|
+| Mesopotamija | tamno-žuta | `#c8a832` |
+| Stari Egipat | zlatno-oker | `#d4943a` |
+| Stara Grčka | plavo-siva | `#5a8ab8` |
+| Rimsko carstvo | tamno-crvena | `#c84040` |
+| Stara Kina | tamno-zelena | `#4ab860` |
+| Stara Indija | tamno-ljubičasta | `#b060c8` |
+| Paleolitik | zlatna | `#c9a227` |
+| Mezolitik | tirkizna | `#3ab8a0` |
+| Neolitik | zelena | `#4ab860` |
+| Bronzano doba | bronzana | `#c89040` |
 
 ### Typography
 
-- Font family: `Georgia, 'Times New Roman', serif` — always serif, never sans-serif
-- Headings: `color: var(--gold2)`, `font-weight: normal`, `letter-spacing: 4-6px`
-- Body text: `color: var(--text)`
-- Helper text: `color: var(--muted)`
-
-### Visual Style
-
-- Dark pub aesthetic with gold accents and warm browns
-- Responsive grid layouts (`display: grid`, `clamp()` for fluid font sizes)
-- `box-sizing: border-box; margin: 0; padding: 0;` reset on every page
-- Smooth transitions (`transition: all 0.2s`) on interactive elements
-- `border-radius: 8-12px` on cards/panels
+- Font: `Georgia, 'Times New Roman', serif` — always serif
+- Headings: `color: var(--era-color)`, `font-weight: normal`, `letter-spacing: 3px`
+- Body: `color: var(--text)`
+- Helper: `color: var(--muted)`
 
 ---
 
-## Page Conventions
+## Home Page Filter Bar Pattern
 
-### HTML Template
+The home page (`index.html`) uses **filter bars** to show/hide topic cards within a round. Sport and Istorija rounds both use this pattern.
 
-Every page follows this head structure:
+### Filter Bar HTML
 
 ```html
-<!DOCTYPE html>
-<html lang="sr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PageTitle — Pub Quiz</title>
-<link rel="manifest" href="../../manifest.json">  <!-- adjust depth -->
-<meta name="theme-color" content="#c9a227">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Pub Quiz">
-<link rel="apple-touch-icon" href="../../icon.svg">  <!-- adjust depth -->
-<style>
-/* ... embedded styles ... */
-</style>
-</head>
+<div class="sport-filter-bar" id="istorijaFilterBar">
+  <button class="sf-btn active" data-sc="all">Sve</button>
+  <button class="sf-btn" data-sc="praistorija">🦕 Praistorija</button>
+  <button class="sf-btn" data-sc="starivek">🏺 Stari vek</button>
+  <button class="sf-btn" data-sc="srednjivek">⚔️ Srednji vek</button>
+  <button class="sf-btn" data-sc="novivek">🏭 Novi vek</button>
+  <button class="sf-btn" data-sc="savremeno">🌍 Savremeno</button>
+</div>
 ```
 
-### Back Navigation
+### Topic Card with Filter Attribute
 
-Every topic page has a back link in the header. Use a relative path appropriate to the depth:
-
-- 1 level deep (`kviz/`): `href="../index.html"`
-- 2 levels deep (`film/oskarovci/`): `href="../../index.html"`
-- Category landing pages link back to the home: `href="../../index.html"`
-
-Back link HTML pattern:
 ```html
-<a href="../../index.html" class="header-back">← PUB QUIZ</a>
+<div class="topic-card" data-sc="praistorija" onclick="window.location='istorija/praistorija/paleolitik/index.html'">
 ```
 
-Or back to a category:
+### Filter JS (identical pattern for Sport and Istorija)
+
+```js
+(function() {
+  var bar = document.getElementById('istorijaFilterBar');
+  var grid = document.getElementById('istorijaTopicsGrid');
+  if (!bar || !grid) return;
+  bar.addEventListener('click', function(e) {
+    var btn = e.target.closest('.sf-btn');
+    if (!btn) return;
+    bar.querySelectorAll('.sf-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    var sc = btn.dataset.sc;
+    grid.querySelectorAll('.topic-card').forEach(function(c) {
+      c.style.display = (sc === 'all' || c.dataset.sc === sc) ? '' : 'none';
+    });
+  });
+})();
+```
+
+---
+
+## Era Page Pattern (Timeline)
+
+All Praistorija and Stari vek pages follow the **same template**. Key elements:
+
+### File Location & Back Navigation
+
+Era pages are always **3 levels deep**:
+```
+istorija/[epoha]/[tema]/index.html
+```
+
+Back link always points to home:
 ```html
-<a href="../index.html" class="header-back">← ISTORIJA</a>
+<a href="../../../index.html" class="header-back">&#8592; Pub Quiz</a>
 ```
 
-### New Topic Pages
-
-To add a new topic page, follow this pattern:
-1. Create directory: `category/topicname/`
-2. Create `category/topicname/index.html`
-3. Embed all CSS in a `<style>` block in `<head>`
-4. Embed all JS in a `<script>` block before `</body>`
-5. Add a topic card to `index.html` in the appropriate round's JavaScript array
-6. If the page should be available offline, add it to `PRECACHE` in `sw.js`
-
----
-
-## Quiz Game (`kviz/index.html`)
-
-### Question Data Format
-
-Questions are stored as a JavaScript object with category arrays:
-
-```js
-const QUESTIONS = {
-  film: [
-    { q: 'Pitanje?', a: 'Tačan odgovor', w: ['Pogrešan1', 'Pogrešan2', 'Pogrešan3'] }
-  ],
-  knjizevnost: [ /* same format */ ],
-  geografija:  [ /* same format */ ]
-};
+PWA manifest and icon also 3 levels up:
+```html
+<link rel="manifest" href="../../../manifest.json">
+<link rel="apple-touch-icon" href="../../../icon.svg">
 ```
 
-- `q` — question text (string)
-- `a` — correct answer (string)
-- `w` — array of exactly 3 wrong answers
+### Page Structure
 
-### Game Mechanics
+```html
+<header>
+  <a href="../../../index.html" class="header-back">← Pub Quiz</a>
+  <div class="header-title">
+    <h1>[ICON] NAZIV CIVILIZACIJE</h1>
+    <p>[PERIOD] • [TAGLINE]</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
 
-- **Timer**: 20 seconds per question, visual countdown bar
-- **Scoring**: 10 base points + speed bonus (up to 5 bonus points based on time remaining)
-- **Answer evaluation**: exact string match (case-insensitive is handled in code)
-- **Question counts**: 10, 15, 20, or custom
-- **Screens**: home → quiz → results (state machine via `.screen.active` class toggling)
+<!-- Optional intro paragraph (2-4 sentences, hook the reader) -->
+<div class="intro-wrap">
+  <p class="intro-text">...</p>
+</div>
 
----
+<!-- Optional map (always visible, above stats) -->
+<div class="map-wrap">
+  <div class="map-box">
+    <img src="../../../assets/img/[tema]/mapa.svg" alt="...">
+    <p class="map-caption">...</p>
+  </div>
+</div>
 
-## Service Worker (`sw.js`)
+<div class="stats-bar">
+  <div class="stats-count"><span id="eventCount">N</span> ključnih događaja</div>
+</div>
 
-The cache name is `pubquiz-v1`. The strategy is **cache-first with background refresh**:
-1. Return cached response immediately if available
-2. Always fetch from network in background and update cache
-3. Cross-origin requests (e.g., Wikipedia API) are skipped entirely
+<div class="main-wrap">
+  <div class="timeline" id="timeline"></div>
+</div>
 
-**When adding a significant new page**, add it to the `PRECACHE` array in `sw.js`:
-
-```js
-var PRECACHE = [
-  '/pub-quiz/',
-  '/pub-quiz/index.html',
-  '/pub-quiz/manifest.json',
-  '/pub-quiz/icon.svg',
-  // ... existing entries ...
-  '/pub-quiz/category/newtopic/index.html'  // add here
-];
+<footer>♦ Naziv ♦ Period ♦</footer>
 ```
 
-**When updating cached content significantly**, bump the cache version: `pubquiz-v1` → `pubquiz-v2`.
-
----
-
-## Home Page (`index.html`)
-
-The home page renders all 8 rounds and their topic cards via JavaScript. Each round is defined as a data object:
+### Event Data Structure
 
 ```js
-const rounds = [
+var EVENTS = [
   {
-    id: 'round1',
-    label: 'RUNDA 1',
-    title: 'Film & Serije',
-    icon: '🎬',
-    topics: [
-      { title: 'Oskarovci', icon: '🏆', url: 'film/oskarovci/index.html', desc: 'Opis' },
-      // ...
-    ]
-  },
-  // ...
+    displayYear: '~3200 p.n.e.',   // approximate dates use ~
+    title: 'Naslov događaja',
+    img: '../../../assets/img/[tema]/slika.jpg',   // optional, local path
+    imgCaption: 'Opis slike, izvor, muzej',          // optional
+    desc: 'Narativni opis u 4-6 rečenica...',        // see Tone section
+    place: 'Grad, danas [zemlja]',
+    figures: 'Ime1, Ime2',
+    fact: 'Zapanjujući detalj koji menja perspektivu...'  // ★ zanimljivo
+  }
 ];
 ```
 
-Adding a new topic card only requires adding an entry to the correct round's `topics` array.
+### buildEvent & toggleEvent Functions
 
----
+These are identical across all era pages. Copy exactly:
 
-## Language & Content
+```js
+function buildEvent(e, uid) {
+  var thumbHtml = e.img
+    ? '<img src="' + e.img + '" alt="" class="event-thumb" loading="lazy" onerror="this.style.display=\'none\'">'
+    : '';
+  var imgHtml = e.img
+    ? '<img src="' + e.img + '" alt="' + e.title + '" class="event-img" loading="lazy" onerror="this.style.display=\'none\';var c=this.nextElementSibling;if(c)c.style.display=\'none\'">' +
+      '<p class="event-img-caption">' + (e.imgCaption || '') + '</p>'
+    : '';
 
-- All UI text, labels, and content are in **Serbian** (Latin script, not Cyrillic)
-- Serbian months, proper nouns, and diacritics (`š`, `ć`, `č`, `ž`, `đ`) must be preserved correctly
-- Do not translate content to English
+  return '<div class="event" id="' + uid + '" onclick="toggleEvent(\'' + uid + '\')">' +
+    '<div class="event-card">' +
+      '<div class="event-head">' +
+        (thumbHtml ? '<div class="event-thumb-wrap">' + thumbHtml + '</div>' : '') +
+        '<div class="event-date-col"><div class="event-date">' + e.displayYear + '</div></div>' +
+        '<div class="event-main"><div class="event-title">' + e.title + '</div></div>' +
+        '<div class="event-arrow">&#9658;</div>' +
+      '</div>' +
+      '<div class="event-body">' +
+        imgHtml +
+        '<div class="event-desc">' + e.desc + '</div>' +
+        '<div class="event-meta-grid">' +
+          (e.place   ? '<div class="event-meta-item"><div class="event-meta-label">Lokacija</div><div class="event-meta-val">' + e.place + '</div></div>' : '') +
+          (e.figures ? '<div class="event-meta-item"><div class="event-meta-label">Kultura / Ličnosti</div><div class="event-meta-val">' + e.figures + '</div></div>' : '') +
+        '</div>' +
+        (e.fact ? '<div class="event-fact">' + e.fact + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
 
----
+function toggleEvent(uid) {
+  var el = document.getElementById(uid);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.event.open').forEach(function(e) { e.classList.remove('open'); });
+  if (!isOpen) el.classList.add('open');
+}
 
-## Development Workflow
-
-Since there is no build step:
-
-1. **Edit** HTML files directly
-2. **Test** by opening `index.html` in a browser (or via a local HTTP server for service worker support)
-3. **No linting or formatting** tools — maintain consistent style by following existing code patterns
-4. **Commit** descriptive messages in English or Serbian (the project history uses both)
-5. **Push** to the feature branch
-
-### Local Server (for PWA/SW testing)
-
-```bash
-python3 -m http.server 8000
-# then open http://localhost:8000/
+var tl = document.getElementById('timeline');
+var html = '';
+EVENTS.forEach(function(e, idx) { html += buildEvent(e, 'ev-' + idx); });
+tl.innerHTML = html;
+document.getElementById('eventCount').textContent = EVENTS.length;
 ```
 
-The service worker requires HTTPS or `localhost` — opening `file://` directly won't register it.
+---
+
+## Content Tone — "Pametan prijatelj"
+
+**Never** write bullet-point PowerPoint style. Write like a knowledgeable friend explaining history at a table — accurate, enthusiastic, conversational.
+
+### Rules
+
+1. **desc** field = 4–6 sentence narrative paragraph
+   - Šta se desilo + zašto je bitno + kako se odrazilo na buduće generacije
+   - Jedno konkretno pitanje koje je ta civilizacija rešavala (isto kao mi danas)
+   - Moderna analogija kada pomaže razumevanju
+2. **fact** field = jedan zapanjujući detalj koji menja perspektivu
+   - Počinje sa "Niko vam nije rekao..." ili iznenađujućim kontrastom
+   - Ne sme biti ono što bi svako pretpostavio
+3. Svi datumi su precizni. Sva imena su tačna. Sve činjenice proverene.
+4. Ton je za odrasle, nije udžbenik, nije Wikipedia.
+
+### Primer dobrog desc-a (Hamurabijev zakonik)
+
+> "Hamurabi je shvatio da carevina bez pravila nije carevina — to je samo puno naoružanih ljudi koji se svađaju. Pa je usekao 282 zakona u bazaltnu stelu visoku skoro 2 metra i postavio je na trgu: nema izgovora da nisi znao. Sistem je bio brutalno jasan — zakon broj 229 kaže da ako graditelj napravi kuću koja se sruši i ubije vlasnika, graditelja pogube. Ali i bogati i siromašni su bili podjednako odgovorni pred istim zakonom — što je za 1754. p.n.e. bila revolucionarna ideja."
+
+### Primer dobrog fact-a
+
+> "Stela sa zakonima danas stoji u Luvru u Parizu. Pronašli su je Francuzi 1901. u Iranu — Elamiti su je odavno odneli kao ratni trofej. 3800 godina putujući zakonik."
+
+---
+
+## Images — Lokalno Hostovanje
+
+**Nikada** ne koristiti Wikimedia hotlink direktno u HTML — vraća 429 (rate limit).
+
+### Workflow za slike
+
+1. Nađi sliku na Wikimedia Commons
+2. Proveri tačan URL pomoću API-ja:
+   ```
+   https://commons.wikimedia.org/w/api.php?action=query&titles=File:FILENAME.jpg&prop=imageinfo&iiprop=url&format=json
+   ```
+3. Preuzmi lokalno:
+   ```bash
+   curl -L -A "Mozilla/5.0" -o naziv.jpg "https://upload.wikimedia.org/wikipedia/commons/..."
+   ```
+4. Resize ako je veće od 1MB:
+   ```bash
+   sips -Z 800 slika.jpg --out slika.jpg
+   ```
+5. Sačuvaj u: `assets/img/[tema]/naziv.jpg`
+6. U HTML-u koristi relativnu putanju: `../../../assets/img/[tema]/naziv.jpg`
+
+### Napomene za URL-ove
+
+- Koristiti **direktne URL-ove bez `/thumb/`** — npr. `commons/a/ab/File.jpg`
+- SVG mape: skinuti kao `.svg` (ne `.svg.png`)
+- Proveriti da fajl nije manji od ~50KB (4KB = HTML greška, ne slika)
+
+---
+
+## Back Navigation Depths
+
+| Lokacija fajla | Back link href |
+|---|---|
+| `kategorija/tema/index.html` | `../../index.html` |
+| `istorija/epoha/tema/index.html` | `../../../index.html` |
+| `kviz/index.html` | `../index.html` |
+
+Dugme uvek glasi: **`← Pub Quiz`** (ne "← Istorija", ne "← Sport")
+
+---
+
+## Stari vek — Plan
+
+6 civilizacija, sve `data-sc="starivek"` u index.html. Implementacioni redosled:
+
+| # | Civilizacija | Fajl | Status |
+|---|---|---|---|
+| 1 | Mesopotamija | `istorija/starivek/mesopotamija/index.html` | ✅ done |
+| 2 | Stari Egipat | `istorija/starivek/egipat/index.html` | 🔜 |
+| 3 | Stara Grčka | `istorija/starivek/grcka/index.html` | 🔜 |
+| 4 | Rimsko carstvo | `istorija/starivek/rim/index.html` | 🔜 |
+| 5 | Stara Kina | `istorija/starivek/kina/index.html` | 🔜 |
+| 6 | Stara Indija | `istorija/starivek/indija/index.html` | 🔜 |
+
+Za svaku: ~10–13 događaja, lokalno hostovane slike, mapa na vrhu, "pametan prijatelj" ton.
 
 ---
 
 ## Key Constraints
 
-- **No npm / no build tools** — never add `package.json`, webpack, Vite, etc.
-- **No external CSS frameworks** — no Tailwind, Bootstrap, etc.
-- **No external JS libraries** — no React, Vue, jQuery, etc.
-- **No TypeScript** — stay with vanilla JS
-- **No separate CSS files** — all styles go in `<style>` blocks inside each HTML file
-- **No separate JS files** (except `sw.js` and `nemanjici.js` which are special cases)
-- **Always use CSS custom properties** from the established palette
-- **Always use Georgia serif font** — never switch to sans-serif
-- **Keep all text in Serbian**
+- **No npm / no build tools**
+- **No external CSS frameworks** (no Tailwind, Bootstrap)
+- **No external JS libraries** (no React, Vue, jQuery)
+- **No TypeScript**
+- **No separate CSS/JS files** (except `sw.js` and `nemanjici.js`)
+- **Always use CSS custom properties** from established palette
+- **Always use Georgia serif font**
+- **All text in Serbian** (Latin script, diacritics: š ć č ž đ)
+- **Never hotlink Wikimedia images** — download and host locally
+- **Back button always says "← Pub Quiz"**
