@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stara Grčka — Stari vek — Pub Quiz</title>
+<link rel="manifest" href="../../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #04080e;
+  --surface: #08101c;
+  --surface2: #0c1828;
+  --surface3: #102030;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #5a7a9a;
+  --text: #e0ecf8;
+  --muted: #7090b0;
+  --border: #101828;
+  --border2: #182438;
+  --era-color: #5a8ab8;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(30,60,120,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(20,50,100,0.15) 0%, transparent 60%);
+}
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back {
+  color: var(--gold-dim);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.header-back:hover { color: var(--era-color); border-color: var(--gold-dim); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 20px; color: var(--gold2); font-weight: normal; letter-spacing: 3px; }
+.header-title p { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 2px; }
+.header-spacer { width: 80px; }
+.intro-wrap { max-width: 860px; margin: 0 auto; padding: 28px 20px 0; }
+.intro-text {
+  font-size: 15px; color: var(--muted); line-height: 1.75;
+  font-style: italic; border-left: 3px solid var(--era-color);
+  padding-left: 16px; margin-bottom: 6px;
+}
+.stats-bar { max-width: 860px; margin: 0 auto; padding: 14px 20px 0; }
+.stats-count { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.stats-count span { color: var(--era-color); }
+.main-wrap { max-width: 860px; margin: 0 auto; padding: 16px 20px 60px; }
+.timeline { position: relative; padding-left: 28px; margin-top: 16px; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+  width: 2px; background: var(--border2);
+}
+.event { position: relative; margin-bottom: 12px; cursor: pointer; }
+.event::before {
+  content: ''; position: absolute; left: -24px; top: 18px;
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--era-color); background: var(--bg);
+  transition: all 0.2s; z-index: 1;
+}
+.event.open::before { background: var(--era-color); transform: scale(1.3); }
+.event-card {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-left: 3px solid var(--era-color); border-radius: 8px;
+  overflow: hidden; transition: box-shadow 0.2s;
+}
+.event:hover .event-card, .event.open .event-card { box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+.event-head { padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+.event-thumb-wrap {
+  flex-shrink: 0; width: 64px; height: 52px;
+  border-radius: 5px; overflow: hidden; border: 1px solid var(--border2);
+}
+.event-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+.event-date-col { flex-shrink: 0; }
+.event-date { font-size: 10px; color: var(--gold-dim); white-space: nowrap; min-width: 90px; font-style: italic; line-height: 1.4; }
+.event-main { flex: 1; }
+.event-title { font-size: 15px; color: var(--text); line-height: 1.35; }
+.event-arrow { color: var(--muted); font-size: 13px; padding-top: 2px; transition: transform 0.2s, color 0.2s; flex-shrink: 0; }
+.event.open .event-arrow { transform: rotate(90deg); color: var(--era-color); }
+.event-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.event.open .event-body { display: block; }
+.event-img { width: 100%; max-height: 220px; object-fit: cover; border-radius: 6px; margin-top: 14px; margin-bottom: 12px; opacity: 0.88; }
+.event-img-caption { font-size: 10px; color: var(--gold-dim); text-align: center; margin-top: -8px; margin-bottom: 12px; font-style: italic; }
+.event-desc { font-size: 13.5px; color: var(--muted); line-height: 1.75; margin-top: 12px; margin-bottom: 12px; }
+.event-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin-bottom: 10px; }
+.event-meta-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+.event-meta-label { font-size: 10px; color: var(--gold-dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.event-meta-val { font-size: 12px; color: var(--text); line-height: 1.5; }
+.event-fact {
+  margin-top: 4px; padding: 10px 14px;
+  background: rgba(90,138,184,0.07); border: 1px solid rgba(90,138,184,0.2);
+  border-radius: 6px; font-size: 12.5px; color: #6090b0;
+  font-style: italic; line-height: 1.6;
+}
+.event-fact::before { content: '\2605\00A0\00A0'; color: var(--era-color); }
+.map-wrap { max-width: 860px; margin: 20px auto 0; padding: 0 20px; }
+.map-box { border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.map-box img { width: 100%; max-height: 340px; object-fit: cover; object-position: center; display: block; }
+.map-caption { padding: 8px 14px; font-size: 11px; color: var(--gold-dim); font-style: italic; text-align: center; border-top: 1px solid var(--border); }
+footer { text-align: center; padding: 24px; border-top: 1px solid var(--border2); font-size: 12px; color: var(--gold-dim); letter-spacing: 2px; }
+@media (max-width: 600px) {
+  .header-title h1 { font-size: 15px; letter-spacing: 1px; }
+  .header-spacer { width: 50px; }
+  .event-date { min-width: 80px; font-size: 9px; }
+  .event-title { font-size: 14px; }
+  .event-meta-grid { grid-template-columns: 1fr; }
+  .event-img { max-height: 160px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../../index.html" class="header-back">&#8592; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#127981; STARA GR&#268;KA</h1>
+    <p>~800 &#8211; 146 P.N.E. &nbsp;&#8226;&nbsp; KOLIJEVKA DEMOKRATIJE</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="intro-wrap">
+  <p class="intro-text">Nikada jedan narod nije imao toliko uticaja na civilizaciju nesrazmerno svojoj veličini. Stara Grčka nikada nije bila jedinstvena država — bila je mozaik međusobno zaraćenih gradova-država koji su se cepa između suparništva i saradnje. Iz te tenzije izniklo je sve što i danas gradimo: demokratija, filozofija, pozorište, olimpijske igre, medicina, geometrija. Mi još uvek živimo u svetu koji su Grci zamislili.</p>
+</div>
+
+<div class="map-wrap">
+  <div class="map-box">
+    <img src="../../../assets/img/grcka/mapa.jpg" alt="Mapa Stare Grčke — Akropolj Atine">
+    <p class="map-caption">Stara Grčka — gradovi-države i kolonije po Mediteranu &#8226; Wikimedia Commons</p>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-count"><span id="eventCount">9</span> klju&#269;nih doga&#273;aja</div>
+</div>
+
+<div class="main-wrap">
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<footer>&#9830; Stara Gr&#269;ka &#9830; ~800&#8211;146 p.n.e. &#9830;</footer>
+
+<script>
+var EVENTS = [
+  {
+    displayYear: '776 p.n.e.',
+    title: 'Prve Olimpijske igre',
+    img: '../../../assets/img/grcka/diskobacac.jpg',
+    imgCaption: 'Diskobacač — rimska kopija grčkog originala Mirona (~450 p.n.e.), Nacionalni muzej, Rim',
+    desc: 'U Olimpiji, posvećenoj Zevsu, svake četiri godine sve grčke ratove je trebalo zaustaviti. Sveta olimpijska primirja davala su putnicima i sportistima slobodan prolaz čak i kroz ratom zahvaćene teritorije. Prve igre 776. p.n.e. imale su samo jednu disciplinu — trku na 192 metra. Postepeno su dodavane rvanje, pentathlon, trke kola, i na kraju pankration — kombinacija boksa i rvanja bez gotovo ikakvih pravila. Pobednici nisu dobijali medalje — dobijali su venac od maslinovog lišća. Ali čitav grad bi ih dočekao kao heroje, pesnici bi pisali ode u njihovu čast, a neki polisi bi rušili deo zidina da pobednik ne mora da ulazi kroz kapiju kao smrtnik.',
+    place: 'Olimpija, Peloponez, Grčka',
+    figures: 'Koreb iz Elide (prvi zabeleženi pobednik)',
+    fact: 'Žene nisu smele ni da gledaju Olimpijske igre — pod pretnjom smrtne kazne. Jedina izuzetak bila je sveštenica Demetre. Međutim, žene su imale sopstvene igre — Hereje, u čast boginje Here — koje su se odvijale na istom stadionu.'
+  },
+  {
+    displayYear: '508 p.n.e.',
+    title: 'Kleisten uvodi demokratiju u Atini',
+    desc: 'Kleisten nije izmislio demokratiju da bi bio velikodušan — izmislio ju je da bi pobedio u političkoj borbi. Kada je izgubio od aristokratske frakcije, obratio se direktno narodu i ponudio nešto što nijedan aristokrata nije: pravo glasa svim slobodnim građanima. Sistem koji je napravio bio je sofisticiran: Bule, savet od 500 članova birano žrebom, upravljao je svakodnevnim poslovima; Eklesija, skupština svih građana, donosila je ključne odluke. Da bi sprečio tiranije, uveo je i ostrakizam — jednom godišnje Atinjani su mogli glasanjem proterati bilo kog građanina na 10 godina, bez suđenja i bez razloga.',
+    place: 'Atina, Atika, Grčka',
+    figures: 'Kleisten, Perikle',
+    fact: 'Atinska demokratija je isključivala žene, robove i strance — koji su zajedno činili više od 80% stanovništva. Od oko 300.000 stanovnika Atike, pravo glasa imalo je svega 30.000–40.000 muškaraca. Po modernim standardima, to bi bila plutokratija, ne demokratija. Ali za 508. p.n.e., bio je to revolucionarni skok.'
+  },
+  {
+    displayYear: '490 p.n.e.',
+    title: 'Bitka kod Maratona — 10.000 Grka zaustavljaju persijsku imperiju',
+    desc: 'Persijska imperija je bila kolosalna — prostirala se od Indije do Egipta i imala je vojsku od možda 25.000 vojnika koji su se iskrcali u Maratonu sa ciljem da pokore Atinu. Atinjani su imali 10.000 hoplita i — ništa više. Poslanik je istrčao 240 km do Sparte da traži pojačanje; Spartanci su rekli da čekaju na kraj verskog praznika. Atinjani su se borili sami. Strateg Miltiijad je iskoristio teren i falangu na neočekivan način — napali su persijsku liniju trčeći, izbegavajući persijske strelce. Pobedili su. Persijci su se povukli na brodove.',
+    place: 'Marathon, Atika, Grčka',
+    figures: 'Miltijad, Temistokle, Datis (persijski general)',
+    fact: 'Glasnik Fidipid nije istrčao 42 km od Maratona do Atine da javi pobedu — ta priča je izmišljotina iz 19. veka. Istoričar Herodot piše da je Fidipid istrčao 240 km do Sparte i nazad PRE bitke. Moderni maraton od 42 km izmišljen je za Olimpijske igre 1896. i baziran je na fikciji, ne na istorijskim izvorima.'
+  },
+  {
+    displayYear: '480 p.n.e.',
+    title: 'Termopile — 300 Spartanaca i mit koji traje 2500 godina',
+    img: '../../../assets/img/grcka/termopile.jpg',
+    imgCaption: 'Leonida na Termopilama — slika Žak-Luj Davida (1814), Luvr, Pariz',
+    desc: 'Persijski car Kserkso je doveo vojsku od možda 200.000 vojnika — ili više, tačan broj je predmet istoričarskih rasprava. Jedini prolaz u Grčku bila je uska klisura kod Termopila, gde je širina terena poništavala prednost u broju. Spartanski kralj Leonida je sa 300 spartanskih elitnih vojnika (i oko 7.000 saveznika koji se obično zaboravljaju) branio prolaz tri dana. Kada ih je Persijanac Efijalt izdao pokazujući stražnji put, Leonida je pustio saveznike da se povuku, a sam ostao sa Spartancima. Svi su poginuli. Persijci su prošli — ali tri dana kašnjenja dalo je Grcima vreme za evakuaciju Atine i pripremu morske bitke kod Salamine.',
+    place: 'Termopilski prolaz, Tesalija, Grčka',
+    figures: 'Leonida I, Kserkso I, Efijalt',
+    fact: 'Spartanski vojnici su znali da idu u smrt. Plutarh beleži da je Leonidina žena pitala šta da radi — odgovorio je: "Udaj se za dobrog muža i rodi dobru decu." Na persijski zahtev da predaju oružje, navodni odgovor je bio "Molon labe" — "Dođi i uzmi." Ova dva slova su i danas moto US Special Operations Command-a.'
+  },
+  {
+    displayYear: '447 p.n.e.',
+    title: 'Izgradnja Partenona — zlatno doba Atine',
+    img: '../../../assets/img/grcka/partenon.jpg',
+    imgCaption: 'Partenon na Akropolju, Atina — hram boginje Atene (447–432 p.n.e.)',
+    desc: 'Perikle je bio vođa Atine u njenom najslavnijem periodu — i bio je svestan toga. Kada je ostao bez persijskog neprijatelja posle pobede kod Salamine, okrenuo je sav politički i novčani kapital ka nečemu drugom: izgradnji savršenog grada. Partenon, Propileji, Erehtejon, kip Atene visok 12 metara od zlata i slonovače unutar hrama — sve je sagrađeno za manje od 50 godina. Periklov Atina je ujedno bila dom Sokrata, Sofokla, Euripida, Aristofana i Tukidida. Nikada na jednom mestu u isto vreme nije živelo toliko genija.',
+    place: 'Akropolj, Atina, Grčka',
+    figures: 'Perikle, arhitekt Iktinos, vajar Fidija',
+    fact: 'Englezi su 1801. uzeli polovinu skulptura sa Partenona — takozvane Elginove mermere. Lord Elgin je dobio dozvolu od osmanskih vlasti koje su tada vladali Grčkom, a koje Grci smatraju nezakonitim vlastodršcima. Grčka od tada traži povratak. Britanski muzej odbija, tvrdeći da bi ih Grci "bolje čuvali" — ali to je argument koji se ne drži, jer Atina ima novi muzej Akropolja izgrađen 2009. sa celim krilom specijalno predviđenim za ove skulpture.'
+  },
+  {
+    displayYear: '399 p.n.e.',
+    title: 'Suđenje i smrt Sokrata',
+    img: '../../../assets/img/grcka/sokrat.jpg',
+    imgCaption: 'Bista Sokrata — Nacionalni muzej, Napulj (rimska kopija grčkog originala)',
+    desc: 'Sokrat nije napisao ni reč — sve što znamo o njemu potiče od njegovih učenika, pre svega Platona. Bio je ružan, siromašan, bos, uvek na agori i uvek postavljao pitanja koja su ljude terala da preispitaju svako uverenje koje imaju. Atina ga je optužila za "kvarenje omladine" i "bezbožnost" — stvarni razlog je bio politički, jer su mu mnogi učenici bili saradnici oligarhije koja je srušila demokratiju. Imao je 70 godina. Mogao je da pobegne — prijatelji su mu nudili put. Odbio je, tvrdeći da bi bekstvo značilo nepoštovanje zakona kojima je živeo. Popio je čašu kukute i umro okružen učenicima.',
+    place: 'Atina, Grčka',
+    figures: 'Sokrat, Platon, Kriton',
+    fact: 'Sokrat se na suđenju nije branio onako kako je trebalo — umesto da izmoli milost, davao je govore koji su sudije još više iritirali. Kad je izrečena smrtna kazna, predložio je kao alternativnu kaznu... besplatan obrok do kraja života u Pritaneju, počast koja se davala olimpijskim pobednicima. Sudije su to shvatile kao podsmeh i glasale za smrt sa još većom većinom nego na prvom glasanju.'
+  },
+  {
+    displayYear: '334 p.n.e.',
+    title: 'Aleksandar Makedonski osvaja svet',
+    img: '../../../assets/img/grcka/aleksandar.jpg',
+    imgCaption: 'Aleksandar Veliki — mozaik iz Pompeje (kopija grčke slike ~300 p.n.e.), Napulj',
+    desc: 'Aleksandar je imao 22 godine kada je krenuo u osvajanje Persijskog carstva, i 32 kada je umro — imajući tada najveće carstvo koje je svet do tada video. Za 10 godina pohoda prošao je 30.000 km, od Makedonije do današnjeg Pakistana, pobeđujući u svakoj bici. Učio ga je Aristotel lično, i Aleksandar je nosio Ilijadu uz mač i spavao sa njom pod jastukom. Svuda gde je dolazio, osnivao je gradove nazvane Aleksandrija — njih 70. Najpoznatija, u Egiptu, postala je centar nauke i kulture antičkog sveta.',
+    place: 'Od Makedonije do Indije',
+    figures: 'Aleksandar III Makedonski, Aristotel, Darije III',
+    fact: 'Aleksandar nikada nije izgubio bitku. Ali u Indiji, na reci Hefasis, njegova vojska je odbila da ide dalje — bili su iscrpljeni posle 10 godina pohoda. Aleksandar se zatvorio u šator tri dana, plakao i odbijao hranu. Na kraju je popustio i okrenuo se nazad. Bio je to jedini put u životu da mu je nešto rečeno "ne".'
+  },
+  {
+    displayYear: '323 p.n.e.',
+    title: 'Smrt Aleksandra u Vavilonu',
+    desc: 'Aleksandar je umro u Vavilonu juna 323. p.n.e., u 32. godini. Uzrok smrti je nerazjašnjen i dan-danas: tifus, trovanje vodom, Zapadni Nil virus, trovanje arsenikom ili prosto kombinacija pianske groznice i alkohola. Nije ostavio jasnog naslednika — kada su ga pitali kome ostavlja carstvo, navodno je rekao "najjačem." Generalima je trebalo samo 20 godina da ga podele na nekoliko kraljevstava, u ratu svakog sa svakim. Aleksandrov san o jedinstvenoj grčko-persijskoj civilizaciji raspao se zajedno s njim.',
+    place: 'Vavilon (danas Irak)',
+    figures: 'Aleksandar Veliki, Ptolemej, Seleuk, Antipater',
+    fact: 'Aleksandrovo telo je stavljeno u med da se sačuva dok se ne odluči gde će biti sahranjeno. Ptolemej ga je "ukrao" i odneo u Egipat, jer telo osnivača carstva davalo je legitimitet onome ko ga poseduje. Telo je završilo u Aleksandriji, u zlatnom sanduku. Gde je danas — niko ne zna. Grob je izgubljen negde u 4. veku n.e.'
+  },
+  {
+    displayYear: '146 p.n.e.',
+    title: 'Rim osvaja Grčku — ali Grčka osvaja Rim',
+    desc: 'Rimski general Lucije Mumije je 146. p.n.e. sravnio Korint sa zemljom, ubio sve muškarce, prodao žene i decu u roblje i poslao sve vredne predmete u Rim. Grčka je postala rimska provincija Ahaja. Ali rimski pesnik Horacij je napisao jednu od najmudrijih rečenica antike: "Graecia capta ferum victorem cepit" — "Zarobljena Grčka zarobila je svog divljeg pobednika." Rimljani su preuzeli grčke bogove (samo im promenili imena), grčku filozofiju, grčku arhitekturu, grčku književnost, grčki jezik za obrazovane ljude. Bez Grčke, ne bi bilo rimske civilizacije kakvu znamo — a bez rimske civilizacije, ne bi bilo Evrope.',
+    place: 'Korint i cela Grčka',
+    figures: 'Lucije Mumije, Polibije',
+    fact: 'Kada su Rimljani pokorili Grčku, bogati Rimljani su počeli da šalju decu u Atinu na studije — kao što danas bogati roditelji šalju decu na Harvard. Grčki učitelji i filozofi su postali cenjeni u Rimu, često kao oslobođeni robovi koji su predavali decu svojih bivših gospodara. Poraz je pretvoren u kulturnu dominaciju.'
+  }
+];
+
+function buildEvent(e, uid) {
+  var thumbHtml = e.img
+    ? '<img src="' + e.img + '" alt="" class="event-thumb" loading="lazy" onerror="this.style.display=\'none\'">'
+    : '';
+  var imgHtml = e.img
+    ? '<img src="' + e.img + '" alt="' + e.title + '" class="event-img" loading="lazy" onerror="this.style.display=\'none\';var c=this.nextElementSibling;if(c)c.style.display=\'none\'">' +
+      '<p class="event-img-caption">' + (e.imgCaption || '') + '</p>'
+    : '';
+  return '<div class="event" id="' + uid + '" onclick="toggleEvent(\'' + uid + '\')">' +
+    '<div class="event-card">' +
+      '<div class="event-head">' +
+        (thumbHtml ? '<div class="event-thumb-wrap">' + thumbHtml + '</div>' : '') +
+        '<div class="event-date-col"><div class="event-date">' + e.displayYear + '</div></div>' +
+        '<div class="event-main"><div class="event-title">' + e.title + '</div></div>' +
+        '<div class="event-arrow">&#9658;</div>' +
+      '</div>' +
+      '<div class="event-body">' +
+        imgHtml +
+        '<div class="event-desc">' + e.desc + '</div>' +
+        '<div class="event-meta-grid">' +
+          (e.place   ? '<div class="event-meta-item"><div class="event-meta-label">Lokacija</div><div class="event-meta-val">' + e.place + '</div></div>' : '') +
+          (e.figures ? '<div class="event-meta-item"><div class="event-meta-label">Li&#269;nosti</div><div class="event-meta-val">' + e.figures + '</div></div>' : '') +
+        '</div>' +
+        (e.fact ? '<div class="event-fact">' + e.fact + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function toggleEvent(uid) {
+  var el = document.getElementById(uid);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.event.open').forEach(function(e) { e.classList.remove('open'); });
+  if (!isOpen) el.classList.add('open');
+}
+
+var tl = document.getElementById('timeline');
+var html = '';
+EVENTS.forEach(function(e, idx) { html += buildEvent(e, 'ev-' + idx); });
+tl.innerHTML = html;
+document.getElementById('eventCount').textContent = EVENTS.length;
+</script>
+</body>
+</html>

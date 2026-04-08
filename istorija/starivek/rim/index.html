@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rimsko carstvo — Stari vek — Pub Quiz</title>
+<link rel="manifest" href="../../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e0404;
+  --surface: #1c0808;
+  --surface2: #261010;
+  --surface3: #301818;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #8a5050;
+  --text: #f0e0e0;
+  --muted: #a07070;
+  --border: #2e1010;
+  --border2: #3e1818;
+  --era-color: #c84040;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(140,20,20,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(100,15,15,0.15) 0%, transparent 60%);
+}
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back {
+  color: var(--gold-dim);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.header-back:hover { color: var(--era-color); border-color: var(--gold-dim); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 20px; color: var(--gold2); font-weight: normal; letter-spacing: 3px; }
+.header-title p { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 2px; }
+.header-spacer { width: 80px; }
+.intro-wrap { max-width: 860px; margin: 0 auto; padding: 28px 20px 0; }
+.intro-text {
+  font-size: 15px; color: var(--muted); line-height: 1.75;
+  font-style: italic; border-left: 3px solid var(--era-color);
+  padding-left: 16px; margin-bottom: 6px;
+}
+.stats-bar { max-width: 860px; margin: 0 auto; padding: 14px 20px 0; }
+.stats-count { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.stats-count span { color: var(--era-color); }
+.main-wrap { max-width: 860px; margin: 0 auto; padding: 16px 20px 60px; }
+.timeline { position: relative; padding-left: 28px; margin-top: 16px; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+  width: 2px; background: var(--border2);
+}
+.event { position: relative; margin-bottom: 12px; cursor: pointer; }
+.event::before {
+  content: ''; position: absolute; left: -24px; top: 18px;
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--era-color); background: var(--bg);
+  transition: all 0.2s; z-index: 1;
+}
+.event.open::before { background: var(--era-color); transform: scale(1.3); }
+.event-card {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-left: 3px solid var(--era-color); border-radius: 8px;
+  overflow: hidden; transition: box-shadow 0.2s;
+}
+.event:hover .event-card, .event.open .event-card { box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+.event-head { padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+.event-thumb-wrap {
+  flex-shrink: 0; width: 64px; height: 52px;
+  border-radius: 5px; overflow: hidden; border: 1px solid var(--border2);
+}
+.event-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+.event-date-col { flex-shrink: 0; }
+.event-date { font-size: 10px; color: var(--gold-dim); white-space: nowrap; min-width: 90px; font-style: italic; line-height: 1.4; }
+.event-main { flex: 1; }
+.event-title { font-size: 15px; color: var(--text); line-height: 1.35; }
+.event-arrow { color: var(--muted); font-size: 13px; padding-top: 2px; transition: transform 0.2s, color 0.2s; flex-shrink: 0; }
+.event.open .event-arrow { transform: rotate(90deg); color: var(--era-color); }
+.event-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.event.open .event-body { display: block; }
+.event-img { width: 100%; max-height: 220px; object-fit: cover; border-radius: 6px; margin-top: 14px; margin-bottom: 12px; opacity: 0.88; }
+.event-img-caption { font-size: 10px; color: var(--gold-dim); text-align: center; margin-top: -8px; margin-bottom: 12px; font-style: italic; }
+.event-desc { font-size: 13.5px; color: var(--muted); line-height: 1.75; margin-top: 12px; margin-bottom: 12px; }
+.event-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin-bottom: 10px; }
+.event-meta-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+.event-meta-label { font-size: 10px; color: var(--gold-dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.event-meta-val { font-size: 12px; color: var(--text); line-height: 1.5; }
+.event-fact {
+  margin-top: 4px; padding: 10px 14px;
+  background: rgba(200,64,64,0.07); border: 1px solid rgba(200,64,64,0.2);
+  border-radius: 6px; font-size: 12.5px; color: #a04040;
+  font-style: italic; line-height: 1.6;
+}
+.event-fact::before { content: '\2605\00A0\00A0'; color: var(--era-color); }
+.map-wrap { max-width: 860px; margin: 20px auto 0; padding: 0 20px; }
+.map-box { border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.map-box img { width: 100%; max-height: 340px; object-fit: cover; object-position: center; display: block; }
+.map-caption { padding: 8px 14px; font-size: 11px; color: var(--gold-dim); font-style: italic; text-align: center; border-top: 1px solid var(--border); }
+footer { text-align: center; padding: 24px; border-top: 1px solid var(--border2); font-size: 12px; color: var(--gold-dim); letter-spacing: 2px; }
+@media (max-width: 600px) {
+  .header-title h1 { font-size: 15px; letter-spacing: 1px; }
+  .header-spacer { width: 50px; }
+  .event-date { min-width: 80px; font-size: 9px; }
+  .event-title { font-size: 14px; }
+  .event-meta-grid { grid-template-columns: 1fr; }
+  .event-img { max-height: 160px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../../index.html" class="header-back">&#8592; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#129413; RIMSKO CARSTVO</h1>
+    <p>753 P.N.E. &#8211; 476 N.E. &nbsp;&#8226;&nbsp; OD SELA DO CARSTVA</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="intro-wrap">
+  <p class="intro-text">Rim je počeo kao malo selo na sedam brežuljaka uz Tibar i završio kao carstvo koje je obuhvatalo ceo Mediteran — od Škotske do Mesopotomije. Trajao je toliko dugo da su Rimljani u svom padu zaboravili šta je bio njihov uspon. Pravo, inženjering, vojska, pravo, administracija, jezik — sve što je Evropa gradila posle pada Rima, gradila je na rimskim temeljima. Mi i danas živimo u gradu koji su Rimljani zamislili.</p>
+</div>
+
+<div class="map-wrap">
+  <div class="map-box">
+    <img src="../../../assets/img/rim/mapa.svg" alt="Mapa Rimskog carstva u svom vrhuncu">
+    <p class="map-caption">Rimsko carstvo u svom vrhuncu (~117 n.e.) — od Britanije do Mesopotamije &#8226; Wikimedia Commons</p>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-count"><span id="eventCount">10</span> klju&#269;nih doga&#273;aja</div>
+</div>
+
+<div class="main-wrap">
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<footer>&#9830; Rimsko carstvo &#9830; 753 p.n.e.&#8211;476 n.e. &#9830;</footer>
+
+<script>
+var EVENTS = [
+  {
+    displayYear: '753 p.n.e.',
+    title: 'Osnivanje Rima — Romul i Rem',
+    desc: 'Prema rimskom mitu, blizanci Romul i Rem, sinovi boga Marsa, hranjeni su vučicom na obalama Tibra. Odrasli su, pa se posvađali oko toga ko će biti osnivač i vladar novog grada — i Romul je ubio Rema. Ovo je mit, ali sadrži nešto istinito: Rim je nastao kao mala naseobina na brežuljku Palatin oko 753. p.n.e., i od samog početka je bio mesto u kom je moć bila važnija od krvi. Romul je, prema legendi, pozvao izbeglice, odbegle robove i kriminalce svih vrsta da dođu i grade novi grad. Rim je od prvog dana bio multikulturalno, nasilno i ambiciozno mesto.',
+    place: 'Rim, Lacijum, Italija',
+    figures: 'Romul, Rem',
+    fact: 'Rimljani su prihvatali i slavili priču o tome da su ih osnovali brat-ubica i potomci izbeglica — jer je ta priča govorila nešto suštinsko o tome šta Rim jeste: ne pleme koje brani svoju zemlju, nego projekt za sve koji su dovoljno jaki i ambiciozni da mu se pridruže.'
+  },
+  {
+    displayYear: '509 p.n.e.',
+    title: 'Rimska republika — kraj kraljevstva',
+    desc: 'Poslednji rimski kralj, Tarkvinije Oholi, bio je toliko omražen da su ga Rimljani proteali i zakleli se da više nikad neće imati kralja. Umesto toga, uspostavili su republiku: dva konzula birani godišnje, Senat koji je savetovao, narodna skupština koja je glasala. Sistem je bio dizajniran da nijedan čovek ne može da zadrži vlast duže od godinu dana. Pet vekova ova mašina za upravljanje radila je — uz krize, građanske ratove i diktature — ali radila je. Rimska republika je bila direktni uzor osnivačima SAD, koji su kopirali njen sistem podele vlasti, dvodomni kongres i konzularno predsedništvo.',
+    place: 'Rim, Italija',
+    figures: 'Lucije Junije Brut, Tarkvinije Oholi',
+    fact: 'Reč "diktator" u Rimu nije bila uvreda — bila je zvanična funkcija. U vanrednim okolnostima, Senat je mogao da imenuje diktatora na maksimalno 6 meseci sa punom vlašću. Cincinnatus je 458. p.n.e. imenovan za diktatora dok je orao njivu, rešio krizu za 15 dana i vratio se na farmu. Američki predsednički kandidat Džordž Vašington citirao je Cincinnatusa kao ideal: čovek koji se odriče vlasti.'
+  },
+  {
+    displayYear: '218–202 p.n.e.',
+    title: 'Hanibal prelazi Alpe — Kartagina napada Rim',
+    img: '../../../assets/img/rim/hanibal.jpg',
+    imgCaption: 'Hanibal prelazi Alpe sa slonovima — slika iz 19. veka',
+    desc: 'Kartagina je bila jedina sila koja je bila rival Rimu u zapadnom Mediteranu, i Punski ratovi su bili dvoboj za dominaciju. Hanibal Barka je uradio nešto što niko nije očekivao: umesto da napadne Rim s mora, prešao je Španiju, Galiju i Alpe sa vojskom od 50.000 vojnika i — po svim izvorima — slonovima. Zima u Alpama je ubila trećinu njegove armije i skoro sve slonove, ali ostatak je ušao u Italiju i narednih 15 godina uništavao rimske legije jednu po jednu. U bici kod Kane 216. p.n.e. ubio je 70.000 rimskih vojnika za jedan dan. Pa ipak, Rim se nije predao.',
+    place: 'Italija, Španija, Severna Afrika',
+    figures: 'Hanibal Barka, Scipion Afrikanac',
+    fact: 'Hanibal je proveo 15 godina u Italiji, pobeđujući u svakoj bici, ali nikada nije napao Rim direktno — jer nije imao mašine za opsadu. Rimljani su promenili taktiku: izbegavali su direktne bitke i napadali Kartaginino snabdevanje. Na kraju ga je Scipion Afrikanac pobedio — ne u Italiji, nego napadom na Kartaginu. Hanibal je morao da se vrati i brani dom. Izgubio je poslednju bitku kod Zame 202. p.n.e.'
+  },
+  {
+    displayYear: '44 p.n.e.',
+    title: 'Ides of March — atentat na Julija Cezara',
+    img: '../../../assets/img/rim/cezar.jpg',
+    imgCaption: 'Bista Julija Cezara — Narodni muzej, Rim',
+    desc: 'Julije Cezar je bio ono što Rimska republika nije bila dizajnirana da podnese: previše sposoban, previše popularan, previše ambiciozan. Posle osvajanja Galije i prelaska Rubikona, zauzeo je Rim bez borbe, oprostio neprijatelji i počeo da vlada kao doživotni diktator. Senatska oligarhija je bila ubeđena da želi da postane kralj — što je za Rome bila najgora moguća uvreda. Ides of March, 15. marta 44. p.n.e., 23 senatora ga je izbola 23 puta u Pompijevom teatru. Ironija: ubili su ga braneći republiku, a republika nije preživela Cezarovu smrt ni 20 godina.',
+    place: 'Rim, Italija',
+    figures: 'Julije Cezar, Brut, Kasije, Marko Antonije',
+    fact: 'Lekar koji je pregledao Cezarovo telo zaključio je da je od 23 uboda samo jedan bio smrtonosan — onaj koji je pogodio srce. Ostalih 22 su bile plitke rane koje su pokazivale koliko su ubice bile nevešte ili ambivalentne. Brutov ubod, prema Plutarhu, bio je onaj smrtonosni — što objašnjava "I ti, Brute" kao poslednje Cezarove reči.'
+  },
+  {
+    displayYear: '27 p.n.e.',
+    title: 'Avgust — prvi car, početak imperije',
+    img: '../../../assets/img/rim/avgust.jpg',
+    imgCaption: 'Avgustov kip iz Prima Porte (~20 p.n.e.) — Vatikanski muzeji, Rim',
+    desc: 'Oktavijan, Cezarov usvojeni sin, bio je dovoljno pametan da ne ponovi ujakov grešku. Nije se proglasio kraljem — uzeo je skromnu titulu "princeps" (prvi građanin) i "augustus" (uzvišeni). Formalno, republika je i dalje postojala, Senat je i dalje zasedao, konzuli su birani. Ali sva stvarna moć bila je u Avgustovim rukama. Rimljani su bili iscrpljeni decenijama građanskih ratova i prihvatili su ovaj eufemizam za monarh. Pokrenuo je 200 godina Pax Romana — rimskog mira i prosperiteta. Rim je u njegovo vreme imao milion stanovnika, što ga čini najvećim gradom do industrijske revolucije.',
+    place: 'Rim, Italija',
+    figures: 'Avgust (Oktavijan), Marko Antonije, Kleopatra',
+    fact: 'Avgust je vladao 40 godina i bio je opsednut svojom javnom slikom. Zabranio je da bude prikazivan kako stari — svi portreti su ga pokazivali kao mladića, čak i kad je imao 70 godina. Umro je 14. n.e. — navodno su mu poslednje reči bile: "Da li sam odigrao dobro komediju života? Onda plješčite dok ja izlazim."'
+  },
+  {
+    displayYear: '80 n.e.',
+    title: 'Otvaranje Koloseuma',
+    img: '../../../assets/img/rim/koloseum.jpg',
+    imgCaption: 'Koloseum u Rimu, Italija — amfiteatar sa 50.000 mesta (72–80 n.e.)',
+    desc: 'Flavijevski amfiteatar — koji zovemo Koloseum — sagrađen je za samo 8 godina, što je i danas inženjering koji fascinira. Mogao je da primi 50.000 gledalaca, imao je 80 ulaza za brzu evakuaciju, sistem tendi za zaštitu od sunca koji su kontrolisala mornarička posada, i kompleksan podrum ispod arene sa liftovima za zveri i gladijatore. Car Tit je otvaranje proslavio igrama koje su trajale 100 dana, tokom kojih je ubijeno 9.000 životinja. Gladijatorske borbe su bile pažljivo organizovane — gladijatori su bili skupi i trenirani, i retko su ubijani na areni bez razloga.',
+    place: 'Rim, Italija',
+    figures: 'Car Vespazijan, car Tit',
+    fact: 'Koloseum je sagrađen novcem od pljačke Jerusalima 70. n.e. — Tit je uništio Drugi hram i odveo sve blago u Rim. Slavoluk Titov na Forumu pokazuje Menoru i druge predmete iz Hrama kako se nose kroz Rim u trijumfalnoj povorci. Ironično, Menora je platila jednu od najprepoznatljivijih građevina u istoriji.'
+  },
+  {
+    displayYear: '313 n.e.',
+    title: 'Milanski edikt — Konstantin legalizuje hrišćanstvo',
+    desc: 'Pre Konstantina, hrišćani su bili proganjana manjina — povremeno korišćeni kao žrtveni jarci za probleme carstva. Konstantin je, prema sopstvenoj priči, video krst na nebu pre odlučujuće bitke kod Milvijskog mosta 312. n.e. i pobedio — pa je pripisao pobedu hrišćanskom bogu. Milanski edikt 313. n.e. nije hrišćanstvo proglasio državnom religijom — samo ga je legalizovao, uz sve ostale religije. Ali Konstantin je favorizovao hrišćane, gradio crkve, finansirao sabore i bio na samrtnoj postelji kršten. Posle njega, hrišćanstvo je postepeno postalo jedina dozvoljena religija.',
+    place: 'Milan (Mediolanum), Italija',
+    figures: 'Konstantin I Veliki, Likinij',
+    fact: 'Konstantin se krstio tek na samrtnoj postelji — što je tada bila česta praksa, jer se verovalo da krštenje briše sve prethodne grehe. Ceo život vladao je kao paganski imperator sa hrišćanskim simpatijama. Na novčićima je do kraja života bio prikazan sa Solem Invictusom — nepobedivim Suncem — paganskim božanstvom.'
+  },
+  {
+    displayYear: '380 n.e.',
+    title: 'Hrišćanstvo postaje jedina dozvoljena religija',
+    desc: 'Solunskim ediktom cara Teodosija, nikejsko hrišćanstvo je proglašeno jedinom legalnom religijom Rimskog carstva. Svi ostali — pagani, arijevci, drugi hrišćanski ogranci — postali su heretici. Hramovi su zatvarani, Olimpijske igre su ukinute 393. n.e. kao paganski ritual, biblioteke i škole kojima su upravljali pagani su zatvarane. Aleksandrijska biblioteka — ili ono što je od nje ostalo — stradala je u ovom periodu. Teodosije je u jednom potezu okončao 1000 godina rimske verske tolerancije i postavio temelje za hrišćansku Evropu.',
+    place: 'Solun (Tesalonika), danas Grčka',
+    figures: 'Teodosije I, papa Damaz I',
+    fact: 'Hipatija Aleksandrijska, matematičar i filozofkinja, rastrgana je od strane hrišćanskog moba 415. n.e. u Aleksandriji — jedna od prvih žrtava verskog nasilja u novoj hrišćanskoj eri. Njen otac Teon je bio poslednji poznati direktor Aleksadrijskog muzejona. Njena smrt često se simbolički uzima kao kraj antičkog sveta.'
+  },
+  {
+    displayYear: '410 n.e.',
+    title: 'Vizigoti pljačkaju Rim — prvi put posle 800 godina',
+    desc: 'Kada su Vizigoti pod Alarihom ušli u Rim 410. n.e. i pljačkali ga tri dana, čitav mediteranski svet je bio u šoku. Rim nije bio osvajan 800 godina. Sveti Augustin je pisao da su mu prijatelji iz Afrike slali pisma u neveri — Rim, večni grad, bio je poražen. Rim nije odmah pao — carstvo se vukloklo još 66 godina. Ali 410. je bila psihološka tačka preloma: od tada su svi znali da je pad moguć. Papstvo je počelo da preuzima administrativne funkcije koje su carstvo napuštalo, postavši tako naslednik rimske vlasti na Zapadu.',
+    place: 'Rim, Italija',
+    figures: 'Alarih I, car Honorije',
+    fact: 'Alarih nije hteo da pljačka Rim — hteo je da dobije titulu i zemju za Vizigote unutar carstva. Tražio je to godinama, car Honorije ga je ignorisao sedeci u Raveni okružen močvarama. Pljačka je bila poslednje sredstvo. Alarih je umro mesec dana posle — a Vizigoti su na kraju dobili ono što su tražili: Španiju kao svoju zemlju.'
+  },
+  {
+    displayYear: '476 n.e.',
+    title: 'Pad Zapadnog Rimskog carstva',
+    desc: 'Poslednji zapadnorimski car, Romul Augustul, bio je dečak od 16 godina kojeg je postavio i zbacio germanski vojskovođa Odoakar 476. n.e. Odoakar nije uzeo carsku titulu — nije imao potrebe. Jednostavno je poslao carske insignije u Konstantinopolj, govoreći da jedan car za ceo Rim dovoljan. Ovo je formalni datum pada Zapadnog Rimskog carstva, ali realnost je bila komplikovanija: carstvo se raspalo postepeno tokom celog 5. veka, dok su germanska plemena preuzimala provinciju po provinciju. Istočno Rimsko carstvo — koje mi zovemo Vizantija — nastavilo je da postoji još 977 godina, do 1453.',
+    place: 'Ravena (prestonica Zapadnog carstva), Italija',
+    figures: 'Romul Augustul, Odoakar',
+    fact: 'Ime poslednjeg rimskog cara je istorijska ironija vredna romana: Romul Augustul — isto ime kao osnivač Rima (Romul) i prvi car (Avgust). Istoričari to ponekad zovu "alfa i omega" rimske istorije. Odoakar ga nije ubio — proterao ga je u dvorac u Kampaniji sa godišnjom penziom. Umro je prirodnom smrću, verovatno decenijama posle pada carstva čiji je bio poslednji car.'
+  }
+];
+
+function buildEvent(e, uid) {
+  var thumbHtml = e.img
+    ? '<img src="' + e.img + '" alt="" class="event-thumb" loading="lazy" onerror="this.style.display=\'none\'">'
+    : '';
+  var imgHtml = e.img
+    ? '<img src="' + e.img + '" alt="' + e.title + '" class="event-img" loading="lazy" onerror="this.style.display=\'none\';var c=this.nextElementSibling;if(c)c.style.display=\'none\'">' +
+      '<p class="event-img-caption">' + (e.imgCaption || '') + '</p>'
+    : '';
+  return '<div class="event" id="' + uid + '" onclick="toggleEvent(\'' + uid + '\')">' +
+    '<div class="event-card">' +
+      '<div class="event-head">' +
+        (thumbHtml ? '<div class="event-thumb-wrap">' + thumbHtml + '</div>' : '') +
+        '<div class="event-date-col"><div class="event-date">' + e.displayYear + '</div></div>' +
+        '<div class="event-main"><div class="event-title">' + e.title + '</div></div>' +
+        '<div class="event-arrow">&#9658;</div>' +
+      '</div>' +
+      '<div class="event-body">' +
+        imgHtml +
+        '<div class="event-desc">' + e.desc + '</div>' +
+        '<div class="event-meta-grid">' +
+          (e.place   ? '<div class="event-meta-item"><div class="event-meta-label">Lokacija</div><div class="event-meta-val">' + e.place + '</div></div>' : '') +
+          (e.figures ? '<div class="event-meta-item"><div class="event-meta-label">Li&#269;nosti</div><div class="event-meta-val">' + e.figures + '</div></div>' : '') +
+        '</div>' +
+        (e.fact ? '<div class="event-fact">' + e.fact + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function toggleEvent(uid) {
+  var el = document.getElementById(uid);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.event.open').forEach(function(e) { e.classList.remove('open'); });
+  if (!isOpen) el.classList.add('open');
+}
+
+var tl = document.getElementById('timeline');
+var html = '';
+EVENTS.forEach(function(e, idx) { html += buildEvent(e, 'ev-' + idx); });
+tl.innerHTML = html;
+document.getElementById('eventCount').textContent = EVENTS.length;
+</script>
+</body>
+</html>

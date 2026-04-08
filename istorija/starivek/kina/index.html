@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stara Kina — Stari vek — Pub Quiz</title>
+<link rel="manifest" href="../../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e0404;
+  --surface: #1c0c08;
+  --surface2: #261408;
+  --surface3: #301c0c;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #8a5040;
+  --text: #f0e4d8;
+  --muted: #a07060;
+  --border: #2e1808;
+  --border2: #3e2010;
+  --era-color: #c83232;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(140,10,10,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(100,10,10,0.12) 0%, transparent 60%);
+}
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back {
+  color: var(--gold-dim);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.header-back:hover { color: var(--era-color); border-color: var(--gold-dim); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 20px; color: var(--gold2); font-weight: normal; letter-spacing: 3px; }
+.header-title p { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 2px; }
+.header-spacer { width: 80px; }
+.intro-wrap { max-width: 860px; margin: 0 auto; padding: 28px 20px 0; }
+.intro-text {
+  font-size: 15px; color: var(--muted); line-height: 1.75;
+  font-style: italic; border-left: 3px solid var(--era-color);
+  padding-left: 16px; margin-bottom: 6px;
+}
+.stats-bar { max-width: 860px; margin: 0 auto; padding: 14px 20px 0; }
+.stats-count { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.stats-count span { color: var(--era-color); }
+.main-wrap { max-width: 860px; margin: 0 auto; padding: 16px 20px 60px; }
+.timeline { position: relative; padding-left: 28px; margin-top: 16px; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+  width: 2px; background: var(--border2);
+}
+.event { position: relative; margin-bottom: 12px; cursor: pointer; }
+.event::before {
+  content: ''; position: absolute; left: -24px; top: 18px;
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--era-color); background: var(--bg);
+  transition: all 0.2s; z-index: 1;
+}
+.event.open::before { background: var(--era-color); transform: scale(1.3); }
+.event-card {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-left: 3px solid var(--era-color); border-radius: 8px;
+  overflow: hidden; transition: box-shadow 0.2s;
+}
+.event:hover .event-card, .event.open .event-card { box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+.event-head { padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+.event-thumb-wrap {
+  flex-shrink: 0; width: 64px; height: 52px;
+  border-radius: 5px; overflow: hidden; border: 1px solid var(--border2);
+}
+.event-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+.event-date-col { flex-shrink: 0; }
+.event-date { font-size: 10px; color: var(--gold-dim); white-space: nowrap; min-width: 90px; font-style: italic; line-height: 1.4; }
+.event-main { flex: 1; }
+.event-title { font-size: 15px; color: var(--text); line-height: 1.35; }
+.event-arrow { color: var(--muted); font-size: 13px; padding-top: 2px; transition: transform 0.2s, color 0.2s; flex-shrink: 0; }
+.event.open .event-arrow { transform: rotate(90deg); color: var(--era-color); }
+.event-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.event.open .event-body { display: block; }
+.event-img { width: 100%; max-height: 220px; object-fit: cover; border-radius: 6px; margin-top: 14px; margin-bottom: 12px; opacity: 0.88; }
+.event-img-caption { font-size: 10px; color: var(--gold-dim); text-align: center; margin-top: -8px; margin-bottom: 12px; font-style: italic; }
+.event-desc { font-size: 13.5px; color: var(--muted); line-height: 1.75; margin-top: 12px; margin-bottom: 12px; }
+.event-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin-bottom: 10px; }
+.event-meta-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+.event-meta-label { font-size: 10px; color: var(--gold-dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.event-meta-val { font-size: 12px; color: var(--text); line-height: 1.5; }
+.event-fact {
+  margin-top: 4px; padding: 10px 14px;
+  background: rgba(200,50,50,0.07); border: 1px solid rgba(200,50,50,0.2);
+  border-radius: 6px; font-size: 12.5px; color: #a03030;
+  font-style: italic; line-height: 1.6;
+}
+.event-fact::before { content: '\2605\00A0\00A0'; color: var(--era-color); }
+.map-wrap { max-width: 860px; margin: 20px auto 0; padding: 0 20px; }
+.map-box { border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.map-box img { width: 100%; max-height: 340px; object-fit: cover; object-position: center; display: block; }
+.map-caption { padding: 8px 14px; font-size: 11px; color: var(--gold-dim); font-style: italic; text-align: center; border-top: 1px solid var(--border); }
+footer { text-align: center; padding: 24px; border-top: 1px solid var(--border2); font-size: 12px; color: var(--gold-dim); letter-spacing: 2px; }
+@media (max-width: 600px) {
+  .header-title h1 { font-size: 15px; letter-spacing: 1px; }
+  .header-spacer { width: 50px; }
+  .event-date { min-width: 80px; font-size: 9px; }
+  .event-title { font-size: 14px; }
+  .event-meta-grid { grid-template-columns: 1fr; }
+  .event-img { max-height: 160px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../../index.html" class="header-back">&#8592; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#129409; STARA KINA</h1>
+    <p>~1600 P.N.E. &#8211; 220 N.E. &nbsp;&#8226;&nbsp; CARSTVO U SRCU AZIJE</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="intro-wrap">
+  <p class="intro-text">Dok su Grci izmišljali demokratiju i Rimljani pravili puteve, Kina je gradila nešto drugačije — trajnost. Dinastije su dolazile i odlazile, ali ideja carstva ostajala je. Kina je dala svetu papir, kompas, barut i štampu — sve četiri pre Evrope za više od hiljadu godina. I sve to iz civilizacije koja se razvijala gotovo potpuno izolovano od ostatka sveta, po sopstvenim pravilima i sopstvenom ritmu.</p>
+</div>
+
+<div class="map-wrap">
+  <div class="map-box">
+    <img src="../../../assets/img/kina/mapa.jpg" alt="Mapa Stare Kine — Dinastija Han">
+    <p class="map-caption">Kina u doba Dinastije Han (~2. vek p.n.e.) — granice carstva i Put svile &#8226; Wikimedia Commons</p>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-count"><span id="eventCount">9</span> klju&#269;nih doga&#273;aja</div>
+</div>
+
+<div class="main-wrap">
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<footer>&#9830; Stara Kina &#9830; ~1600 p.n.e.&#8211;220 n.e. &#9830;</footer>
+
+<script>
+var EVENTS = [
+  {
+    displayYear: '~1600 p.n.e.',
+    title: 'Dinastija Šang — prva potvrđena kineska dinastija',
+    desc: 'Dugo se mislilo da su rane kineske dinastije — Sja, Šang — samo mitovi, poput Romula i Rema. Onda su arheolozi pronašli Anjang, drevnu prestonicu Šang dinastije, i unutra hiljade kostiju sa urezanim pismom. Ovo orakularno pismo — najstarije kinesko pismo koje posedujemo — koristilo se za gatanje: kost bi se zagrejala dok ne pukne, a sveštenici bi tumačili prsline kao poruke bogova. Na kostima su čuvani zapisi: pitanja o ratu, letini, zdravlju vladara. Iz tih prslinastih slova razvilo se kinesko pismo koje i danas koriste milijarda i po ljudi.',
+    place: 'Anjang, dolina reke Žute reke, Kina',
+    figures: 'Šang vladari, Car Tang',
+    fact: 'Orakularnih kostiju pronađeno je više od 150.000. Dugo su ih lokalni seljaci prodavali kao "zmajevske kosti" apotekarima koji su ih mlevli u prah za lekove — ne znajući da uništavaju najstarije pismene zapise Kine. Tek 1899. kineski naučnik je prepoznao znake na kupljenim kostima i identifikovao ih kao starovekovne natpise.'
+  },
+  {
+    displayYear: '~551 p.n.e.',
+    title: 'Konfučije — filosof koji je oblikovao pola sveta',
+    img: '../../../assets/img/kina/konfucije.jpg',
+    imgCaption: 'Portret Konfučija — tradicionalna kineska ilustracija iz 18. veka',
+    desc: 'Kong Ću, kojeg Zapad zna kao Konfučija, nije bio mudrac koji je sedeo na planini i meditirao. Bio je praktičar — putovao je od dvora do dvora nudeći vladaocima savet o tome kako da upravljaju pravedno. Gotovo svuda je bio odbijen. Njegova filozofija je bila jednostavna i revolucionarna: dobro društvo ne počiva na zakonu i kazni, nego na kultivaciji vrline. Ako je vladar vrli, narod će slediti. Ako je narod vrli, zakoni nisu potrebni. Tri osnovna odnosa — roditelj-dete, vladar-podanik, stariji-mlađi — treba da budu ispunjena obostovnom brigom i poštovanjem. Ovo je postalo temelj kineske civilizacije na 2500 godina.',
+    place: 'Država Lu (danas provincija Shandong), Kina',
+    figures: 'Konfučije (Kong Ću), učenici Zilu i Jan Hui',
+    fact: 'Konfučije nije napisao ni reč. Sve što znamo o njemu potiče od njegovih učenika koji su posle njegove smrti skupili njegove izreke u zbirku Analekti. Ovo je tačna paralela sa Sokratom koji je umro 80 godina posle Konfučija — ni on nije pisao, sve znamo iz Platonovih zapisa.'
+  },
+  {
+    displayYear: '~500 p.n.e.',
+    title: 'Lao Ce i Tao Te Đing — knjiga od 5000 reči',
+    desc: 'Prema legendi, Lao Ce je bio stariji savremenik Konfučija — arhivar na carskom dvoru koji se umorio od sveta. Kada je krenuo prema zapadu da napusti Kinu, stražar na kapiji ga je zamolio da ostavi nešto za sobom. Lao Ce je seo i napisao Tao Te Đing — 5000 reči o putu stvari, o nedelovanju kao delovanju, o tome da sila klizi tamo gde nema otpora. "Onaj ko zna, ne govori. Onaj ko govori, ne zna." Taoizam koji je iz toga izrastao naučio je Kineze da postoji mudrost u povlačenju, u praznini, u prihvatanju prirodnog toka — direktna suprotnost konfucijanskoj aktivnoj vrlini.',
+    place: 'Država Čou, Kina',
+    figures: 'Lao Ce',
+    fact: 'Nije sigurno da je Lao Ce uopšte postojao — možda je "Stari Majstor" (što ime znači) zbirno ime za više autora. Ali to ne umanjuje uticaj Tao Te Đinga: prevedena je na više jezika od bilo koje knjige osim Biblije, i i danas je jedna od najprodavanijih knjiga na svetu.'
+  },
+  {
+    displayYear: '221 p.n.e.',
+    title: 'Ćin Ši Huang — prvi car ujedinjene Kine',
+    desc: 'Pre Ćin Ši Huanga, Kina je bila mozaik zaraćenih država koje su se borile vekovima u periodu koji Kinezi zovu "Zaraćena carstva." Ćin Ši Huang ih je sve pokorio za 9 godina i proglasio se "prvim carem" — titula koju je sam izmislio, jer nijedna dosadašnja reč nije bila dovoljna za ono što je on bio. Ono što je potom uradio je neverovatno: standardizovao je pismo, mere i tegove, valutu, širinu točkova na kolima (da svi putevi budu iste širine), izgradio putnu mrežu i počeo spajanje lokalnih zidova u jedinstven kineski zid. Za 11 godina vladavine promenio je Kinu zauvek.',
+    place: 'Sjanjang (danas Xi\'an), Kina',
+    figures: 'Ćin Ši Huang, Li Si (glavni ministar)',
+    fact: 'Ćin Ši Huang je bio opsednut besmrtnošću. Slao je ekspedicije da pronađu eleksir života, a živu je jeo kao lek — i verovatno umro od trovanja živom. Sahranjem je sa vojskom od 8000 terakotnih vojnika, svaki jedinstven, svaki u punoj borbenoj opremi. Grobnica je pronađena 1974. slučajno — farmer je bušio bunar.'
+  },
+  {
+    displayYear: '214 p.n.e.',
+    title: 'Kineski zid — zid koji nije zaustavio nikoga',
+    img: '../../../assets/img/kina/zid.jpg',
+    imgCaption: 'Kineski zid na Džinšanling planini — Kina',
+    desc: 'Kineski zid nije jedna građevina — to je skup zidova koje su gradile različite dinastije tokom 2000 godina. Ono što turisti danas posećuju je uglavnom zid Dinastije Ming iz 15. veka. Ćin Ši Huang je prvi naredio spajanje postojećih severnih zidova u jedinstven sistem — koristeći vojnike, osuđenike i prisilne radnike, od kojih su mnogi umrli i navodno sahranjeni u samom zidu. Zid je trebalo da zaštiti Kinu od nomadskih naroda sa severa — Mongola, Sjungnua, Huna. Ali nije funkcionisao: svaki put kad su nomadi hteli da prodru, ili su pronašli prolaz ili su podmitili stražare.',
+    place: 'Severna granica Kine',
+    figures: 'Ćin Ši Huang, general Meng Tjan',
+    fact: 'Priča da se Kineski zid vidi iz svemira je mit — širok je svega 4–5 metara, što je premalo da bude vidljivo golim okom iz orbite. Kineski astronaut Jang Livej je 2003. potvrdio da ga nije video iz svemira. NASA je zvanično demantovala ovu urbanu legendu. Zid je ipak najveća građevina ikad sagrađena — dug je ukupno oko 21.000 km.'
+  },
+  {
+    displayYear: '210 p.n.e.',
+    title: 'Terakotna armija — 8000 vojnika za zagrobni život',
+    img: '../../../assets/img/kina/terakota.jpg',
+    imgCaption: 'Terakotna armija u jami br. 1 — muzej u blizini Xi\'ana, Kina',
+    desc: 'Ćin Ši Huang je počeo da gradi svoju grobnicu čim je preuzeo vlast sa 13 godina — i gradio je 36 godina, sve do smrti. U kompleksu grobnice, koji je veličine Pariza, pronađene su tri jame sa 8000 terakotnih vojnika u prirodnoj veličini, svaki s jedinstvenim licem, kao i konji, kola i oružje. Sav metal je bio pravi — mačevi su bili presvučeni hromom i i danas su oštri. Liveni su da budu vojnici za zagrobni život, jer car nije verovao da može da vlada bez armije čak ni posle smrti. Sama grobna komora još nije otvorena — sadrži, prema drevnim izvorima, model carstva sa rekama od žive.',
+    place: 'Blizina Xi\'ana, provincija Šansi, Kina',
+    figures: 'Ćin Ši Huang',
+    fact: 'Terakotna armija pronađena je 1974. — farmer Jang Cvajfang bušio je bunar i naišao na fragmente glinene figure. Kina mu nikad nije platila adekvatnu nadoknadu. Decenijama je prodavao autograme turistima ispred muzeja za malo para, dok je Kina zarađivala milijarde od ulaznica. Preminuo je 2021. bez ikakvih zvaničnih počasti.'
+  },
+  {
+    displayYear: '~130 p.n.e.',
+    title: 'Put svile — mreža koja je spojila svet',
+    img: '../../../assets/img/kina/put_svile.jpg',
+    imgCaption: 'Mapa Puta svile — kopnene i pomorske trgovačke rute između Kine i Mediterana',
+    desc: 'Car Han Vudi je 138. p.n.e. poslao izaslanika Džang Čijana na zapad da pronađe saveznike protiv Sjungnua. Džang Čijan se vratio 13 godina kasnije — bio je zarobljen dvaput — ali doneo je nešto vrednije od saveza: informacije o bogatim zemljama na zapadu. Iz tog izviđačkog pohoda nastala je mreža trgovačkih puteva koje znamo kao Put svile. Kineska svila, porcelan i začini putovale su na zapad; zlatni novac, staklo i egzotične životinje dolazile su na istok. Put svile nije bio jedan put — bio je sistem ruta kroz centralnu Aziju, Persiju i sve do Rima. Ni Kinezi ni Rimljani nikada nisu direktno kontaktirali jedni druge — između njih su uvek bili posrednici.',
+    place: 'Od Kine do Rima, kroz centralnu Aziju',
+    figures: 'Car Han Vudi, Džang Čijan',
+    fact: 'Rim je bio opsednut kineskom svilom — toliko da je Senat dva puta pokušao da zabrani njeno nošenje, jer je smatrali previše providnom i "neskromnom." Rim nije znao odakle svila dolazi ni kako se pravi — mislili su da raste na drveću. Kina je čuvala tajnu svilarstva pod smrtnom kaznom, i uspela je da je zadrži više od 3000 godina.'
+  },
+  {
+    displayYear: '105 n.e.',
+    title: 'Pronalazak papira — Caj Lun menja svet',
+    desc: 'Pre papira, Kinezi su pisali na bambusovim pločicama i svilenim tkaninama — bambusove su bile teške, svila preskupa. Caj Lun, dvorski zvaničnik Dinastije Han, 105. n.e. opisao je proces pravljenja papira od kore drveta, konoplje, krpa i ribarske mreže — natopljene vodom, istučene u kašu i osušene. Papir je bio lak, jeftin i savršen za pisanje. Iz Kine je putovao polako ka zapadu: do Persije u 7. veku, do Španije u 12. veku, do ostatka Evrope u 13. veku. Bez papira, ne bi bilo Gutenberga. Bez Gutenberga, ne bi bilo reformacije, naučne revolucije ni modernog sveta.',
+    place: 'Luojang, Kina',
+    figures: 'Caj Lun',
+    fact: 'Caj Lun je bio dvorski evnuh — kastrat koji je služio na carskom dvoru. Papir mu je doneo slavu i titulu, ali je na kraju bio uvučen u palačke intrige i otrovan. Umro je 121. n.e. Hiljadu i devet stotina godina posle njegove smrti, svaki komad papira koji dotaknete koristi isti princip koji je on opisao.'
+  },
+  {
+    displayYear: '220 n.e.',
+    title: 'Pad Dinastije Han — kraj stare Kine',
+    desc: 'Dinastija Han je trajala 400 godina i bila je jedna od najdugovečnijih i najslavnijih u kineskoj istoriji. Na vrhuncu je kontrolisala teritoriju veću od Rimskog carstva i imala sličan broj stanovnika — oko 60 miliona. Njen pad 220. n.e. nije bio ni iznenadan ni dramtičan — bio je postepen raspad koji je počeo decenijama ranije kroz korupciju, pobune seljaka, borbe dvorskih frakcija i lokalne vojskovođe koji su preuzimali autonomiju. Ono što je usledilo — period Tri carstva — jedno je od najslavnijih poglavlja u kineskoj književnosti i kulturi, slično kao što je Homerova Troja za Grke.',
+    place: 'Luojang, Kina',
+    figures: 'Car Sjan od Hana, Cao Cao, Liu Bei',
+    fact: 'Period Tri carstva (220–280 n.e.) koji je usledio iza pada Hana bio je toliko traumatičan — procenjuje se da je populacija Kine pala sa 60 na 16 miliona — da je 1800 godina posle njega roman "Romanansa Tri carstva" bio najpopularnija knjiga u Kini. I danas se smatra jednim od četiri klasika kineske književnosti, a igre i filmovi zasnovani na njemu zarađuju milijarde godišnje.'
+  }
+];
+
+function buildEvent(e, uid) {
+  var thumbHtml = e.img
+    ? '<img src="' + e.img + '" alt="" class="event-thumb" loading="lazy" onerror="this.style.display=\'none\'">'
+    : '';
+  var imgHtml = e.img
+    ? '<img src="' + e.img + '" alt="' + e.title + '" class="event-img" loading="lazy" onerror="this.style.display=\'none\';var c=this.nextElementSibling;if(c)c.style.display=\'none\'">' +
+      '<p class="event-img-caption">' + (e.imgCaption || '') + '</p>'
+    : '';
+  return '<div class="event" id="' + uid + '" onclick="toggleEvent(\'' + uid + '\')">' +
+    '<div class="event-card">' +
+      '<div class="event-head">' +
+        (thumbHtml ? '<div class="event-thumb-wrap">' + thumbHtml + '</div>' : '') +
+        '<div class="event-date-col"><div class="event-date">' + e.displayYear + '</div></div>' +
+        '<div class="event-main"><div class="event-title">' + e.title + '</div></div>' +
+        '<div class="event-arrow">&#9658;</div>' +
+      '</div>' +
+      '<div class="event-body">' +
+        imgHtml +
+        '<div class="event-desc">' + e.desc + '</div>' +
+        '<div class="event-meta-grid">' +
+          (e.place   ? '<div class="event-meta-item"><div class="event-meta-label">Lokacija</div><div class="event-meta-val">' + e.place + '</div></div>' : '') +
+          (e.figures ? '<div class="event-meta-item"><div class="event-meta-label">Li&#269;nosti</div><div class="event-meta-val">' + e.figures + '</div></div>' : '') +
+        '</div>' +
+        (e.fact ? '<div class="event-fact">' + e.fact + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function toggleEvent(uid) {
+  var el = document.getElementById(uid);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.event.open').forEach(function(e) { e.classList.remove('open'); });
+  if (!isOpen) el.classList.add('open');
+}
+
+var tl = document.getElementById('timeline');
+var html = '';
+EVENTS.forEach(function(e, idx) { html += buildEvent(e, 'ev-' + idx); });
+tl.innerHTML = html;
+document.getElementById('eventCount').textContent = EVENTS.length;
+</script>
+</body>
+</html>

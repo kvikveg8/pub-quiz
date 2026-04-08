@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stari Egipat — Stari vek — Pub Quiz</title>
+<link rel="manifest" href="../../../manifest.json">
+<meta name="theme-color" content="#c9a227">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pub Quiz">
+<link rel="apple-touch-icon" href="../../../icon.svg">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e0904;
+  --surface: #1c1408;
+  --surface2: #261c0a;
+  --surface3: #302410;
+  --gold: #c9a227;
+  --gold2: #e8c84a;
+  --gold-dim: #7a6015;
+  --text: #f0e6d0;
+  --muted: #9a8060;
+  --border: #2e2008;
+  --border2: #3e300c;
+  --era-color: #d4943a;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(140,80,10,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(100,60,10,0.15) 0%, transparent 60%);
+}
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-back {
+  color: var(--gold-dim);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.header-back:hover { color: var(--gold); border-color: var(--gold-dim); }
+.header-title { flex: 1; text-align: center; }
+.header-title h1 { font-size: 20px; color: var(--gold2); font-weight: normal; letter-spacing: 3px; }
+.header-title p { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 2px; }
+.header-spacer { width: 80px; }
+.intro-wrap { max-width: 860px; margin: 0 auto; padding: 28px 20px 0; }
+.intro-text {
+  font-size: 15px; color: var(--muted); line-height: 1.75;
+  font-style: italic; border-left: 3px solid var(--era-color);
+  padding-left: 16px; margin-bottom: 6px;
+}
+.stats-bar { max-width: 860px; margin: 0 auto; padding: 14px 20px 0; }
+.stats-count { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.stats-count span { color: var(--era-color); }
+.main-wrap { max-width: 860px; margin: 0 auto; padding: 16px 20px 60px; }
+.timeline { position: relative; padding-left: 28px; margin-top: 16px; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+  width: 2px; background: var(--border2);
+}
+.event { position: relative; margin-bottom: 12px; cursor: pointer; }
+.event::before {
+  content: ''; position: absolute; left: -24px; top: 18px;
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--era-color); background: var(--bg);
+  transition: all 0.2s; z-index: 1;
+}
+.event.open::before { background: var(--era-color); transform: scale(1.3); }
+.event-card {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-left: 3px solid var(--era-color); border-radius: 8px;
+  overflow: hidden; transition: box-shadow 0.2s;
+}
+.event:hover .event-card, .event.open .event-card { box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+.event-head { padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+.event-thumb-wrap {
+  flex-shrink: 0; width: 64px; height: 52px;
+  border-radius: 5px; overflow: hidden; border: 1px solid var(--border2);
+}
+.event-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+.event-date-col { flex-shrink: 0; }
+.event-date { font-size: 10px; color: var(--gold-dim); white-space: nowrap; min-width: 90px; font-style: italic; line-height: 1.4; }
+.event-main { flex: 1; }
+.event-title { font-size: 15px; color: var(--text); line-height: 1.35; }
+.event-arrow { color: var(--muted); font-size: 13px; padding-top: 2px; transition: transform 0.2s, color 0.2s; flex-shrink: 0; }
+.event.open .event-arrow { transform: rotate(90deg); color: var(--era-color); }
+.event-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.event.open .event-body { display: block; }
+.event-img { width: 100%; max-height: 220px; object-fit: cover; border-radius: 6px; margin-top: 14px; margin-bottom: 12px; opacity: 0.88; }
+.event-img-caption { font-size: 10px; color: var(--gold-dim); text-align: center; margin-top: -8px; margin-bottom: 12px; font-style: italic; }
+.event-desc { font-size: 13.5px; color: var(--muted); line-height: 1.75; margin-top: 12px; margin-bottom: 12px; }
+.event-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin-bottom: 10px; }
+.event-meta-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+.event-meta-label { font-size: 10px; color: var(--gold-dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.event-meta-val { font-size: 12px; color: var(--text); line-height: 1.5; }
+.event-fact {
+  margin-top: 4px; padding: 10px 14px;
+  background: rgba(212,148,58,0.07); border: 1px solid rgba(212,148,58,0.2);
+  border-radius: 6px; font-size: 12.5px; color: #a07030;
+  font-style: italic; line-height: 1.6;
+}
+.event-fact::before { content: '\2605\00A0\00A0'; color: var(--era-color); }
+.map-wrap { max-width: 860px; margin: 20px auto 0; padding: 0 20px; }
+.map-box { border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.map-box img { width: 100%; max-height: 340px; object-fit: cover; object-position: center; display: block; }
+.map-caption { padding: 8px 14px; font-size: 11px; color: var(--gold-dim); font-style: italic; text-align: center; border-top: 1px solid var(--border); }
+footer { text-align: center; padding: 24px; border-top: 1px solid var(--border2); font-size: 12px; color: var(--gold-dim); letter-spacing: 2px; }
+@media (max-width: 600px) {
+  .header-title h1 { font-size: 15px; letter-spacing: 1px; }
+  .header-spacer { width: 50px; }
+  .event-date { min-width: 80px; font-size: 9px; }
+  .event-title { font-size: 14px; }
+  .event-meta-grid { grid-template-columns: 1fr; }
+  .event-img { max-height: 160px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../../index.html" class="header-back">&#8592; Pub Quiz</a>
+  <div class="header-title">
+    <h1>&#127981; STARI EGIPAT</h1>
+    <p>~3100 &#8211; 30 P.N.E. &nbsp;&#8226;&nbsp; ZEMLJA FARAONA</p>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="intro-wrap">
+  <p class="intro-text">Tri hiljade godina jedna zemlja je izgledala gotovo isto — isti bogovi, isti faraoni, iste piramide. Dok su se carstva rađala i propadala oko Nila, Egipat je bio nepokolebljiv kao kamen od kog je gradio. Sve što znamo o njemu — hijeroglife, mumije, piramide — tek je vrh ledenog brega jedne od najdugotrajnijih civilizacija u istoriji čovečanstva.</p>
+</div>
+
+<div class="map-wrap">
+  <div class="map-box">
+    <img src="../../../assets/img/egipat/mapa.svg" alt="Mapa Starog Egipta — Nil, Gornji i Donji Egipat">
+    <p class="map-caption">Stari Egipat — civilizacija duž Nila. Gornji Egipat na jugu, Donji Egipat na severu &#8226; Wikimedia Commons</p>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-count"><span id="eventCount">8</span> klju&#269;nih doga&#273;aja</div>
+</div>
+
+<div class="main-wrap">
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<footer>&#9830; Stari Egipat &#9830; ~3100&#8211;30 p.n.e. &#9830;</footer>
+
+<script>
+var EVENTS = [
+  {
+    displayYear: '~3100 p.n.e.',
+    title: 'Narmer ujedinjuje Egipat',
+    img: '../../../assets/img/egipat/mapa.svg',
+    imgCaption: 'Mapa Starog Egipta — Gornji i Donji Egipat pre ujedinjenja',
+    desc: 'Pre Narmera, Egipat su bile dve odvojene zemlje: Gornji Egipat na jugu, uz reku, i Donji Egipat na severu, u delti. Narmer — ili možda Menes, istoričari se i dan danas svađaju oko toga — obukao je dve krune najednom i spojio ih u jednu. To je bio trenutak u kom nije nastao samo novi faraon, nego i pojam države kakvu do tada svet nije video: centralizovana vlast, jedna administracija, jedan sistem pisanja, jedna vojska. Sve što zovemo "Stari Egipat" počelo je tim jednim gestom.',
+    place: 'Gornji i Donji Egipat, dolina Nila',
+    figures: 'Narmer (Menes)',
+    fact: 'Narmerjeva paleta — kamena ploča sa prikazom ujedinjenja — pronađena je 1898. i jedna je od prvih političkih propagandnih artefakata u istoriji. Faraon je prikazan krupniji od svih ostalih, što je konvencija koja će se koristiti 3000 godina bez izmena.'
+  },
+  {
+    displayYear: '~2560 p.n.e.',
+    title: 'Keopsova piramida — jedino sačuvano čudo starog sveta',
+    img: '../../../assets/img/egipat/piramide.jpg',
+    imgCaption: 'Keopsova piramida u Gizi — jedino od sedam čuda starog sveta koje još uvek stoji',
+    desc: 'Kada su Grci pravili listu sedam čuda sveta, Keopsova piramida je bila na njoj kao najstarija građevina. Svih ostalih šest danas nema — piramida i dalje stoji. Sagrađena je za manje od 20 godina, korišćenjem oko 2,3 miliona kamenih blokova, prosečne težine 2,5 tone. Fascinantno je da su je izgradili plaćeni radnici, ne robovi — to nam govore papirusi pronađeni 2013. koji beleže plate, obroke i čak bolovanja. Bila je najviša građevina na svetu 3800 godina — sve do izgradnje katedrale u Linkolnu 1311. godine.',
+    place: 'Giza, danas predgrađe Kaira, Egipat',
+    figures: 'Faraon Keops (Kufu), arhitekt Hemiun',
+    fact: 'Piramida je prvobitno bila obložena poliranim belim krečnjakom koji je sijao na suncu i bila je vidljiva sa stotine kilometara udaljenosti. Obloga je skidana vekovima za gradnju kuća u Kairu. Ono što vidimo danas je samo unutrašnja konstrukcija.'
+  },
+  {
+    displayYear: '~1479 p.n.e.',
+    title: 'Hatšepsut — faraon žena koja je vladala kao muškarac',
+    img: '../../../assets/img/egipat/hatsepsut.jpg',
+    imgCaption: 'Kip Hatšepsut sa lažnom bradom — Metropoliten muzej umetnosti, Njujork',
+    desc: 'Hatšepsut je bila žena koja je bila regentkinja za svog malog pastorka Tutmozisa III — i odlučila da ne čeka da odraste. Proglasila se faraonkom i vladala Egiptom pune dve decenije, oblačeći se u faraonsku odeću, noseći lažnu zlatnu bradu na ceremonijama, i naređujući da bude prikazivana kao muškarac na svim zvaničnim prikazima. Pod njenom vladavinom Egipat je procvetao: organizovala je trgovačke ekspedicije u legendarne zemlje, gradila je hramove, uključujući i veličanstveni Deir el-Bahari. Bila je jedan od najuspešnijih faraona, ali je njen naslednik pokušao da izbriše svaki trag njenog postojanja.',
+    place: 'Teba (danas Luksor), Egipat',
+    figures: 'Hatšepsut, Tutmozis III',
+    fact: 'Tutmozis III je posle njene smrti naredio da se njeno ime i likovi uklone sa svih zidova i statua. Uspeo je toliko dobro da je Hatšepsut bila praktično zaboravljena 3000 godina — sve dok je egipatolog Howard Carter nije otkrio krajem 19. veka. Čak i tada, njenu mumiju su identifikovali tek 2007. — po zubu koji se podudarao sa kutijom sa natpisom njenog imena.'
+  },
+  {
+    displayYear: '~1353 p.n.e.',
+    title: 'Akhenaton — faraon koji je izumeo monoteizam',
+    desc: 'Amenhotep IV je uradi nešto što nijedan faraon pre njega nije smeo: otpustio je sve bogove. Promenio je ime u Akhenaton, zatvorio hramove, raspustio sveštenstvo i proglasio da postoji samo jedan bog — Aton, disk sunca. Premestio je prestonicu u potpuno novi grad koji je sagradio za 8 godina — Akhetaton (danas Amarna). Njegova žena bila je legendarna Nefertiti. Posle njegove smrti, Egipat se hitro vratio starim bogovima i pokušao da izbriše "jeretičkog faraona" iz istorije — zbog čega je i zaboravljen do modernih istraživanja.',
+    place: 'Akhetaton (Amarna), Egipat',
+    figures: 'Akhenaton, Nefertiti',
+    fact: 'Mnogi istoričari smatraju da je Akhenatona monoteizam mogao da utiče na hebrejski jednoboštvo — Jevreji su živeli u Egiptu upravo u to vreme. Nije potvrđena direktna veza, ali paralele između Atonovih himni i Psalma 104 su toliko upečatljive da ih niko ne može ignorisati.'
+  },
+  {
+    displayYear: '~1274 p.n.e.',
+    title: 'Bitka kod Kadeša — prvi mirovni ugovor u istoriji',
+    desc: 'Ramzes II je bio majstor propagande. Bitku kod Kadeša, u kojoj su se Egipćani i Hetiti sukobili u Siriji, Ramzes je proglasio velikom pobjedom i uklesao na sve hramove — ali u stvarnosti je bila neodlučna. Obe strane su pretrpele gubitke, niko nije zauzeo ništa. Ono što je zaista važno: umesto da se bore do iscrpljenosti, Ramzes i hetitski kralj Hatušili III su 13 godina nakon bitke potpisali mirovni sporazum. Taj sporazum — uklesan na srebrenim pločama i na hramskim zidovima — najstariji je međunarodni mirovni ugovor čiji tekst posedujemo. Kopija stoji u sedištu UN u Njujorku.',
+    place: 'Kadiš (danas Sirija)',
+    figures: 'Ramzes II, Hatušili III',
+    fact: 'Ramzes II je vladao 66 godina i imao je preko 100 dece. Toliko dugo je živeo da je nekoliko generacija Egipćana odraslo misleći da je on večan i da bogovi ne dozvoljavaju da umre. Kada je konačno preminuo, niko nije znao kako se sahranjuje faraon — procedura je bila zaboravljena.'
+  },
+  {
+    displayYear: '1323 p.n.e.',
+    title: 'Tutankamon — zaboravljeni dečak faraon',
+    desc: 'Tutankamon je bio beznačajan faraon koji je umro sa oko 18 godina, vladajući svega 9 godina tokom kojih nije uradio ništa posebno zapaženo. Istorija ga je zaboravila na 3000 godina. Onda je, 1922. godine, Howard Carter pronašao njegovu grobnicu u Dolini kraljeva — jedinu faraonsku grobnicu koja nije bila opljačkana. Unutra: 5398 predmeta, zlatna pogrebna maska teška 10 kilograma, zlatni sarkofag, drvene figure, nakit, čak i hranu. Tutankamon je postao najpoznatiji faraon u istoriji isključivo zahvaljujući tome što je niko nije primetio i nije opljačkao.',
+    place: 'Dolina kraljeva, Teba, Egipat',
+    figures: 'Tutankamon, Howard Carter',
+    fact: 'U grobnici je pronađen i pramen kose — za koga su istraživači dugo mislili da pripada Tutankamonovoj baki. DNK analiza je pokazala da je to kosa njegove majke Kije, i da je Tutankamon bio sin Akhenatonove. Bio je, zapravo, produkt incesta — što objašnjava zdravstvene probleme koji su verovatno doveli do njegove rane smrti.'
+  },
+  {
+    displayYear: '196 p.n.e.',
+    title: 'Rozetanska ploča — ključ za dešifrovanje staroegipatskog',
+    img: '../../../assets/img/egipat/rozeta.jpg',
+    imgCaption: 'Rozetanska ploča — Britanski muzej, London',
+    desc: 'Rozetanska ploča je kamen sa dekretom faraona Ptolemeja V, uklesanim na tri jezika: hieroglifima, egipatskim demotičkim pismom i grčkim. Nije bila ništa posebno u svoje vreme — rutinski kraljevski proglas. Ali kada su je Napoleonovi vojnici pronašli u Egiptu 1799. i shvatili da sadrži isti tekst na tri pisma, postalo je jasno: ovaj kamen je ključ za dešifrovanje hijeroglifa, koji nisu bili čitani 1400 godina. Tome Jang i Žan-Fransoa Šampolion su 1822. konačno dešifrovali pismo, otvorivši put za čitanje celokupne egipatske istorije.',
+    place: 'Roseta (Rašid), Egipat',
+    figures: 'Žan-Fransoa Šampolion, Tome Jang',
+    fact: 'Britanci su uzeli Rozetansku ploču od Francuza nakon poraza Napoleona 1801. Egipat i Francuska i danas traže da im se vrati iz Britanskog muzeja. Britanski muzej je odbio svaki zahtev — kamen je jedna od tri najposećenije atrakcije muzeja, odmah posle mramornih friza Partenona i mumija.'
+  },
+  {
+    displayYear: '51–30 p.n.e.',
+    title: 'Kleopatra — poslednji faraon i kraj egipatske civilizacije',
+    img: '../../../assets/img/egipat/kleopatra.jpg',
+    imgCaption: 'Kleopatra VII — reljef iz hrama u Denderahu, Egipat',
+    desc: 'Kleopatra VII je bila jedina od ptolemejske dinastije koja je naučila egipatski jezik — svi pre nje vladali su Egiptom govoreći isključivo grčki. Bila je politički genije koji je uspevao da balansira između dve supersile starog sveta — Julija Cezara i Marka Antonija — koristeći ih oba kao saveznice u pokušaju da zadrži nezavisnost Egipta. Njen brak sa Markom Antonijem doveo je do rata sa Rimom i Oktavijanom. Posle poraza, i Antonije i Kleopatra su se ubili 30. p.n.e. Oktavijan je anektirao Egipat kao rimsku provinciju — kraj tri milenijuma faraonske civilizacije.',
+    place: 'Aleksandrija, Egipat',
+    figures: 'Kleopatra VII, Julije Cezar, Marko Antonije, Oktavijan',
+    fact: 'Kleopatra nije bila egipatskog porekla — bila je Grkinja iz makedonske loza Ptolemeja, koji su vladali Egiptom od Aleksandrovog osvajanja 332. p.n.e. Takođe, ona verovatno nije bila ni posebno lepa prema antičkim standardima — istoričari kažu da je njena privlačnost bila pre svega u inteligenciji, obrazovanju i glasu.'
+  }
+];
+
+function buildEvent(e, uid) {
+  var thumbHtml = e.img
+    ? '<img src="' + e.img + '" alt="" class="event-thumb" loading="lazy" onerror="this.style.display=\'none\'">'
+    : '';
+  var imgHtml = e.img
+    ? '<img src="' + e.img + '" alt="' + e.title + '" class="event-img" loading="lazy" onerror="this.style.display=\'none\';var c=this.nextElementSibling;if(c)c.style.display=\'none\'">' +
+      '<p class="event-img-caption">' + (e.imgCaption || '') + '</p>'
+    : '';
+  return '<div class="event" id="' + uid + '" onclick="toggleEvent(\'' + uid + '\')">' +
+    '<div class="event-card">' +
+      '<div class="event-head">' +
+        (thumbHtml ? '<div class="event-thumb-wrap">' + thumbHtml + '</div>' : '') +
+        '<div class="event-date-col"><div class="event-date">' + e.displayYear + '</div></div>' +
+        '<div class="event-main"><div class="event-title">' + e.title + '</div></div>' +
+        '<div class="event-arrow">&#9658;</div>' +
+      '</div>' +
+      '<div class="event-body">' +
+        imgHtml +
+        '<div class="event-desc">' + e.desc + '</div>' +
+        '<div class="event-meta-grid">' +
+          (e.place   ? '<div class="event-meta-item"><div class="event-meta-label">Lokacija</div><div class="event-meta-val">' + e.place + '</div></div>' : '') +
+          (e.figures ? '<div class="event-meta-item"><div class="event-meta-label">Ličnosti</div><div class="event-meta-val">' + e.figures + '</div></div>' : '') +
+        '</div>' +
+        (e.fact ? '<div class="event-fact">' + e.fact + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function toggleEvent(uid) {
+  var el = document.getElementById(uid);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.event.open').forEach(function(e) { e.classList.remove('open'); });
+  if (!isOpen) el.classList.add('open');
+}
+
+var tl = document.getElementById('timeline');
+var html = '';
+EVENTS.forEach(function(e, idx) { html += buildEvent(e, 'ev-' + idx); });
+tl.innerHTML = html;
+document.getElementById('eventCount').textContent = EVENTS.length;
+</script>
+</body>
+</html>
